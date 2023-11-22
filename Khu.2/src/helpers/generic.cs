@@ -1,4 +1,4 @@
-namespace Helpers {
+namespace Bot.Helpers {
 	public static class GenericHelpers {
 		public static string Ordinal (float num) {
 			float ones = num % 10;

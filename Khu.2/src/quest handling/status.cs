@@ -1,4 +1,4 @@
-namespace Quests {
+namespace Bot.Quests {
 	public enum Status {
 		Unplayed,
 		Ongoing,

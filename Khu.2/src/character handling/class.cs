@@ -1,6 +1,6 @@
-using PF2;
+using Bot.PF2;
 
-namespace Characters {
+namespace Bot.Characters {
 	public class Class : CharacterFeatures {
 		private List<Skill> _skills;
 		private List<Ability> _attributes;

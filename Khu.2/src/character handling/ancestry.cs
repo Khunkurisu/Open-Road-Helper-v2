@@ -1,6 +1,6 @@
-using PF2;
+using Bot.PF2;
 
-namespace Characters {
+namespace Bot.Characters {
 	public class Ancestry : CharacterFeatures {
 		private bool _restricted = false;
 		private List<Ability> _attributes;

@@ -1,4 +1,4 @@
-namespace PF2 {
+namespace Bot.PF2 {
 	public static class Helper {
 		public static int[] LevelBasedDCs = new int[] {
 			14,

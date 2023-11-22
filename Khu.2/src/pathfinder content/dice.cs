@@ -1,4 +1,4 @@
-namespace PF2 {
+namespace Bot.PF2 {
 	public readonly struct DiceRoll {
 		public DiceRoll (short sides = 20, int count = 1) {
 			for (int i = 0; i < count; i++) {

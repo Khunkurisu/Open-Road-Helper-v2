@@ -1,5 +1,5 @@
-using static PF2.Helper;
-namespace Characters {
+using static Bot.PF2.Helper;
+namespace Bot.Characters {
 	public class Skill {
 		private string _name;
 		private Proficiency _bonus;

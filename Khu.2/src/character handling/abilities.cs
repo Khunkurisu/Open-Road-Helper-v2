@@ -1,4 +1,4 @@
-namespace Characters {
+namespace Bot.Characters {
 	public class Ability {
 		private string _name;
 		private short _modifier = 0;

@@ -1,4 +1,4 @@
-namespace Characters {
+namespace Bot.Characters {
 	public class Generation {
 		public static int Total = 0;
 		private readonly int _id;

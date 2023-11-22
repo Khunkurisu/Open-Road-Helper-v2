@@ -1,5 +1,5 @@
-using PF2;
-namespace Characters {
+using Bot.PF2;
+namespace Bot.Characters {
 	public abstract class CharacterFeatures {
 		protected readonly string _name;
 		protected int _rarity = 0;

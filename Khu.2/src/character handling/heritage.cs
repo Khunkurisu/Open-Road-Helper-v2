@@ -1,6 +1,6 @@
-using PF2;
+using Bot.PF2;
 
-namespace Characters {
+namespace Bot.Characters {
 	public class Heritage : CharacterFeatures {
 		private bool _versatile = false;
 

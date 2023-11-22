@@ -1,4 +1,4 @@
-namespace PF2 {
+namespace Bot.PF2 {
 	using static Helper;
 	public abstract class Downtime {
 		protected readonly short _modifier;

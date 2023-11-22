@@ -1,7 +1,7 @@
+using Bot.Helpers;
 using Discord;
-using Helpers;
 
-namespace Characters {
+namespace Bot.Characters {
 	public class Character {
 		public static int Total = 0;
 		private readonly int _id;
@@ -32,7 +32,8 @@ namespace Characters {
 
 		private int _lastTokenTrade = 0;
 		private ulong _messageId;
-		private long _created;
+		private readonly long _created;
+		private long _updated;
 		private int _status = 0;
 
 		public Character (IUser user, string name, string desc, string rep, int age, float height, float weight, int birthday,
@@ -165,6 +166,9 @@ namespace Characters {
 		}
 		public long CreatedOn {
 			get { return _created; }
+		}
+		public long UpdatedOn {
+			get { return _updated; }
 		}
 		public int Status {
 			get { return _status; }

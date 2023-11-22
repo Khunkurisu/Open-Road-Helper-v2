@@ -1,9 +1,7 @@
-using System.Reflection.Metadata.Ecma335;
-using System.Reflection.PortableExecutable;
-using Characters;
+using Bot.Characters;
 using Discord;
 
-namespace Quests {
+namespace Bot.Quests {
 	public class Quest {
 		public static int Total = 0;
 		private readonly int _id;
