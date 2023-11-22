@@ -1,24 +1,45 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 
 public class Program {
 	public static Task Main (string[] args) => new Program ().MainAsync ();
 
-	private DiscordSocketClient _client;
-	private CommandService _commands;
-	private CommandHandler _commandHandler;
-	private LoggingService _logging;
+	public Program () {
+		_commands = new CommandService ();
+		_serviceProvider = CreateProvider ();
+	}
+
+	private readonly CommandService _commands;
+	private CommandHandler? _commandHandler;
+	private LoggingService? _logging;
+	private readonly IServiceProvider _serviceProvider;
+
+	private List<SlashCommandHandler> _slashCommandHandlers = new ();
+
+	static IServiceProvider CreateProvider () {
+		var config = new DiscordSocketConfig {
+			AlwaysDownloadUsers = true,
+				MessageCacheSize = 100,
+				GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
+		};
+		var collection = new ServiceCollection ()
+			.AddSingleton (config)
+			.AddSingleton<DiscordSocketClient> ();
+		return collection.BuildServiceProvider ();
+	}
 
 	public async Task MainAsync () {
-		// create client and assign log method, create command handlers
-		_client = new DiscordSocketClient ();
-		_commands = new CommandService ();
-		_commandHandler = new CommandHandler (_client, _commands);
-		_logging = new LoggingService (_client, _commands);
 
 		// assign token from file (token.txt added to .gitignore for security)
 		var token = File.ReadAllText ("token.txt");
+
+		var _client = _serviceProvider.GetRequiredService<DiscordSocketClient> ();
+		_commandHandler = new CommandHandler (_client, _commands);
+		_logging = new LoggingService (_client, _commands);
+
+		_slashCommandHandlers.Add(new SlashCommandHandler(_client, _serviceProvider));
 
 		// login asynchronously to discord with client as bot using token
 		await _client.LoginAsync (TokenType.Bot, token);

@@ -24,7 +24,7 @@ public class CommandHandler {
 
 		int argPos = 0;
 
-		if (!(message.HasCharPrefix ('!', ref argPos) || message.HasMentionPrefix (_client.CurrentUser, ref argPos)) || message.Author.IsBot) {
+		if (!(message.HasStringPrefix ("!!", ref argPos) || message.HasMentionPrefix (_client.CurrentUser, ref argPos)) || message.Author.IsBot) {
 			return;
 		}
 
