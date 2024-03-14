@@ -1,24 +1,29 @@
-public enum Months {
-	Abadius = 1,
-	Calistril,
-	Pharast,
-	Gozran,
-	Desnus,
-	Sarenith,
-	Erastus,
-	Arodus,
-	Rova,
-	Lamashan,
-	Neth,
-	Kuthona
-}
+namespace Bot
+{
+    public enum Months
+    {
+        Abadius = 1,
+        Calistril,
+        Pharast,
+        Gozran,
+        Desnus,
+        Sarenith,
+        Erastus,
+        Arodus,
+        Rova,
+        Lamashan,
+        Neth,
+        Kuthona
+    }
 
-public enum Weekdays {
-	Moonday = 1,
-	Toilday,
-	Wealday,
-	Oathday,
-	Fireday,
-	Starday,
-	Sunday
+    public enum Weekdays
+    {
+        Moonday = 1,
+        Toilday,
+        Wealday,
+        Oathday,
+        Fireday,
+        Starday,
+        Sunday
+    }
 }
