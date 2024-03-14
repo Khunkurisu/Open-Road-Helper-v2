@@ -1,6 +1,5 @@
 using Discord;
 using Discord.Interactions;
-using Discord.WebSocket;
 
 namespace Bot.Quests
 {
@@ -11,21 +10,44 @@ namespace Bot.Quests
     [Group("quest", "Manage quests with these commands.")]
     public class QuestManagement : InteractionModuleBase<SocketInteractionContext>
     {
+
         [SlashCommand("create", "Create a quest.")]
         public async Task CreateQuest(
             string name,
             string desc,
             int threat,
             string tags,
-            long time,
-            int level,
-            int maxPlayers,
-            ulong messageId,
-            ulong threadId
+            int maxPlayers
         )
         {
             await RespondAsync(name);
-            SocketUser gm = Context.Client.CurrentUser;
+            IUser gm = Context.User;
+        }
+
+        [SlashCommand("availability", "Update your availability for GMing.")]
+        public async Task ModifyAvailability(uint earlyStart, uint latestStart, uint cutoff)
+        {
+            await RespondAsync("<t:" + earlyStart + ":F>");
+            await RespondAsync("<t:" + latestStart + ":F>");
+            await RespondAsync("<t:" + cutoff + ":F>");
+            IUser gm = Context.User;
+            Timeframe newTimeframe =
+                new()
+                {
+                    EarliestStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(
+                        earlyStart
+                    ),
+                    LatestStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(
+                        latestStart
+                    ),
+                    Cutoff = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(cutoff),
+                };
+
+            if (GMAvailabilities.ContainsKey(gm.Username))
+            {
+                GMAvailability gmAvailability = GMAvailabilities[gm.Username];
+                gmAvailability.AddTimeframe(newTimeframe);
+            }
         }
     }
 }
