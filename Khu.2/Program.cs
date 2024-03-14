@@ -9,8 +9,6 @@ namespace Bot
 {
     public class Program
     {
-        public static readonly Dictionary<string, GMAvailability> GMAvailabilities = new();
-
         public static Task Main(string[] args) => new Program().MainAsync();
 
         public Program()

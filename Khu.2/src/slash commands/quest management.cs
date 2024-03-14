@@ -10,6 +10,7 @@ namespace Bot.Quests
     [Group("quest", "Manage quests with these commands.")]
     public class QuestManagement : InteractionModuleBase<SocketInteractionContext>
     {
+        public static readonly Dictionary<string, GMAvailability> GMAvailabilities = new();
 
         [SlashCommand("create", "Create a quest.")]
         public async Task CreateQuest(
