@@ -11,10 +11,10 @@ namespace Bot.Quests
         private readonly IUser _gm;
         private string _desc;
         private int _threat;
-        private List<string> _tags;
+        private readonly List<string> _tags;
         private int _level;
         private int _maxPlayers;
-        private List<Character> _chars = new();
+        private readonly List<Character> _chars = new();
         private int _status = 0;
         private ulong _messageId;
         private ulong _threadId;

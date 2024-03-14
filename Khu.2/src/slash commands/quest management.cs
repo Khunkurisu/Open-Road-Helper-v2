@@ -1,4 +1,5 @@
 using Bot.Guilds;
+using Bot.Helpers;
 using Discord;
 using Discord.Interactions;
 
@@ -34,13 +35,9 @@ namespace Bot.Quests
             Timeframe newTimeframe =
                 new()
                 {
-                    EarliestStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(
-                        earlyStart
-                    ),
-                    LatestStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(
-                        latestStart
-                    ),
-                    Cutoff = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(cutoff),
+                    EarliestStart = GenericHelpers.DateTimeFromUnixSeconds(earlyStart),
+                    LatestStart = GenericHelpers.DateTimeFromUnixSeconds(latestStart),
+                    Cutoff = GenericHelpers.DateTimeFromUnixSeconds(cutoff)
                 };
 
             Guild guild = BotManager.GetGuildById(Context.Guild.Id);

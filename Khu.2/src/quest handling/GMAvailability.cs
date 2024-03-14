@@ -1,4 +1,6 @@
+using Bot.Helpers;
 using Discord;
+using System.Text.Json;
 
 namespace Bot.Quests
 {
@@ -84,6 +86,30 @@ namespace Bot.Quests
             _lastClear = DateTime.Now;
         }
 
+        public bool IsAvailable(DateTime time)
+        {
+            foreach (Timeframe timeframe in _availability)
+            {
+                if (timeframe.IsAvailableTime(time))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool IsAvailable(uint time)
+        {
+            foreach (Timeframe timeframe in _availability)
+            {
+                if (timeframe.IsAvailableTime(GenericHelpers.DateTimeFromUnixSeconds(time)))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public IUser GM
         {
             get => _gm;
@@ -111,6 +137,11 @@ namespace Bot.Quests
             return timeframe.EarliestStart == EarliestStart
                 && timeframe.LatestStart == LatestStart
                 && timeframe.Cutoff == Cutoff;
+        }
+
+        public readonly bool IsAvailableTime(DateTime time)
+        {
+            return EarliestStart.CompareTo(time) <= 0 && LatestStart.CompareTo(time) >= 0;
         }
     }
 }
