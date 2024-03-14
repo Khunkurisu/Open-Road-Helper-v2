@@ -1,3 +1,4 @@
+using Bot.Guilds;
 using Discord;
 using Discord.Interactions;
 
@@ -10,8 +11,6 @@ namespace Bot.Quests
     [Group("quest", "Manage quests with these commands.")]
     public class QuestManagement : InteractionModuleBase<SocketInteractionContext>
     {
-        public static readonly Dictionary<string, GMAvailability> GMAvailabilities = new();
-
         [SlashCommand("create", "Create a quest.")]
         public async Task CreateQuest(
             string name,
@@ -44,10 +43,16 @@ namespace Bot.Quests
                     Cutoff = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(cutoff),
                 };
 
-            if (GMAvailabilities.ContainsKey(gm.Username))
+            Guild guild = BotManager.GetGuildById(Context.Guild.Id);
+            if (guild.GMAvailabilities.ContainsKey(gm.Username))
             {
-                GMAvailability gmAvailability = GMAvailabilities[gm.Username];
+                GMAvailability gmAvailability = guild.GMAvailabilities[gm.Username];
                 gmAvailability.AddTimeframe(newTimeframe);
+            }
+            else
+            {
+                GMAvailability gmAvailability = new(gm, newTimeframe);
+                guild.GMAvailabilities.Add(gm.Username, gmAvailability);
             }
         }
     }

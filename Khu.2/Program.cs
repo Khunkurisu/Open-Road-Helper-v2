@@ -1,5 +1,5 @@
 ﻿using Bot.Commands;
-using Bot.Quests;
+using Bot;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -10,6 +10,8 @@ namespace Bot
     public class Program
     {
         public static Task Main(string[] args) => new Program().MainAsync();
+
+        public static readonly BotManager Bot = new();
 
         public Program()
         {
