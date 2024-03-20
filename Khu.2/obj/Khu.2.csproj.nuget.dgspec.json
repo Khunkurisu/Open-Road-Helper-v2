@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Khunkurisu\\Documents\\Projects\\Discord\\Khu.2\\Khu.2\\Khu.2.csproj": {}
+    "d:\\Khunkurisu\\Documents\\Projects\\Discord\\Khu.2\\Khu.2\\Khu.2.csproj": {}
   },
   "projects": {
-    "D:\\Khunkurisu\\Documents\\Projects\\Discord\\Khu.2\\Khu.2\\Khu.2.csproj": {
+    "d:\\Khunkurisu\\Documents\\Projects\\Discord\\Khu.2\\Khu.2\\Khu.2.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Khunkurisu\\Documents\\Projects\\Discord\\Khu.2\\Khu.2\\Khu.2.csproj",
+        "projectUniqueName": "d:\\Khunkurisu\\Documents\\Projects\\Discord\\Khu.2\\Khu.2\\Khu.2.csproj",
         "projectName": "Khu.2",
-        "projectPath": "D:\\Khunkurisu\\Documents\\Projects\\Discord\\Khu.2\\Khu.2\\Khu.2.csproj",
+        "projectPath": "d:\\Khunkurisu\\Documents\\Projects\\Discord\\Khu.2\\Khu.2\\Khu.2.csproj",
         "packagesPath": "C:\\Users\\Khunkurisu\\.nuget\\packages\\",
-        "outputPath": "D:\\Khunkurisu\\Documents\\Projects\\Discord\\Khu.2\\Khu.2\\obj\\",
+        "outputPath": "d:\\Khunkurisu\\Documents\\Projects\\Discord\\Khu.2\\Khu.2\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Users\\Khunkurisu\\AppData\\Roaming\\Godot\\mono\\GodotNuGetFallbackFolder",

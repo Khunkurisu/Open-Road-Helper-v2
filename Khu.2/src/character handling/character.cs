@@ -7,7 +7,7 @@ namespace Bot.Characters
     {
         public static int Total = 0;
         private readonly int _id;
-        private readonly IUser _user;
+        private readonly ulong _user;
 
         private string _name;
         private string _desc;
@@ -39,7 +39,7 @@ namespace Bot.Characters
         private int _status = 0;
 
         public Character(
-            IUser user,
+            ulong user,
             string name,
             string desc,
             string rep,
@@ -115,7 +115,7 @@ namespace Bot.Characters
         {
             get { return _id; }
         }
-        public IUser User
+        public ulong User
         {
             get { return _user; }
         }

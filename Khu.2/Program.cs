@@ -11,7 +11,7 @@ namespace Bot
     {
         public static Task Main(string[] args) => new Program().MainAsync();
 
-        public static readonly BotManager Bot = new();
+        public BotManager? Bot;
 
         public Program()
         {
@@ -23,8 +23,7 @@ namespace Bot
         private CommandHandler? _commandHandler;
         private LoggingService? _logging;
         private readonly IServiceProvider _serviceProvider;
-
-        private List<SlashCommandHandler> _slashCommandHandlers = new();
+        private SlashCommandHandler? _slashCommandHandler;
 
         static IServiceProvider CreateProvider()
         {
@@ -46,10 +45,11 @@ namespace Bot
             var token = File.ReadAllText("token.txt");
 
             var _client = _serviceProvider.GetRequiredService<DiscordSocketClient>();
+            Bot = new(_client);
             _commandHandler = new CommandHandler(_client, _commands);
             _logging = new LoggingService(_client, _commands);
 
-            _slashCommandHandlers.Add(new SlashCommandHandler(_client, _serviceProvider));
+            _slashCommandHandler = new SlashCommandHandler(_client, _serviceProvider);
 
             // login asynchronously to discord with client as bot using token
             await _client.LoginAsync(TokenType.Bot, token);

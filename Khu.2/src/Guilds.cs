@@ -1,13 +1,13 @@
 using System.Collections.ObjectModel;
-using System.Text.Json;
 using Bot.Characters;
 using Bot.Helpers;
 using Bot.Quests;
 using Discord;
+using Newtonsoft.Json;
 
 namespace Bot.Guilds
 {
-    public readonly struct Guild
+    public class Guild
     {
         private readonly ulong _id;
         private const string _guildDataPath = @".\data\guilds\";
@@ -17,8 +17,8 @@ namespace Bot.Guilds
         private const string _partiesPath = @"\parties.json";
         private readonly List<Quest> _quests = new();
         private readonly List<Character> _characters = new();
-        public readonly Dictionary<string, GMAvailability> GMAvailabilities = new();
-        public readonly List<Party> Parties = new();
+        private readonly Dictionary<string, GMAvailability> _gmAvailabilities = new();
+        private readonly List<Party> _parties = new();
 
         public Guild(ulong id)
         {
@@ -28,6 +28,10 @@ namespace Bot.Guilds
 
         private void LoadAll()
         {
+            if (!Directory.Exists(_guildDataPath + _id))
+            {
+                Directory.CreateDirectory(_guildDataPath + _id);
+            }
             LoadCharacters();
             LoadQuests();
             LoadAvailability();
@@ -40,15 +44,15 @@ namespace Bot.Guilds
             {
                 return;
             }
-            string json = File.ReadAllText(_guildDataPath + _id + _availabilityPath);
-            if (
-                JsonSerializer.Deserialize(json, GMAvailabilities.GetType())
-                is Dictionary<string, GMAvailability> availability
-            )
+            string jsonString = File.ReadAllText(_guildDataPath + _id + _availabilityPath);
+            Dictionary<string, GMAvailability>? gmAvailabilities = JsonConvert.DeserializeObject<
+                Dictionary<string, GMAvailability>
+            >(jsonString);
+            if (gmAvailabilities != null)
             {
-                foreach (string gm in availability.Keys)
+                foreach (string gm in gmAvailabilities.Keys)
                 {
-                    GMAvailabilities[gm] = availability[gm];
+                    _gmAvailabilities.Add(gm, gmAvailabilities[gm]);
                 }
             }
         }
@@ -59,11 +63,11 @@ namespace Bot.Guilds
             {
                 return;
             }
-            string json = File.ReadAllText(_guildDataPath + _id + _charactersPath);
-            if (
-                JsonSerializer.Deserialize(json, _characters.GetType())
-                is List<Character> characters
-            )
+            string jsonString = File.ReadAllText(_guildDataPath + _id + _charactersPath);
+            List<Character>? characters = JsonConvert.DeserializeObject<List<Character>>(
+                jsonString
+            );
+            if (characters != null)
             {
                 foreach (Character character in characters)
                 {
@@ -78,8 +82,9 @@ namespace Bot.Guilds
             {
                 return;
             }
-            string json = File.ReadAllText(_guildDataPath + _id + _questsPath);
-            if (JsonSerializer.Deserialize(json, _quests.GetType()) is List<Quest> quests)
+            string jsonString = File.ReadAllText(_guildDataPath + _id + _questsPath);
+            List<Quest>? quests = JsonConvert.DeserializeObject<List<Quest>>(jsonString);
+            if (quests != null)
             {
                 foreach (Quest quest in quests)
                 {
@@ -94,18 +99,23 @@ namespace Bot.Guilds
             {
                 return;
             }
-            string json = File.ReadAllText(_guildDataPath + _id + _partiesPath);
-            if (JsonSerializer.Deserialize(json, Parties.GetType()) is List<Party> parties)
+            string jsonString = File.ReadAllText(_guildDataPath + _id + _partiesPath);
+            List<Party>? parties = JsonConvert.DeserializeObject<List<Party>>(jsonString);
+            if (parties != null)
             {
                 foreach (Party party in parties)
                 {
-                    Parties.Add(party);
+                    _parties.Add(party);
                 }
             }
         }
 
         public void SaveAll()
         {
+            if (!Directory.Exists(_guildDataPath + _id))
+            {
+                Directory.CreateDirectory(_guildDataPath + _id);
+            }
             SaveCharacters();
             SaveQuests();
             SaveAvailability();
@@ -114,26 +124,38 @@ namespace Bot.Guilds
 
         private void SaveAvailability()
         {
-            string json = JsonSerializer.Serialize(GMAvailabilities);
-            File.WriteAllText(_guildDataPath + _id + _availabilityPath, json);
+            if (_gmAvailabilities.Count > 0)
+            {
+                string json = JsonConvert.SerializeObject(_gmAvailabilities);
+                File.WriteAllText(_guildDataPath + _id + _availabilityPath, json);
+            }
         }
 
         private void SaveCharacters()
         {
-            string json = JsonSerializer.Serialize(Characters);
-            File.WriteAllText(_guildDataPath + _id + _charactersPath, json);
+            if (_characters.Count > 0)
+            {
+                string json = JsonConvert.SerializeObject(_characters);
+                File.WriteAllText(_guildDataPath + _id + _charactersPath, json);
+            }
         }
 
         private void SaveQuests()
         {
-            string json = JsonSerializer.Serialize(Quests);
-            File.WriteAllText(_guildDataPath + _id + _questsPath, json);
+            if (_quests.Count > 0)
+            {
+                string json = JsonConvert.SerializeObject(_quests);
+                File.WriteAllText(_guildDataPath + _id + _questsPath, json);
+            }
         }
 
         private void SaveParties()
         {
-            string json = JsonSerializer.Serialize(Parties);
-            File.WriteAllText(_guildDataPath + _id + _partiesPath, json);
+            if (_parties.Count > 0)
+            {
+                string json = JsonConvert.SerializeObject(_parties);
+                File.WriteAllText(_guildDataPath + _id + _partiesPath, json);
+            }
         }
 
         public void AddCharacter(Character character)
@@ -150,12 +172,17 @@ namespace Bot.Guilds
 
         public bool FormParty(Character creator, Quest quest, DateTime startTime)
         {
-            GMAvailability availability = GetAvailability(quest.GM);
+            IUser? gm = BotManager.GetGuildUserByID(Id, quest.GM);
+            if (gm == null)
+            {
+                return false;
+            }
+            GMAvailability availability = GetAvailability(gm);
             if (!availability.IsAvailable(startTime))
             {
                 return false;
             }
-            Parties.Add(new(creator, quest, startTime));
+            _parties.Add(new(creator, quest, startTime));
 
             SaveParties();
             return true;
@@ -163,12 +190,17 @@ namespace Bot.Guilds
 
         public bool FormParty(List<Character> members, Quest quest, DateTime startTime)
         {
-            GMAvailability availability = GetAvailability(quest.GM);
+            IUser? gm = BotManager.GetGuildUserByID(Id, quest.GM);
+            if (gm == null)
+            {
+                return false;
+            }
+            GMAvailability availability = GetAvailability(gm);
             if (!availability.IsAvailable(startTime))
             {
                 return false;
             }
-            Parties.Add(new(members, quest, startTime));
+            _parties.Add(new(members, quest, startTime));
 
             SaveParties();
             return true;
@@ -176,12 +208,17 @@ namespace Bot.Guilds
 
         public bool FormParty(Character creator, Quest quest, uint startTime)
         {
-            GMAvailability availability = GetAvailability(quest.GM);
+            IUser? gm = BotManager.GetGuildUserByID(Id, quest.GM);
+            if (gm == null)
+            {
+                return false;
+            }
+            GMAvailability availability = GetAvailability(gm);
             if (!availability.IsAvailable(startTime))
             {
                 return false;
             }
-            Parties.Add(new(creator, quest, GenericHelpers.DateTimeFromUnixSeconds(startTime)));
+            _parties.Add(new(creator, quest, GenericHelpers.DateTimeFromUnixSeconds(startTime)));
 
             SaveParties();
             return true;
@@ -189,12 +226,17 @@ namespace Bot.Guilds
 
         public bool FormParty(List<Character> members, Quest quest, uint startTime)
         {
-            GMAvailability availability = GetAvailability(quest.GM);
+            IUser? gm = BotManager.GetGuildUserByID(Id, quest.GM);
+            if (gm == null)
+            {
+                return false;
+            }
+            GMAvailability availability = GetAvailability(gm);
             if (!availability.IsAvailable(startTime))
             {
                 return false;
             }
-            Parties.Add(new(members, quest, GenericHelpers.DateTimeFromUnixSeconds(startTime)));
+            _parties.Add(new(members, quest, GenericHelpers.DateTimeFromUnixSeconds(startTime)));
 
             SaveParties();
             return true;
@@ -202,11 +244,11 @@ namespace Bot.Guilds
 
         public void DisbandParty(Character creator, Quest quest)
         {
-            foreach (Party party in Parties)
+            foreach (Party party in _parties)
             {
                 if (party.Members[1] == creator && party.Quest == quest)
                 {
-                    Parties.Remove(party);
+                    _parties.Remove(party);
                 }
             }
             SaveParties();
@@ -224,15 +266,63 @@ namespace Bot.Guilds
             SaveQuests();
         }
 
+        public void RemoveQuest(Quest quest)
+        {
+            _quests.Remove(quest);
+            SaveQuests();
+        }
+
+        public Quest? GetQuest(string name, IUser gm)
+        {
+            foreach (Quest quest in _quests)
+            {
+                if (quest.Name == name && quest.GM == gm.Id)
+                    return quest;
+            }
+            return null;
+        }
+
         public GMAvailability GetAvailability(IUser gm)
         {
-            if (!GMAvailabilities.ContainsKey(gm.Username))
+            if (!_gmAvailabilities.ContainsKey(gm.Username))
             {
-                GMAvailabilities.Add(gm.Username, new(gm));
+                _gmAvailabilities.Add(gm.Username, new(gm));
             }
 
             SaveAvailability();
-            return GMAvailabilities[gm.Username];
+            return _gmAvailabilities[gm.Username];
+        }
+
+        public void AddAvailability(IUser gm, Timeframe newTimeframe)
+        {
+            if (_gmAvailabilities.ContainsKey(gm.Username))
+            {
+                GMAvailability availability = _gmAvailabilities[gm.Username];
+                availability.AddTimeframe(newTimeframe);
+            }
+            else
+            {
+                GMAvailability gmAvailability = new(gm, newTimeframe);
+                _gmAvailabilities.Add(gm.Username, gmAvailability);
+            }
+        }
+
+        public void RemoveAvailability(IUser gm, Timeframe time)
+        {
+            if (_gmAvailabilities.ContainsKey(gm.Username))
+            {
+                GMAvailability availability = _gmAvailabilities[gm.Username];
+                availability.RemoveTimeframe(time);
+            }
+        }
+
+        public void RemoveAvailability(IUser gm, int index)
+        {
+            if (_gmAvailabilities.ContainsKey(gm.Username))
+            {
+                GMAvailability availability = _gmAvailabilities[gm.Username];
+                availability.RemoveTimeframe(index);
+            }
         }
 
         public ulong Id
@@ -246,6 +336,16 @@ namespace Bot.Guilds
         public ReadOnlyCollection<Character> Characters
         {
             get { return _characters.AsReadOnly(); }
+        }
+
+        public ReadOnlyCollection<Party> Parties
+        {
+            get => _parties.AsReadOnly();
+        }
+
+        public ReadOnlyDictionary<string, GMAvailability> Availability
+        {
+            get => _gmAvailabilities.AsReadOnly();
         }
     }
 }

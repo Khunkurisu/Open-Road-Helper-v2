@@ -13,16 +13,47 @@ namespace Bot.Quests
     public class QuestManagement : InteractionModuleBase<SocketInteractionContext>
     {
         [SlashCommand("create", "Create a quest.")]
-        public async Task CreateQuest(
-            string name,
-            string desc,
-            int threat,
-            string tags,
-            int maxPlayers
-        )
+        public async Task CreateQuest()
         {
-            await RespondAsync(name);
+            ulong guildId = Context.Guild.Id;
             IUser gm = Context.User;
+
+            var textBox = new ModalBuilder()
+                .WithTitle("Create Quest")
+                .WithCustomId("createQuest-" + guildId + "-" + gm.Username)
+                .AddTextInput("Name", "quest_name", placeholder: "Quest Name")
+                .AddTextInput(
+                    "Description",
+                    "quest_description",
+                    TextInputStyle.Paragraph,
+                    "Quest description."
+                )
+                .AddTextInput("Tags", "quest_tags", placeholder: "Comma, Separated, Tags");
+
+            await Context.Interaction.RespondWithModalAsync(textBox.Build());
+        }
+
+        [SlashCommand("list", "List the quests currently stored.")]
+        public async Task ListQuests()
+        {
+            ulong guildId = Context.Guild.Id;
+            Guild guild = BotManager.GetGuildById(guildId);
+
+            IUser gm = Context.User;
+
+            List<Embed> questEmbeds = new();
+            int count = 0;
+            foreach (Quest quest in guild.Quests)
+            {
+                questEmbeds.Add(quest.GenerateEmbed(gm).Build());
+                count++;
+                if (count >= 10)
+                {
+                    break;
+                }
+            }
+
+            await Context.Interaction.RespondAsync(embeds: questEmbeds.ToArray());
         }
 
         [SlashCommand("availability", "Update your availability for GMing.")]
@@ -41,16 +72,7 @@ namespace Bot.Quests
                 };
 
             Guild guild = BotManager.GetGuildById(Context.Guild.Id);
-            if (guild.GMAvailabilities.ContainsKey(gm.Username))
-            {
-                GMAvailability gmAvailability = guild.GMAvailabilities[gm.Username];
-                gmAvailability.AddTimeframe(newTimeframe);
-            }
-            else
-            {
-                GMAvailability gmAvailability = new(gm, newTimeframe);
-                guild.GMAvailabilities.Add(gm.Username, gmAvailability);
-            }
+            guild.AddAvailability(gm, newTimeframe);
         }
     }
 }

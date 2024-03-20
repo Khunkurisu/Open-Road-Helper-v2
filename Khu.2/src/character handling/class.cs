@@ -1,20 +1,22 @@
 using Bot.PF2;
 
-namespace Bot.Characters {
-	public class Class : CharacterFeatures {
-		private List<Skill> _skills;
-		private List<Ability> _attributes;
+namespace Bot.Characters
+{
+    public class Class : CharacterFeatures
+    {
+        public List<Skill> _skills;
+        public List<Ability> _attributes;
 
-		public Class (string name, Helper.Rarity rarity, List<string> traits, List<Skill> skills, List<Ability> attributes) : base (name, rarity, traits) {
-			_skills = skills;
-			_attributes = attributes;
-		}
-
-		public List<Skill> Skills {
-			get { return _skills; }
-		}
-		public List<Ability> KeyAttributes {
-			get { return _attributes; }
-		}
-	}
+        public Class(
+            string name,
+            Helper.Rarity rarity,
+            List<string> traits,
+            List<Skill> skills,
+            List<Ability> attributes
+        ) : base(name, rarity, traits)
+        {
+            _skills = skills;
+            _attributes = attributes;
+        }
+    }
 }

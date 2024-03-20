@@ -16,17 +16,18 @@ namespace Bot.Commands
         {
             _client = client;
             _serviceProvider = serviceProvider;
-            _client.Ready += Client_Ready;
+            _client.Ready += OnClientReady;
         }
 
-        public async Task Client_Ready()
+        public async Task OnClientReady()
         {
             _interactionService = new InteractionService(_client);
             await _interactionService.AddModulesAsync(
                 Assembly.GetEntryAssembly(),
                 _serviceProvider
             );
-            await _interactionService.RegisterCommandsGloballyAsync();
+            //await _interactionService.RegisterCommandsGloballyAsync();
+            await _interactionService.RegisterCommandsToGuildAsync(1165262696397152276);
 
             _client.InteractionCreated += async interaction =>
             {
