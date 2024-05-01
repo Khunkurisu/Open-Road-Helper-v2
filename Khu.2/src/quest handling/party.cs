@@ -5,50 +5,59 @@ namespace Bot.Quests
 {
     public class Party
     {
-        private readonly List<Character> _members;
-        private readonly Quest _quest;
-        private readonly DateTime _chosenTime;
+        public Guid Id;
+        public ulong Guild;
+        public string Name;
+        public List<Guid> Members;
 
-        public Party(Character creator, Quest quest, DateTime chosenTime)
+        public Party(Character creator)
         {
-            _members = new() { creator };
-            _quest = quest;
-            _chosenTime = chosenTime;
+            Name = creator.Name + "'s Party";
+            Members = new() { creator.Id };
         }
 
-        public Party(List<Character> members, Quest quest, DateTime chosenTime)
+        public Party(Guid creatorId)
         {
-            _members = members;
-            _quest = quest;
-            _chosenTime = chosenTime;
+            Character creator = BotManager.GetCharacter(Guild, creatorId);
+            Name = creator.Name + "'s Party";
+            Members = new() { creator.Id };
         }
 
-        public ReadOnlyCollection<Character> Members
+        public Party(List<Guid> memberIds)
         {
-            get => _members.AsReadOnly();
+            Character creator = BotManager.GetCharacter(Guild, memberIds[0]);
+            Name = creator.Name + "'s Party";
+            Members = memberIds;
         }
 
-        public Quest Quest
+        public Party(List<Character> members)
         {
-            get => _quest;
-        }
-
-        public DateTime ChosenTime
-        {
-            get => _chosenTime;
+            Name = members[0].Name + "'s Party";
+            Members = new();
+            foreach (Character character in members)
+            {
+                Members.Add(character.Id);
+            }
         }
 
         public void AddMember(Character character)
         {
-            if (_members.Count < _quest.MaxPlayers)
-            {
-                _members.Add(character);
-            }
+            Members.Add(character.Id);
+        }
+
+        public void AddMember(Guid characterId)
+        {
+            Members.Add(characterId);
+        }
+
+        public void RemoveMember(Guid characterId)
+        {
+            Members.Remove(characterId);
         }
 
         public void RemoveMember(Character character)
         {
-            _members.Remove(character);
+            Members.Remove(character.Id);
         }
     }
 }

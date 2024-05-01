@@ -12,7 +12,7 @@ namespace Bot.PF2
             }
         }
 
-        private readonly Random rng = new Random();
+        private readonly Random rng = new();
 
         private readonly int _total = 0;
         private readonly List<int> _results = new();

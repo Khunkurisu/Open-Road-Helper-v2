@@ -1,3 +1,5 @@
+using Bot.Quests;
+
 namespace Bot.PF2
 {
     public static class Helper
@@ -129,16 +131,8 @@ namespace Bot.PF2
             { 80000, 20000 },
             { 140000, 35000 },
         };
-        public static float[] ThreatMults = new float[] { 0.5f, 0.75f, 1.0f, 1.5f, 2.0f };
 
-        public enum Threats
-        {
-            Trivial,
-            Low,
-            Moderate,
-            Severe,
-            Extreme
-        }
+        public static float[] ThreatMults = new float[] { 0.5f, 0.75f, 1.0f, 1.5f, 2.0f };
 
         public enum Rarity
         {

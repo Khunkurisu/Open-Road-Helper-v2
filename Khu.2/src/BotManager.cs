@@ -1,3 +1,4 @@
+using Bot.Characters;
 using Bot.Guilds;
 using Bot.Quests;
 using Discord;
@@ -7,10 +8,38 @@ namespace Bot
 {
     public class BotManager
     {
-        private static DiscordSocketClient _client;
+        private static DiscordSocketClient? _client;
         public static readonly List<Guild> Guilds = new();
 
-        public static IUser? GetGuildUserByID(ulong guild, ulong user)
+        public static Quest? GetQuest(ulong guildId, Guid questId)
+        {
+            return GetGuild(guildId).GetQuest(questId);
+        }
+
+        public static Character? GetCharacter(ulong guildId, Guid characterId)
+        {
+            return GetGuild(guildId).GetCharacter(characterId);
+        }
+
+        public static IForumChannel? GetForumChannel(ulong guildId, ulong channelId)
+        {
+            if (_client != null)
+            {
+                return _client.GetGuild(guildId).GetForumChannel(channelId);
+            }
+            return null;
+        }
+
+        public static IGuildChannel? GetChannel(ulong guildId, ulong channelId)
+        {
+            if (_client != null)
+            {
+                return _client.GetGuild(guildId).GetChannel(channelId);
+            }
+            return null;
+        }
+
+        public static IUser? GetGuildUser(ulong guild, ulong user)
         {
             if (_client != null)
             {
@@ -19,7 +48,7 @@ namespace Bot
             return null;
         }
 
-        public static Guild GetGuildById(ulong id)
+        public static Guild GetGuild(ulong id)
         {
             Guild guild;
             try
@@ -34,12 +63,41 @@ namespace Bot
             return guild;
         }
 
+        public static void StoreTempCharacter(
+            FoundryImport characterImport,
+            ulong guildId,
+            IUser player
+        )
+        {
+            Guild guild = GetGuild(guildId);
+            if (guild == null)
+            {
+                return;
+            }
+            guild.StoreTempCharacter(player.Id, characterImport);
+        }
+
         public BotManager(DiscordSocketClient client)
         {
             _client = client;
             _client.ModalSubmitted += OnModalSubmit;
             _client.SelectMenuExecuted += OnSelectMenuExecuted;
             _client.ButtonExecuted += OnButtonExecuted;
+            _client.Ready += OnClientReady;
+        }
+
+        private async Task OnClientReady()
+        {
+            string guildData = @".\data\guilds\";
+            string[] guildIds = Directory.GetDirectories(guildData);
+            foreach (string guildId in guildIds)
+            {
+                Guild guild = new(ulong.Parse(guildId.Replace(guildData, "")));
+                Guilds.Add(guild);
+                guild.LoadAll();
+                await Task.Yield();
+            }
+            await Task.CompletedTask;
         }
 
         private async Task OnButtonExecuted(SocketMessageComponent button)
@@ -77,10 +135,10 @@ namespace Bot
             {
                 await QuestCreate(modal, components);
             }
-            /* else if (modal.Data.CustomId.Contains("createCharacter"))
+            else if (modal.Data.CustomId.Contains("createCharacter"))
             {
                 await CharacterCreate(modal, components);
-            } */
+            }
         }
 
         private static async Task QuestCreateConfirm(SocketMessageComponent button)
@@ -90,14 +148,14 @@ namespace Bot
             if (user.Username == gm)
             {
                 string guildId = button.Data.CustomId.Split("-")[1];
-                Guild guild = GetGuildById(ulong.Parse(guildId));
+                Guild guild = GetGuild(ulong.Parse(guildId));
 
                 string name = button.Data.CustomId.Split("-")[3];
 
                 Quest? quest = guild.GetQuest(name, user);
                 if (quest != null)
                 {
-                    await PostQuest(button, guild, quest);
+                    await PostQuest(button, guild, quest, user);
                 }
                 else
                 {
@@ -120,7 +178,7 @@ namespace Bot
             if (user.Username == gm)
             {
                 string guildId = button.Data.CustomId.Split("-")[1];
-                Guild guild = GetGuildById(ulong.Parse(guildId));
+                Guild guild = GetGuild(ulong.Parse(guildId));
 
                 string name = button.Data.CustomId.Split("-")[3];
 
@@ -163,7 +221,7 @@ namespace Bot
             if (user.Username == gm)
             {
                 string guildId = button.Data.CustomId.Split("-")[1];
-                Guild guild = GetGuildById(ulong.Parse(guildId));
+                Guild guild = GetGuild(ulong.Parse(guildId));
 
                 string name = button.Data.CustomId.Split("-")[3];
 
@@ -199,7 +257,7 @@ namespace Bot
             if (user.Username == gm)
             {
                 string guildId = selectMenu.Data.CustomId.Split("-")[1];
-                Guild guild = GetGuildById(ulong.Parse(guildId));
+                Guild guild = GetGuild(ulong.Parse(guildId));
 
                 string name = selectMenu.Data.CustomId.Split("-")[3];
                 string menuType = selectMenu.Data.CustomId.Split("-")[4];
@@ -260,6 +318,27 @@ namespace Bot
             }
         }
 
+        private static async Task CharacterCreate(
+            SocketModal modal,
+            List<SocketMessageComponentData> components
+        )
+        {
+            string guildId = modal.Data.CustomId.Split("-")[1];
+            Guild guild = GetGuild(ulong.Parse(guildId));
+            string userId = modal.Data.CustomId.Split("-")[2];
+            IUser player = modal.User;
+
+            string charName = components.First(x => x.CustomId == "character_name").Value;
+            string charDescription = components
+                .First(x => x.CustomId == "character_description")
+                .Value;
+            string charReputation = components
+                .First(x => x.CustomId == "character_reputation")
+                .Value;
+
+            await modal.RespondAsync(charName + " has been saved.");
+        }
+
         private static async Task QuestCreate(
             SocketModal modal,
             List<SocketMessageComponentData> components
@@ -268,7 +347,7 @@ namespace Bot
             string gm = modal.Data.CustomId.Split("-")[2];
             IUser gamemaster = modal.User;
             string guildId = modal.Data.CustomId.Split("-")[1];
-            Guild guild = GetGuildById(ulong.Parse(guildId));
+            Guild guild = GetGuild(ulong.Parse(guildId));
 
             string name = components.First(x => x.CustomId == "quest_name").Value;
             string description = components.First(x => x.CustomId == "quest_description").Value;
@@ -302,16 +381,35 @@ namespace Bot
         private static async Task PostQuest(
             SocketMessageComponent context,
             Guild guild,
-            Quest quest
+            Quest quest,
+            IUser gm
         )
         {
             guild.SaveAll();
-            await context.UpdateAsync(x =>
+            if (guild.QuestBoard != null)
             {
-                x.Content = "Quest posted!";
-                x.Embed = null;
-                x.Components = null;
-            });
+                EmbedBuilder questEmbed = quest.GenerateEmbed(gm);
+                ForumTag[] tags = { guild.QuestBoard.Tags.First(x => x.Name == "Pending") };
+                ComponentBuilder components = new ComponentBuilder().WithButton(
+                    "Edit",
+                    "editQuest-" + guild.Id + "-" + quest.Name + "-editStart",
+                    ButtonStyle.Secondary
+                );
+                IThreadChannel thread = await guild.QuestBoard.CreatePostAsync(
+                    quest.Name,
+                    ThreadArchiveDuration.OneWeek,
+                    embed: questEmbed.Build(),
+                    tags: tags,
+                    components: components.Build()
+                );
+                await thread.AddUserAsync((IGuildUser)gm);
+                await context.UpdateAsync(x =>
+                {
+                    x.Content = "Quest posted! " + thread.Mention;
+                    x.Embed = null;
+                    x.Components = null;
+                });
+            }
         }
 
         /* private async Task CharacterCreate(

@@ -20,7 +20,6 @@ namespace Bot
         }
 
         private readonly CommandService _commands;
-        private CommandHandler? _commandHandler;
         private LoggingService? _logging;
         private readonly IServiceProvider _serviceProvider;
         private SlashCommandHandler? _slashCommandHandler;
@@ -46,7 +45,6 @@ namespace Bot
 
             var _client = _serviceProvider.GetRequiredService<DiscordSocketClient>();
             Bot = new(_client);
-            _commandHandler = new CommandHandler(_client, _commands);
             _logging = new LoggingService(_client, _commands);
 
             _slashCommandHandler = new SlashCommandHandler(_client, _serviceProvider);
@@ -54,8 +52,6 @@ namespace Bot
             // login asynchronously to discord with client as bot using token
             await _client.LoginAsync(TokenType.Bot, token);
             await _client.StartAsync();
-
-            await _commandHandler.InstallCommandsAsync();
 
             // block this task until the program closes
             await Task.Delay(-1);

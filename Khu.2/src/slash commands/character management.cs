@@ -1,39 +1,112 @@
+using System.Net;
+using Bot.Guilds;
+using Bot.Helpers;
+using Bot.PF2;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Newtonsoft.Json;
 
-namespace Bot.Characters {
-	[Group ("character", "Manage your characters with these commands.")]
-	public class CharacterManagement : InteractionModuleBase<SocketInteractionContext> {
+namespace Bot.Characters
+{
+    [Group("character", "Manage your characters with these commands.")]
+    public class CharacterManagement : InteractionModuleBase<SocketInteractionContext>
+    {
+        [SlashCommand("create", "Create a character.")]
+        public async Task CreateCharacter(IAttachment sheet)
+        {
+            if (sheet.Filename.Contains(".json"))
+            {
+                ulong guildId = Context.Guild.Id;
+                IUser player = Context.User;
+                HttpClient client = new() { Timeout = TimeSpan.FromSeconds(30) };
+                string json = await client.GetStringAsync(sheet.Url);
 
-		[SlashCommand ("create", "Create a character.")]
-		public async Task CreateCharacter (string name, string desc, string rep, int age, float height, float weight, int birthday,
-			int birthmonth, int birthyear, string ancestry, string heritage, string charClass, string color, string avatar, string sheet) {
-			await RespondAsync (name);
-			//ulong messageId = SetToNewMessageID();
-			SocketUser user = Context.Client.CurrentUser;
-			await ReplyAsync ($"{user.Username}#{user.Discriminator}");
-		}
+                Dictionary<string, dynamic>? importData = JsonConvert.DeserializeObject<
+                    Dictionary<string, dynamic>
+                >(json);
 
-		[SlashCommand ("update", "Update a character.")]
-		public async Task UpdateCharacter (string name, string desc = "", string rep = "", int age = 0, float height = 0f, float weight = 0f,
-			int birthday = 0, int birthmonth = 0, int birthyear = 0, string ancestry = "", string heritage = "", string charClass = "",
-			string color = "", string avatar = "", string sheet = "") {
-			await RespondAsync (name);
-			//ulong messageId = SetToNewMessageID();
-			SocketUser user = Context.Client.CurrentUser;
-			await ReplyAsync ($"{user.Username}#{user.Discriminator}");
-		}
-	}
+                if (importData != null)
+                {
+                    FoundryImport foundryImport = new(importData);
 
-	public class CharacterNameSuggestions : AutocompleteHandler {
-		public override async Task<AutocompletionResult> GenerateSuggestionsAsync (IInteractionContext context,
-			IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services) {
-			IEnumerable<AutocompleteResult> results = new [] {
-				new AutocompleteResult ("name1", "value1"),
-					new AutocompleteResult ("name2", "value2")
-			};
-			return AutocompletionResult.FromSuccess (results.Take (25));
-		}
-	}
+                    //BotManager.StoreTempCharacter(foundryImport, guildId, player);
+                    var textBox = new ModalBuilder()
+                        .WithTitle("Create Character")
+                        .WithCustomId("createCharacter-" + guildId + "-" + player.Id)
+                        .AddTextInput("Name", "character_name", placeholder: "Character Name")
+                        .AddTextInput(
+                            "Description",
+                            "character_description",
+                            TextInputStyle.Paragraph,
+                            "The character's outward appearance and general description."
+                        )
+                        .AddTextInput(
+                            "Description",
+                            "character_reputation",
+                            TextInputStyle.Paragraph,
+                            "The character's public reputation and info."
+                        );
+
+                    await RespondWithModalAsync(textBox.Build());
+                }
+                else
+                {
+                    await RespondAsync("Please upload a valid json file.");
+                }
+            }
+            else
+            {
+                await RespondAsync("Please upload a valid json file.");
+            }
+        }
+
+        [SlashCommand("update", "Update a character.")]
+        public async Task UpdateCharacter(string name, IAttachment sheet)
+        {
+            await RespondAsync(name);
+            //ulong messageId = SetToNewMessageID();
+            SocketUser user = Context.Client.CurrentUser;
+            await ReplyAsync($"{user.Username}#{user.Discriminator}");
+        }
+
+        [SlashCommand("roleplay", "Roleplay as a character.")]
+        public async Task Roleplay(string name)
+        {
+            ulong guildId = Context.Guild.Id;
+            IUser player = Context.User;
+
+            var textBox = new ModalBuilder()
+                .WithTitle("Roleplay Post")
+                .WithCustomId("createRP-" + guildId + "-" + player.Username + "-" + name)
+                .AddTextInput("Display Name", "display_name", placeholder: name, required: false)
+                .AddTextInput(
+                    "Roleplay",
+                    "roleplay",
+                    TextInputStyle.Paragraph,
+                    "Roleplay text content."
+                );
+
+            await Context.Interaction.RespondWithModalAsync(textBox.Build());
+        }
+    }
+
+    public class CharacterNameSuggestions : AutocompleteHandler
+    {
+        public override async Task<AutocompletionResult> GenerateSuggestionsAsync(
+            IInteractionContext context,
+            IAutocompleteInteraction autocompleteInteraction,
+            IParameterInfo parameter,
+            IServiceProvider services
+        )
+        {
+            await Task.Yield();
+            IEnumerable<AutocompleteResult> results = new[]
+            {
+                new AutocompleteResult("name1", "value1"),
+                new AutocompleteResult("name2", "value2")
+            };
+            return AutocompletionResult.FromSuccess(results.Take(25));
+        }
+    }
 }

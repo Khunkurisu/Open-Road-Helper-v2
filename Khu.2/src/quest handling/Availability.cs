@@ -4,33 +4,33 @@ using System.Text.Json;
 
 namespace Bot.Quests
 {
-    public class GMAvailability
+    public class Availability
     {
-        private readonly IUser _gm;
-        private readonly List<Timeframe> _availability;
+        private readonly ulong _gm;
+        private readonly List<Timeframe> _times;
         private DateTime _lastUpdate;
         private DateTime _lastClear;
 
-        public GMAvailability(IUser gm, List<Timeframe> availability)
+        public Availability(IUser gm, List<Timeframe> availability)
         {
-            _gm = gm;
-            _availability = availability;
+            _gm = gm.Id;
+            _times = availability;
             _lastUpdate = DateTime.Now;
             _lastClear = DateTime.Now;
         }
 
-        public GMAvailability(IUser gm, Timeframe availability)
+        public Availability(IUser gm, Timeframe availability)
         {
-            _gm = gm;
-            _availability = new() { availability };
+            _gm = gm.Id;
+            _times = new() { availability };
             _lastUpdate = DateTime.Now;
             _lastClear = DateTime.Now;
         }
 
-        public GMAvailability(IUser gm)
+        public Availability(IUser gm)
         {
-            _gm = gm;
-            _availability = new();
+            _gm = gm.Id;
+            _times = new();
             _lastUpdate = DateTime.Now;
             _lastClear = DateTime.Now;
         }
@@ -38,18 +38,18 @@ namespace Bot.Quests
         public void AddTimeframe(Timeframe time)
         {
             CheckShouldClearPast();
-            _availability.Add(time);
+            _times.Add(time);
             _lastUpdate = DateTime.Now;
         }
 
         public void RemoveTimeframe(Timeframe time)
         {
             CheckShouldClearPast();
-            foreach (Timeframe timeframe in _availability)
+            foreach (Timeframe timeframe in _times)
             {
                 if (timeframe.IsEqual(time))
                 {
-                    _availability.Remove(timeframe);
+                    _times.Remove(timeframe);
                 }
             }
             _lastUpdate = DateTime.Now;
@@ -58,9 +58,9 @@ namespace Bot.Quests
         public void RemoveTimeframe(int index)
         {
             CheckShouldClearPast();
-            if (index < _availability.Count)
+            if (index < _times.Count)
             {
-                _availability.Remove(_availability[index]);
+                _times.Remove(_times[index]);
                 _lastUpdate = DateTime.Now;
             }
         }
@@ -76,11 +76,11 @@ namespace Bot.Quests
 
         private void ClearPastAvailability()
         {
-            foreach (Timeframe timeframe in _availability)
+            foreach (Timeframe timeframe in _times)
             {
                 if (timeframe.EarliestStart.CompareTo(DateTime.Now.AddHours(-8)) <= 0)
                 {
-                    _availability.Remove(timeframe);
+                    _times.Remove(timeframe);
                 }
             }
             _lastClear = DateTime.Now;
@@ -88,7 +88,7 @@ namespace Bot.Quests
 
         public bool IsAvailable(DateTime time)
         {
-            foreach (Timeframe timeframe in _availability)
+            foreach (Timeframe timeframe in _times)
             {
                 if (timeframe.IsAvailableTime(time))
                 {
@@ -100,7 +100,7 @@ namespace Bot.Quests
 
         public bool IsAvailable(uint time)
         {
-            foreach (Timeframe timeframe in _availability)
+            foreach (Timeframe timeframe in _times)
             {
                 if (timeframe.IsAvailableTime(GenericHelpers.DateTimeFromUnixSeconds(time)))
                 {
@@ -110,14 +110,14 @@ namespace Bot.Quests
             return false;
         }
 
-        public IUser GM
+        public ulong GM
         {
             get => _gm;
         }
 
-        public List<Timeframe> Availability
+        public List<Timeframe> Times
         {
-            get => _availability;
+            get => _times;
         }
 
         public DateTime Updated

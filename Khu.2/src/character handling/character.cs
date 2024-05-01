@@ -5,8 +5,7 @@ namespace Bot.Characters
 {
     public class Character
     {
-        public static int Total = 0;
-        private readonly int _id;
+        private readonly Guid _id;
         private readonly ulong _user;
 
         private string _name;
@@ -62,8 +61,7 @@ namespace Bot.Characters
             ulong messageId
         )
         {
-            Total++;
-            _id = Total;
+            _id = Guid.NewGuid();
             _user = user;
             _name = name;
             _desc = desc;
@@ -111,7 +109,7 @@ namespace Bot.Characters
             return $"{GenericHelpers.Ordinal(_birthDay)} {_birthMonth} {_birthYear} AR";
         }
 
-        public int Id
+        public Guid Id
         {
             get { return _id; }
         }

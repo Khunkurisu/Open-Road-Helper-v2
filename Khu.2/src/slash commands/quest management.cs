@@ -37,7 +37,7 @@ namespace Bot.Quests
         public async Task ListQuests()
         {
             ulong guildId = Context.Guild.Id;
-            Guild guild = BotManager.GetGuildById(guildId);
+            Guild guild = BotManager.GetGuild(guildId);
 
             IUser gm = Context.User;
 
@@ -71,7 +71,7 @@ namespace Bot.Quests
                     Cutoff = GenericHelpers.DateTimeFromUnixSeconds(cutoff)
                 };
 
-            Guild guild = BotManager.GetGuildById(Context.Guild.Id);
+            Guild guild = BotManager.GetGuild(Context.Guild.Id);
             guild.AddAvailability(gm, newTimeframe);
         }
     }

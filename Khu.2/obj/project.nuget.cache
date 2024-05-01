@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "l1V6NX2keSHcaJ6+W0IjcIsvdf/QymDnJF6KxWunHHSMQ4+8D8E3AWcJ4Z3MoQ95zYQEDCAA4BmOfvCGd+d9zg==",
+  "dgSpecHash": "bcnBFwp3ocEwKI5yCZwD+hbRH3mED1VWonAt8FJfav8gpAHtJDdVqS6Koc2caCXF9DXqfju+NYrAKzIv5HBIAQ==",
   "success": true,
-  "projectFilePath": "d:\\Khunkurisu\\Documents\\Projects\\Discord\\Khu.2\\Khu.2\\Khu.2.csproj",
+  "projectFilePath": "D:\\Khunkurisu\\Documents\\Projects\\Discord\\Khu.2\\Khu.2\\Khu.2.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Khunkurisu\\.nuget\\packages\\discord.net\\3.12.0\\discord.net.3.12.0.nupkg.sha512",
     "C:\\Users\\Khunkurisu\\.nuget\\packages\\discord.net.commands\\3.12.0\\discord.net.commands.3.12.0.nupkg.sha512",
