@@ -17,11 +17,55 @@ namespace Bot.Guilds
         private const string _partiesPath = @"\parties.json";
         private const string _boardsPath = @"\boards.json";
 
+        private const uint _initialTokens = 1;
+
         private readonly List<Quest> _quests = new();
-        private readonly List<Character> _characters = new();
-        private readonly Dictionary<ulong, FoundryImport> _characterValues = new();
+        private readonly Dictionary<ulong, List<Character>> _characters = new();
+        private readonly Dictionary<ulong, IImportable> _characterValues = new();
         private readonly Dictionary<string, Availability> _gmAvailabilities = new();
         private readonly List<Party> _parties = new();
+        private readonly Dictionary<ulong, uint> _playerTokens = new();
+
+        public readonly List<uint> Generations = new() { 5 };
+
+        public int GenerationCount
+        {
+            get { return Generations.Count; }
+        }
+
+        public uint GetPlayerTokenCount(ulong playerId)
+        {
+            if (!_playerTokens.ContainsKey(playerId))
+            {
+                _playerTokens[playerId] = _initialTokens;
+            }
+            return _playerTokens[playerId];
+        }
+
+        public void SetPlayerTokenCount(ulong playerId, uint tokenCount)
+        {
+            _playerTokens[playerId] = tokenCount;
+        }
+
+        public void IncreasePlayerTokenCount(ulong playerId, uint tokenCount)
+        {
+            SetPlayerTokenCount(playerId, GetPlayerTokenCount(playerId) + tokenCount);
+        }
+
+        public bool DecreasePlayerTokenCount(ulong playerId, int tokenCount)
+        {
+            int currentTokens = (int)GetPlayerTokenCount(playerId);
+
+            if (currentTokens - tokenCount < 0)
+            {
+                return false;
+            }
+
+            int newTokens = currentTokens - tokenCount;
+            SetPlayerTokenCount(playerId, (uint)newTokens);
+
+            return true;
+        }
 
         public IForumChannel? QuestBoard;
         public IForumChannel? TransactionBoard;
@@ -32,19 +76,19 @@ namespace Bot.Guilds
             _id = id;
         }
 
-        public void StoreTempCharacter(ulong playerId, FoundryImport foundryImport)
+        public void StoreTempCharacter(ulong playerId, IImportable characterImport)
         {
             if (!_characterValues.ContainsKey(playerId))
             {
-                _characterValues.Add(playerId, foundryImport);
+                _characterValues.Add(playerId, characterImport);
             }
             else
             {
-                _characterValues[playerId] = foundryImport;
+                _characterValues[playerId] = characterImport;
             }
         }
 
-        public FoundryImport? GetCharacterJson(ulong playerId)
+        public IImportable? GetCharacterJson(ulong playerId)
         {
             return _characterValues.ContainsKey(playerId) ? _characterValues[playerId] : null;
         }
@@ -88,14 +132,14 @@ namespace Bot.Guilds
                 return;
             }
             string jsonString = File.ReadAllText(_guildDataPath + _id + _charactersPath);
-            List<Character>? characters = JsonConvert.DeserializeObject<List<Character>>(
-                jsonString
-            );
+            Dictionary<ulong, List<Character>>? characters = JsonConvert.DeserializeObject<
+                Dictionary<ulong, List<Character>>
+            >(jsonString);
             if (characters != null)
             {
-                foreach (Character character in characters)
+                foreach (ulong playerId in characters.Keys)
                 {
-                    _characters.Add(character);
+                    _characters[playerId] = characters[playerId];
                 }
             }
         }
@@ -232,9 +276,13 @@ namespace Bot.Guilds
             }
         }
 
-        public void AddCharacter(Character character)
+        public void AddCharacter(ulong playerId, Character character)
         {
-            _characters.Add(character);
+            if (!_characters.ContainsKey(playerId))
+            {
+                _characters[playerId] = new();
+            }
+            _characters[playerId].Add(character);
             SaveCharacters();
         }
 
@@ -246,10 +294,15 @@ namespace Bot.Guilds
 
         public bool FormParty(Guid creator)
         {
-            _parties.Add(new(creator));
+            Character? partyCreator = GetCharacter(creator);
+            if (partyCreator != null)
+            {
+                _parties.Add(new(partyCreator));
 
-            SaveParties();
-            return true;
+                SaveParties();
+                return true;
+            }
+            return false;
         }
 
         public bool FormParty(List<Character> members)
@@ -270,16 +323,32 @@ namespace Bot.Guilds
 
         public bool FormParty(List<Guid> members)
         {
-            _parties.Add(new(members));
+            List<Character> partyMembers = new();
+            foreach (Guid member in members)
+            {
+                Character? character = GetCharacter(member);
+                if (character != null)
+                {
+                    partyMembers.Add(character);
+                }
+            }
+            if (partyMembers.Count > 0)
+            {
+                _parties.Add(new(partyMembers));
 
-            SaveParties();
-            return true;
+                SaveParties();
+                return true;
+            }
+            return false;
         }
 
-        public void RemoveCharacter(int index)
+        public void RemoveCharacter(ulong playerId, int index)
         {
-            _characters.RemoveAt(index);
-            SaveCharacters();
+            if (_characters.ContainsKey(playerId))
+            {
+                _characters[playerId].RemoveAt(index);
+                SaveCharacters();
+            }
         }
 
         public void RemoveQuest(int index)
@@ -304,9 +373,28 @@ namespace Bot.Guilds
             return Quests.First(x => x.Id == id);
         }
 
+        public Character? GetCharacter(ulong playerId, Guid characterId)
+        {
+            if (_characters.ContainsKey(playerId) && _characters[playerId].Count > 0)
+            {
+                return _characters[playerId].First(x => x.Id == characterId);
+            }
+            return null;
+        }
+
         public Character? GetCharacter(Guid characterId)
         {
-            return _characters.First(x => x.Id == characterId);
+            foreach (ulong playerId in _characters.Keys)
+            {
+                foreach (Character character in _characters[playerId])
+                {
+                    if (character.Id == characterId)
+                    {
+                        return character;
+                    }
+                }
+            }
+            return null;
         }
 
         public Party? GetParty(Guid partyId)
@@ -365,7 +453,7 @@ namespace Bot.Guilds
         {
             get { return _quests.AsReadOnly(); }
         }
-        public ReadOnlyCollection<Character> Characters
+        public ReadOnlyDictionary<ulong, List<Character>> Characters
         {
             get { return _characters.AsReadOnly(); }
         }

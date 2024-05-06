@@ -16,7 +16,12 @@ namespace Bot
             return GetGuild(guildId).GetQuest(questId);
         }
 
-        public static Character? GetCharacter(ulong guildId, Guid characterId)
+        public static Character? GetCharacter(ulong guildId, ulong playerId, Guid characterId)
+        {
+            return GetGuild(guildId).GetCharacter(playerId, characterId);
+        }
+
+		public static Character? GetCharacter(ulong guildId, Guid characterId)
         {
             return GetGuild(guildId).GetCharacter(characterId);
         }
@@ -64,7 +69,7 @@ namespace Bot
         }
 
         public static void StoreTempCharacter(
-            FoundryImport characterImport,
+            IImportable characterImport,
             ulong guildId,
             IUser player
         )
@@ -325,7 +330,7 @@ namespace Bot
         {
             string guildId = modal.Data.CustomId.Split("-")[1];
             Guild guild = GetGuild(ulong.Parse(guildId));
-            string userId = modal.Data.CustomId.Split("-")[2];
+            string playerId = modal.Data.CustomId.Split("-")[2];
             IUser player = modal.User;
 
             string charName = components.First(x => x.CustomId == "character_name").Value;
@@ -335,6 +340,18 @@ namespace Bot
             string charReputation = components
                 .First(x => x.CustomId == "character_reputation")
                 .Value;
+
+            Dictionary<string, dynamic>? charData;
+            IImportable? importedCharacter = guild.GetCharacterJson(ulong.Parse(playerId));
+            if (importedCharacter != null)
+            {
+                charData = importedCharacter.GetCharacterData();
+                if (charData != null)
+                {
+                    Character character =
+                        new(player, charName, charDescription, charReputation, charData);
+                }
+            }
 
             await modal.RespondAsync(charName + " has been saved.");
         }
