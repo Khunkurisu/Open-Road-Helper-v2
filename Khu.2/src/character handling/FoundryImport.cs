@@ -13,14 +13,8 @@ namespace Bot.Characters
             jsonData.Remove("folder");
             jsonData.Remove("flags");
             jsonData.Remove("_stats");
-            foreach (string key in jsonData.Keys)
-            {
-                Console.WriteLine(key + ": " + jsonData[key].GetType());
-            }
 
             _name = jsonData["name"];
-
-            Console.WriteLine(_name);
 
             Dictionary<string, dynamic> systemData = jsonData["system"].ToObject<
                 Dictionary<string, dynamic>
@@ -33,12 +27,12 @@ namespace Bot.Characters
             systemData.Remove("abilities");
             systemData.Remove("pfs");
             systemData.Remove("exploration");
-            foreach (string key in systemData.Keys)
-            {
-                Console.WriteLine(key + ": " + systemData[key].GetType());
-            }
+
+            Console.WriteLine("trying to collate system data");
 
             CollateSystemData(systemData);
+
+            Console.WriteLine("finished trying to collate system data");
 
             List<Dictionary<string, dynamic>> itemData = jsonData["items"].ToObject<
                 List<Dictionary<string, dynamic>>
@@ -60,21 +54,34 @@ namespace Bot.Characters
                 itemData.Remove(dict);
             }
 
-            foreach (Dictionary<string, dynamic> dict in itemData)
+            Console.WriteLine("trying to list items");
+
+            try
             {
-                if (dict.ContainsKey("name"))
+                foreach (Dictionary<string, dynamic> dict in itemData)
                 {
-                    Console.WriteLine(dict["name"]);
+                    if (dict.ContainsKey("name"))
+                    {
+                        Console.WriteLine(dict["name"]);
+                    }
                 }
             }
-            CollateItemData(itemData);
+            catch (Exception)
+            {
+                throw;
+            }
+            //CollateItemData(itemData);
         }
 
         private void CollateSystemData(Dictionary<string, dynamic> systemData)
         {
-            Dictionary<string, dynamic> details = systemData["details"].ToObject();
+            Dictionary<string, dynamic> details = systemData["details"].ToObject<
+                Dictionary<string, dynamic>
+            >();
 
-            Dictionary<string, dynamic> biography = details["biography"].ToObject();
+            Dictionary<string, dynamic> biography = details["biography"].ToObject<
+                Dictionary<string, dynamic>
+            >();
             _description = biography["appearance"];
             _birthplace = biography["birthPlace"];
             _backstory = biography["backstory"];
@@ -87,7 +94,9 @@ namespace Bot.Characters
                 _anathema.Add(anathema);
             }
 
-            Dictionary<string, dynamic> languages = details["languages"].ToObject();
+            Dictionary<string, dynamic> languages = details["languages"].ToObject<
+                Dictionary<string, dynamic>
+            >();
             foreach (string language in languages["value"])
             {
                 _languages.Add(language);
@@ -101,7 +110,9 @@ namespace Bot.Characters
             _nationality = details["nationality"]["value"];
             _deity = details["deity"]["value"];
 
-            Dictionary<string, Dictionary<string, uint>> skills = details["skills"].ToObject();
+            Dictionary<string, Dictionary<string, uint>> skills = systemData["skills"].ToObject<
+                Dictionary<string, Dictionary<string, uint>>
+            >();
             foreach (string skill in skills.Keys)
             {
                 uint skillRank = skills[skill]["rank"];
@@ -109,10 +120,25 @@ namespace Bot.Characters
                 _skills.Add(skillName, skillRank);
             }
 
-            Dictionary<string, Dictionary<string, uint>> saves = details["saves"].ToObject();
+            Dictionary<string, Dictionary<string, uint>> saves = systemData["saves"].ToObject<
+                Dictionary<string, Dictionary<string, uint>>
+            >();
             foreach (string save in saves.Keys)
             {
-                uint saveRank = saves[save]["value"];
+                Dictionary<string, uint> saveHolder = saves[save];
+                string valueKey = "value";
+                if (!saveHolder.ContainsKey("value"))
+                {
+                    if (saveHolder.ContainsKey("rank"))
+                    {
+                        valueKey = "rank";
+                    }
+                    else
+                    {
+                        valueKey = "tank";
+                    }
+                }
+                uint saveRank = saves[save][valueKey];
                 _saves.Add(save, saveRank);
             }
         }
@@ -141,6 +167,20 @@ namespace Bot.Characters
 
             foreach (var item in itemData)
             {
+                if (item["type"] == "treasure")
+                {
+                    double value = item["system"]["quantity"];
+					switch (item["name"]) {
+						case "Platinum Pieces": value *= 10; break;
+						case "Silver Pieces": value *= 0.1; break;
+						case "Copper Pieces": value *= 0.01; break;
+					}
+					_coin += value;
+                }
+            }
+
+            foreach (var item in itemData)
+            {
                 if (item["type"] == "spell")
                 {
                     _spells.Add(item["name"]);
@@ -160,9 +200,6 @@ namespace Bot.Characters
         private string _description = "";
         private string _backstory = "";
         private string _birthplace = "";
-        private readonly List<string> _languages = new();
-        private readonly List<string> _edicts = new();
-        private readonly List<string> _anathema = new();
         private uint _age = 0;
         private string _height = "";
         private string _weight = "";
@@ -174,6 +211,10 @@ namespace Bot.Characters
         private string _ancestry = "";
         private string _heritage = "";
         private string _background = "";
+		private double _coin = 0;
+        private readonly List<string> _languages = new();
+        private readonly List<string> _edicts = new();
+        private readonly List<string> _anathema = new();
         private readonly Dictionary<string, uint> _skills = new();
         private readonly Dictionary<string, uint> _lore = new();
         private readonly Dictionary<string, uint> _saves = new();
@@ -181,9 +222,9 @@ namespace Bot.Characters
         private readonly List<string> _spells = new();
 
         private readonly List<string> TypeFilter =
-            new() { "feat", "lore", "class", "ancestry", "heritage", "background", "spell" };
+            new() { "feat", "lore", "class", "ancestry", "heritage", "background", "spell", "treasure" };
 
-        public Dictionary<string, string>? GetCharacterData()
+        public Dictionary<string, dynamic>? GetCharacterData()
         {
             return null;
         }
