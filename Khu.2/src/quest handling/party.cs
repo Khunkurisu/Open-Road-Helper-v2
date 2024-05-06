@@ -16,20 +16,6 @@ namespace Bot.Quests
             Members = new() { creator.Id };
         }
 
-        public Party(Guid creatorId)
-        {
-            Character creator = BotManager.GetCharacter(Guild, creatorId);
-            Name = creator.Name + "'s Party";
-            Members = new() { creator.Id };
-        }
-
-        public Party(List<Guid> memberIds)
-        {
-            Character creator = BotManager.GetCharacter(Guild, memberIds[0]);
-            Name = creator.Name + "'s Party";
-            Members = memberIds;
-        }
-
         public Party(List<Character> members)
         {
             Name = members[0].Name + "'s Party";
