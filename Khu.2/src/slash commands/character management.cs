@@ -19,7 +19,7 @@ namespace Bot.Characters
             {
                 ulong guildId = Context.Guild.Id;
                 IUser player = Context.User;
-                HttpClient client = new() { Timeout = TimeSpan.FromSeconds(30) };
+                HttpClient client = new() { Timeout = TimeSpan.FromSeconds(2) };
                 string json = await client.GetStringAsync(sheet.Url);
 
                 Dictionary<string, dynamic>? importData = JsonConvert.DeserializeObject<
@@ -28,9 +28,6 @@ namespace Bot.Characters
 
                 if (importData != null)
                 {
-                    FoundryImport foundryImport = new(importData);
-
-                    //BotManager.StoreTempCharacter(foundryImport, guildId, player);
                     var textBox = new ModalBuilder()
                         .WithTitle("Create Character")
                         .WithCustomId("createCharacter-" + guildId + "-" + player.Id)
@@ -42,13 +39,16 @@ namespace Bot.Characters
                             "The character's outward appearance and general description."
                         )
                         .AddTextInput(
-                            "Description",
+                            "Reputation",
                             "character_reputation",
                             TextInputStyle.Paragraph,
                             "The character's public reputation and info."
                         );
 
                     await RespondWithModalAsync(textBox.Build());
+
+                    FoundryImport foundryImport = new(importData);
+                    BotManager.StoreTempCharacter(foundryImport, guildId, player);
                 }
                 else
                 {
