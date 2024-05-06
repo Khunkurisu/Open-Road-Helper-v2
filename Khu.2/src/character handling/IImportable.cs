@@ -2,6 +2,6 @@ namespace Bot.Characters
 {
     public interface IImportable
     {
-        public Dictionary<string, string>? GetCharacterData();
+        public Dictionary<string, dynamic>? GetCharacterData();
     }
 }
