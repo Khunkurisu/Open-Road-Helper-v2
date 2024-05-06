@@ -30,6 +30,7 @@ namespace Bot
             {
                 AlwaysDownloadUsers = true,
                 MessageCacheSize = 100,
+                UseInteractionSnowflakeDate = false,
                 GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
             };
             var collection = new ServiceCollection()
