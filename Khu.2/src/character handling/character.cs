@@ -1,3 +1,4 @@
+using Bot.Guilds;
 using Bot.Helpers;
 using Discord;
 
@@ -7,6 +8,7 @@ namespace Bot.Characters
     {
         private readonly Guid _id;
         private readonly ulong _user;
+        private readonly ulong _guild;
 
         private string _name;
         private string _desc;
@@ -48,6 +50,7 @@ namespace Bot.Characters
 
         public Character(
             IUser user,
+            Guild guild,
             string name,
             string desc,
             string rep,
@@ -56,6 +59,7 @@ namespace Bot.Characters
         {
             _id = Guid.NewGuid();
             _user = user.Id;
+            _guild = guild.Id;
             _name = name;
             _desc = desc;
             _rep = rep;
@@ -118,6 +122,10 @@ namespace Bot.Characters
         public ulong User
         {
             get { return _user; }
+        }
+        public ulong Guild
+        {
+            get { return _guild; }
         }
         public string Name
         {

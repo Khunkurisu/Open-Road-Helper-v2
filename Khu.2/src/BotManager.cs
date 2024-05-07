@@ -349,7 +349,7 @@ namespace Bot
                 if (charData != null)
                 {
                     Character character =
-                        new(player, charName, charDescription, charReputation, charData);
+                        new(player, guild, charName, charDescription, charReputation, charData);
                 }
             }
 
