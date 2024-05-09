@@ -17,7 +17,8 @@ namespace Bot.Characters
             _deity = buildData["deity"];
             _age = uint.Parse(buildData["age"]);
             _gender = buildData["gender"];
-            _level = buildData["level"];
+            long level = buildData["level"];
+            _level = (uint)level;
 
             CollateProficiencies(buildData);
             CollateLanguages(buildData);
