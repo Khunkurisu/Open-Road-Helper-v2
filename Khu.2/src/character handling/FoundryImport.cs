@@ -27,12 +27,7 @@ namespace Bot.Characters
             systemData.Remove("abilities");
             systemData.Remove("pfs");
             systemData.Remove("exploration");
-
-            Console.WriteLine("trying to collate system data");
-
             CollateSystemData(systemData);
-
-            Console.WriteLine("finished trying to collate system data");
 
             List<Dictionary<string, dynamic>> itemData = jsonData["items"].ToObject<
                 List<Dictionary<string, dynamic>>
@@ -53,31 +48,88 @@ namespace Bot.Characters
             {
                 itemData.Remove(dict);
             }
+            CollateItemData(itemData);
+            CollateAttributeData();
+        }
 
-            Console.WriteLine("trying to list items");
+        private void CollateAttributeData()
+        {
+            Dictionary<string, dynamic> attributeData = _buildData["attributes"].ToObject<
+                Dictionary<string, dynamic>
+            >();
+            Dictionary<string, List<string>> boostData = attributeData["boosts"].ToObject<
+                Dictionary<string, List<string>>
+            >();
 
-            try
+            foreach (string l in boostData.Keys)
             {
-                foreach (Dictionary<string, dynamic> dict in itemData)
+                foreach (string attribute in boostData[l])
                 {
-                    if (dict.ContainsKey("name"))
+                    uint mod = 2;
+                    if (_attributes[attribute] >= 18)
                     {
-                        Console.WriteLine(dict["name"]);
+                        mod = 1;
                     }
+                    _attributes[attribute] += mod;
                 }
             }
-            catch (Exception)
+
+            Dictionary<string, dynamic> systemData = _ancestryData["system"].ToObject<
+                Dictionary<string, dynamic>
+            >();
+            Dictionary<string, dynamic> boostsData = systemData["boosts"].ToObject<
+                Dictionary<string, dynamic>
+            >();
+            foreach (string l in boostsData.Keys)
             {
-                throw;
+                Dictionary<string, dynamic> levelData = boostsData[l].ToObject<
+                    Dictionary<string, dynamic>
+                >();
+
+                if (levelData.ContainsKey("selected"))
+                {
+                    string attribute = levelData["selected"];
+                    uint mod = 2;
+                    if (_attributes[attribute] >= 18)
+                    {
+                        mod = 1;
+                    }
+                    _attributes[attribute] += mod;
+                }
             }
-            //CollateItemData(itemData);
+
+            Dictionary<string, dynamic> flawsData = systemData["boosts"].ToObject<
+                Dictionary<string, dynamic>
+            >();
+            foreach (string l in flawsData.Keys)
+            {
+                Dictionary<string, dynamic> levelData = flawsData[l].ToObject<
+                    Dictionary<string, dynamic>
+                >();
+
+                if (levelData.ContainsKey("selected"))
+                {
+                    string attribute = levelData["selected"];
+                    uint mod = 2;
+                    if (_attributes[attribute] > 18)
+                    {
+                        mod = 1;
+                    }
+                    _attributes[attribute] -= mod;
+                }
+            }
         }
 
         private void CollateSystemData(Dictionary<string, dynamic> systemData)
         {
+            _buildData = systemData["build"].ToObject<Dictionary<string, dynamic>>();
+
             Dictionary<string, dynamic> details = systemData["details"].ToObject<
                 Dictionary<string, dynamic>
             >();
+
+            Dictionary<string, uint> level = details["level"].ToObject<Dictionary<string, uint>>();
+            _level = level["value"];
 
             Dictionary<string, dynamic> biography = details["biography"].ToObject<
                 Dictionary<string, dynamic>
@@ -147,8 +199,14 @@ namespace Bot.Characters
         {
             Dictionary<string, dynamic> classData = itemData.First(x => x["type"] == "class");
             _class = classData["name"];
-            Dictionary<string, dynamic> ancestryData = itemData.First(x => x["type"] == "ancestry");
-            _ancestry = ancestryData["name"];
+            Dictionary<string, dynamic> classSystem = classData["system"].ToObject<
+                Dictionary<string, dynamic>
+            >();
+            long perception = classSystem["perception"];
+            _perception = (int)perception;
+
+            _ancestryData = itemData.First(x => x["type"] == "ancestry");
+            _ancestry = _ancestryData["name"];
             Dictionary<string, dynamic> heritageData = itemData.First(x => x["type"] == "heritage");
             _heritage = heritageData["name"];
             Dictionary<string, dynamic> backgroundData = itemData.First(
@@ -170,12 +228,19 @@ namespace Bot.Characters
                 if (item["type"] == "treasure")
                 {
                     double value = item["system"]["quantity"];
-					switch (item["name"]) {
-						case "Platinum Pieces": value *= 10; break;
-						case "Silver Pieces": value *= 0.1; break;
-						case "Copper Pieces": value *= 0.01; break;
-					}
-					_coin += value;
+                    switch (item["name"])
+                    {
+                        case "Platinum Pieces":
+                            value *= 10;
+                            break;
+                        case "Silver Pieces":
+                            value *= 0.1;
+                            break;
+                        case "Copper Pieces":
+                            value *= 0.01;
+                            break;
+                    }
+                    _coin += value;
                 }
             }
 
@@ -192,11 +257,19 @@ namespace Bot.Characters
                 if (item["type"] == "feat")
                 {
                     _feats.Add(item["name"]);
+                    if (item["name"] == "Canny Acumen (Perception)")
+                    {
+                        _perception = 2;
+                    }
                 }
             }
         }
 
+        private Dictionary<string, dynamic> _buildData = new();
+        private Dictionary<string, dynamic> _ancestryData = new();
+
         private readonly string _name;
+        private uint _level = 1;
         private string _description = "";
         private string _backstory = "";
         private string _birthplace = "";
@@ -211,7 +284,8 @@ namespace Bot.Characters
         private string _ancestry = "";
         private string _heritage = "";
         private string _background = "";
-		private double _coin = 0;
+        private double _coin = 0;
+        private int _perception = 0;
         private readonly List<string> _languages = new();
         private readonly List<string> _edicts = new();
         private readonly List<string> _anathema = new();
@@ -220,9 +294,29 @@ namespace Bot.Characters
         private readonly Dictionary<string, uint> _saves = new();
         private readonly List<string> _feats = new();
         private readonly List<string> _spells = new();
+        private readonly Dictionary<string, uint> _attributes =
+            new()
+            {
+                { "str", 10 },
+                { "dex", 10 },
+                { "con", 10 },
+                { "int", 10 },
+                { "wis", 10 },
+                { "cha", 10 }
+            };
 
         private readonly List<string> TypeFilter =
-            new() { "feat", "lore", "class", "ancestry", "heritage", "background", "spell", "treasure" };
+            new()
+            {
+                "feat",
+                "lore",
+                "class",
+                "ancestry",
+                "heritage",
+                "background",
+                "spell",
+                "treasure"
+            };
 
         public Dictionary<string, dynamic>? GetCharacterData()
         {
