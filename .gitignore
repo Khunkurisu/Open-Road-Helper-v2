@@ -12,3 +12,6 @@ artifacts/
 *.userprefs
 *DS_Store
 *.sln.ide
+Khu.2/obj/project.nuget.cache
+Khu.2/obj/Debug/net7.0/Khu.2.assets.cache
+Khu.2/obj/Debug/net7.0/Khu.2.GeneratedMSBuildEditorConfig.editorconfig
