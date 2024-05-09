@@ -26,11 +26,16 @@ namespace Bot.Guilds
         private readonly List<Party> _parties = new();
         private readonly Dictionary<ulong, uint> _playerTokens = new();
 
-        public readonly List<uint> Generations = new() { 5 };
+        public List<uint> Generations { get; } = new() { 5 };
 
         public int GenerationCount
         {
             get { return Generations.Count; }
+        }
+
+        public uint Generation
+        {
+            get { return Generations[^1]; }
         }
 
         public uint GetPlayerTokenCount(ulong playerId)
@@ -74,23 +79,7 @@ namespace Bot.Guilds
         public Guild(ulong id)
         {
             _id = id;
-        }
-
-        public void StoreTempCharacter(ulong playerId, IImportable characterImport)
-        {
-            if (!_characterValues.ContainsKey(playerId))
-            {
-                _characterValues.Add(playerId, characterImport);
-            }
-            else
-            {
-                _characterValues[playerId] = characterImport;
-            }
-        }
-
-        public IImportable? GetCharacterJson(ulong playerId)
-        {
-            return _characterValues.ContainsKey(playerId) ? _characterValues[playerId] : null;
+			LoadAll();
         }
 
         public void LoadAll()
@@ -142,6 +131,23 @@ namespace Bot.Guilds
                     _characters[playerId] = characters[playerId];
                 }
             }
+        }
+
+        public void StoreTempCharacter(ulong playerId, IImportable characterImport)
+        {
+            if (!_characterValues.ContainsKey(playerId))
+            {
+                _characterValues.Add(playerId, characterImport);
+            }
+            else
+            {
+                _characterValues[playerId] = characterImport;
+            }
+        }
+
+        public IImportable? GetCharacterJson(ulong playerId)
+        {
+            return _characterValues.ContainsKey(playerId) ? _characterValues[playerId] : null;
         }
 
         private void LoadBoards()
