@@ -6,7 +6,7 @@ using Discord.WebSocket;
 
 namespace Bot
 {
-    public class BotManager
+    public partial class BotManager
     {
         private static DiscordSocketClient? _client;
         public static readonly List<Guild> Guilds = new();
