@@ -13,21 +13,49 @@ namespace Bot.Characters
     public class CharacterManagement : InteractionModuleBase<SocketInteractionContext>
     {
         [SlashCommand("create", "Create a character.")]
-        public async Task CreateCharacter(IAttachment sheet)
+        public async Task CreateCharacter(IAttachment? sheet = null, int pathbuilderId = -1)
         {
-            if (sheet.Filename.Contains(".json"))
-            {
-                ulong guildId = Context.Guild.Id;
-                IUser player = Context.User;
-                HttpClient client = new() { Timeout = TimeSpan.FromSeconds(2) };
-                string json = await client.GetStringAsync(sheet.Url);
+            ulong guildId = Context.Guild.Id;
+            IUser player = Context.User;
+            string json = "";
+            int sheetType = 0;
+            HttpClient client = new() { Timeout = TimeSpan.FromSeconds(2) };
 
+            if (sheet != null && sheet.Filename.Contains(".json"))
+            {
+                json = await client.GetStringAsync(sheet.Url);
+                sheetType = 1;
+            }
+            else if (pathbuilderId > 0)
+            {
+                json = await client.GetStringAsync(
+                    "https://pathbuilder2e.com/json.php?id=" + pathbuilderId
+                );
+                sheetType = 2;
+            }
+            if (json != "")
+            {
                 Dictionary<string, dynamic>? importData = JsonConvert.DeserializeObject<
                     Dictionary<string, dynamic>
                 >(json);
 
                 if (importData != null)
                 {
+                    if (sheetType == 1)
+                    {
+                        FoundryImport characterImport = new(importData);
+                        BotManager.StoreTempCharacter(characterImport, guildId, player);
+                    }
+                    else if (sheetType == 2)
+                    {
+                        PathbuilderImport characterImport = new(importData);
+                        BotManager.StoreTempCharacter(characterImport, guildId, player);
+                    }
+                    else
+                    {
+                        await RespondAsync("Please upload a valid json file or import code.");
+                    }
+
                     var textBox = new ModalBuilder()
                         .WithTitle("Create Character")
                         .WithCustomId("createCharacter-" + guildId + "-" + player.Id)
@@ -46,18 +74,15 @@ namespace Bot.Characters
                         );
 
                     await RespondWithModalAsync(textBox.Build());
-
-                    FoundryImport foundryImport = new(importData);
-                    BotManager.StoreTempCharacter(foundryImport, guildId, player);
                 }
                 else
                 {
-                    await RespondAsync("Please upload a valid json file.");
+                    await RespondAsync("Please upload a valid json file or import code.");
                 }
             }
             else
             {
-                await RespondAsync("Please upload a valid json file.");
+                await RespondAsync("Please upload a valid json file or import code.");
             }
         }
 
