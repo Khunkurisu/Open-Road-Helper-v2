@@ -4,46 +4,211 @@ namespace Bot.Characters
     {
         public PathbuilderImport(Dictionary<string, dynamic> jsonData)
         {
-            // some code here
+            jsonData.Remove("success");
+            Dictionary<string, dynamic> buildData = jsonData["build"].ToObject<
+                Dictionary<string, dynamic>
+            >();
+
+            _name = buildData["name"];
+            _class = buildData["class"];
+            _ancestry = buildData["ancestry"];
+            _heritage = buildData["heritage"];
+            _background = buildData["background"];
+            _deity = buildData["deity"];
+            _age = uint.Parse(buildData["age"]);
+            _gender = buildData["gender"];
+            _level = buildData["level"];
+
+            CollateProficiencies(buildData);
+            CollateLanguages(buildData);
+            CollateSpells(buildData);
+            CollateCoinage(buildData);
+            CollateAttributeData(buildData);
+        }
+
+        public void CollateCoinage(Dictionary<string, dynamic> jsonData)
+        {
+            Dictionary<string, double> coins = jsonData["money"].ToObject<
+                Dictionary<string, double>
+            >();
+            foreach (string c in coins.Keys)
+            {
+                double value = coins[c];
+                switch (c)
+                {
+                    case "cp":
+                        value *= 0.01;
+                        break;
+                    case "sp":
+                        value *= 0.1;
+                        break;
+                    case "pp":
+                        value *= 10.0;
+                        break;
+                }
+                _coin += value;
+            }
+        }
+
+        public void CollateSpells(Dictionary<string, dynamic> jsonData)
+        {
+            List<Dictionary<string, dynamic>> spellcasting = jsonData["spellCasters"].ToObject<
+                List<Dictionary<string, dynamic>>
+            >();
+            foreach (Dictionary<string, dynamic> spellcaster in spellcasting)
+            {
+                List<Dictionary<string, dynamic>> spellLists = spellcaster["spells"].ToObject<
+                    List<Dictionary<string, dynamic>>
+                >();
+
+                foreach (Dictionary<string, dynamic> spellList in spellLists)
+                {
+                    List<string> spells = spellList["list"].ToObject<List<string>>();
+                    foreach (string spell in spells)
+                    {
+                        _spells.Add(spell);
+                    }
+                }
+            }
+
+            Dictionary<string, dynamic> focusTraditions = jsonData["focus"].ToObject<
+                Dictionary<string, dynamic>
+            >();
+            foreach (string t in focusTraditions.Keys)
+            {
+                Dictionary<string, dynamic> focusAttributes = focusTraditions[t].ToObject<
+                    Dictionary<string, dynamic>
+                >();
+                foreach (string a in focusAttributes.Keys)
+                {
+                    Dictionary<string, dynamic> focusAttribute = focusAttributes[a].ToObject<
+                        Dictionary<string, dynamic>
+                    >();
+                    List<string> focusSpells = focusAttribute["focusSpells"].ToObject<
+                        List<string>
+                    >();
+                    foreach (string f in focusSpells)
+                    {
+                        _spells.Add(f);
+                    }
+                }
+            }
+        }
+
+        public void CollateProficiencies(Dictionary<string, dynamic> jsonData)
+        {
+            Dictionary<string, int> proficiencies = jsonData["proficiencies"].ToObject<
+                Dictionary<string, int>
+            >();
+
+            _perception = proficiencies["perception"];
+
+            foreach (string k in ProficiencyFilters)
+            {
+                proficiencies.Remove(k);
+            }
+
+            foreach (string p in proficiencies.Keys)
+            {
+                if (SaveKeys.Contains(p))
+                {
+                    _saves[p] = (uint)proficiencies[p];
+                }
+                else
+                {
+                    _skills[p] = (uint)proficiencies[p];
+                }
+            }
+
+            List<List<dynamic>> lores = jsonData["lores"].ToObject<List<List<dynamic>>>();
+
+            foreach (List<dynamic> entry in lores)
+            {
+                string loreName = entry[0];
+                long loreValue = entry[1];
+                _lore[loreName] = (uint)loreValue;
+            }
+        }
+
+        public void CollateLanguages(Dictionary<string, dynamic> jsonData)
+        {
+            List<string> languages = jsonData["languages"].ToObject<List<string>>();
+
+            foreach (string l in languages)
+            {
+                if (l.StartsWith("Pathbuilder"))
+                {
+                    continue;
+                }
+                _languages.Add(l);
+            }
+        }
+
+        public void CollateAttributeData(Dictionary<string, dynamic> jsonData)
+        {
+            Dictionary<string, dynamic> abilityData = jsonData["abilities"].ToObject<
+                Dictionary<string, dynamic>
+            >();
+
+            foreach (string ability in abilityData.Keys)
+            {
+                if (ability == "breakdown")
+                {
+                    continue;
+                }
+
+                long abilityScore = abilityData[ability];
+                _attributes[ability] = (uint)abilityScore;
+            }
         }
 
         private readonly string _name;
-        private string _description = "";
-        private string _backstory = "";
-        private string _birthplace = "";
+        private uint _level = 1;
         private uint _age = 0;
-        private string _height = "";
-        private string _weight = "";
         private string _gender = "";
-        private string _ethnicity = "";
-        private string _nationality = "";
         private string _deity = "";
         private string _class = "";
         private string _ancestry = "";
         private string _heritage = "";
         private string _background = "";
         private double _coin = 0;
+        private int _perception = 0;
         private readonly List<string> _languages = new();
-        private readonly List<string> _edicts = new();
-        private readonly List<string> _anathema = new();
         private readonly Dictionary<string, uint> _skills = new();
         private readonly Dictionary<string, uint> _lore = new();
         private readonly Dictionary<string, uint> _saves = new();
         private readonly List<string> _feats = new();
         private readonly List<string> _spells = new();
-
-        private readonly List<string> TypeFilter =
+        private readonly Dictionary<string, uint> _attributes =
             new()
             {
-                "feat",
-                "lore",
-                "class",
-                "ancestry",
-                "heritage",
-                "background",
-                "spell",
-                "treasure"
+                { "str", 10 },
+                { "dex", 10 },
+                { "con", 10 },
+                { "int", 10 },
+                { "wis", 10 },
+                { "cha", 10 }
             };
+
+        private readonly List<string> ProficiencyFilters =
+            new()
+            {
+                "classDC",
+                "heavy",
+                "medium",
+                "light",
+                "unarmored",
+                "advanced",
+                "martial",
+                "simple",
+                "unarmed",
+                "castingArcane",
+                "castingDivine",
+                "castingOccult",
+                "castingPrimal",
+                "perception"
+            };
+        private readonly List<string> SaveKeys = new() { "reflex", "will", "fortitude" };
 
         public Dictionary<string, dynamic>? GetCharacterData()
         {
