@@ -12,4 +12,7 @@ artifacts/
 *.userprefs
 *DS_Store
 *.sln.ide
-Khu.2/obj/
+obj/
+bin/
+Bin/
+Obj/
