@@ -257,10 +257,6 @@ namespace Bot.Characters
                 if (item["type"] == "feat")
                 {
                     _feats.Add(item["name"]);
-                    if (item["name"] == "Canny Acumen (Perception)")
-                    {
-                        _perception = 2;
-                    }
                 }
             }
         }
@@ -320,7 +316,38 @@ namespace Bot.Characters
 
         public Dictionary<string, dynamic>? GetCharacterData()
         {
-            return null;
+            return new()
+            {
+                { "name", _name },
+                { "level", _level },
+                { "description", _description },
+                { "backstory", _backstory },
+                { "birthplace", _birthplace },
+                { "age", _age },
+                { "height", _height },
+                { "weight", _weight },
+                { "gender", _gender },
+                { "ethnicity", _ethnicity },
+                { "nationality", _nationality },
+                { "deity", _deity },
+                { "class", _class },
+                { "ancestry", _ancestry },
+                { "heritage", _heritage },
+                { "background", _background },
+                { "coin", _coin },
+                { "perception", _perception },
+                { "languages", _languages },
+                { "edicts", _edicts },
+                { "anathema", _anathema },
+                { "skills", _skills },
+                { "lore", _lore },
+                { "saves", _saves },
+                { "feats", _feats },
+                { "spells", _spells },
+                { "attributes", _attributes }
+            };
         }
+
+        public ImportType ImportType { get; } = ImportType.Foundry;
     }
 }
