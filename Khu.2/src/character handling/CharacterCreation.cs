@@ -54,11 +54,43 @@ namespace Bot
                     charData = importedCharacter.GetCharacterData();
                     if (charData != null)
                     {
-                        Character character =
-                            new(player, guild, charName, charDescription, charReputation, charData);
+                        int tokenCost = guild.GetPlayerCharacterCount(playerId) + 1;
+                        uint tokenCount = guild.GetPlayerTokenCount(playerId);
+                        if (tokenCount < tokenCost)
+                        {
+                            await modal.RespondAsync(
+                                "You lack sufficient tokens to create a new character. ("
+                                    + tokenCost
+                                    + " PT required)"
+                            );
+                        }
+                        else
+                        {
+                            Character character =
+                                new(
+                                    player,
+                                    guild,
+                                    charName,
+                                    charDescription,
+                                    charReputation,
+                                    charData
+                                );
 
-                        guild.AddCharacter(playerId, character);
-                        await modal.RespondAsync(charName + " has been saved.");
+                            /* guild.SetPlayerTokenCount(playerId, (uint)(tokenCount - tokenCost));
+                            guild.AddCharacter(playerId, character); */
+                            EmbedBuilder? charEmbed = character.GenerateEmbed();
+                            if (charEmbed != null)
+                            {
+                                await modal.RespondAsync(
+                                    "Ensure everything looks correct before continuing!",
+                                    embed: charEmbed.Build()
+                                );
+                            }
+                            else
+                            {
+                                await modal.RespondAsync("failed to create embed");
+                            }
+                        }
                     }
                     else
                     {
