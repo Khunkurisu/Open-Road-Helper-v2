@@ -84,5 +84,20 @@ namespace Bot.Helpers
         {
             return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(unixSeconds);
         }
+
+        public static float FeetToCentimeters(float feet)
+        {
+            return 30.48f * feet;
+        }
+
+        public static float InchesToCentimeters(float inches)
+        {
+            return 2.54f * inches;
+        }
+
+        public static float PoundsToKilograms(float lbs)
+        {
+            return 0.45359237f * lbs;
+        }
     }
 }
