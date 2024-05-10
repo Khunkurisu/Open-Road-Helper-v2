@@ -1,8 +1,6 @@
-using System.Text.RegularExpressions;
 using Bot.Guilds;
 using Bot.Helpers;
 using Discord;
-using Newtonsoft.Json;
 
 namespace Bot.Characters
 {
@@ -75,8 +73,8 @@ namespace Bot.Characters
             ImportType importType = data["type"];
             if (importType == ImportType.Foundry)
             {
-                _height = GetHeightFromString(data["height"]);
-                _weight = GetWeightFromString(data["weight"]);
+                _height = GenericHelpers.GetHeightFromString(data["height"]);
+                _weight = GenericHelpers.GetWeightFromString(data["weight"]);
             }
             _id = Guid.NewGuid();
             _user = user.Id;
@@ -116,71 +114,6 @@ namespace Bot.Characters
             {
                 _anathema = data["anathema"];
             }
-        }
-
-        private static float GetHeightFromString(string heightString)
-        {
-            float height = 0f;
-            string patternImperial = " ?\"| ?'";
-            string patternMetric = " ?cms?";
-
-            Regex regex = new(patternImperial);
-            string[] heightImperial = regex.Split(heightString);
-            if (regex.IsMatch(patternImperial) && heightImperial.Length > 1)
-            {
-                if (float.TryParse(heightImperial[0], out float resultFeet))
-                {
-                    height += GenericHelpers.FeetToCentimeters(resultFeet);
-                }
-                if (float.TryParse(heightImperial[1], out float resultInches))
-                {
-                    height += GenericHelpers.InchesToCentimeters(resultInches);
-                }
-                return height;
-            }
-
-            regex = new(patternMetric);
-            string[] heightMetric = regex.Split(heightString);
-            if (regex.IsMatch(patternMetric) && heightMetric.Length > 0)
-            {
-                if (float.TryParse(heightMetric[0], out float result))
-                {
-                    height += result;
-                    return height;
-                }
-            }
-
-            return height;
-        }
-
-        private static float GetWeightFromString(string weightString)
-        {
-            float weight = 0f;
-            string patternImperial = " ?lbs?";
-            string patternMetric = " ?kgs?";
-
-            Regex regex = new(patternImperial);
-            string[] weightImperial = regex.Split(weightString);
-            if (regex.IsMatch(patternImperial) && weightImperial.Length > 1)
-            {
-                if (float.TryParse(weightImperial[0], out float resultFeet))
-                {
-                    weight += GenericHelpers.PoundsToKilograms(resultFeet);
-                    return weight;
-                }
-            }
-
-            regex = new(patternMetric);
-            string[] weightMetric = regex.Split(weightString);
-            if (regex.IsMatch(patternMetric) && weightMetric.Length > 0)
-            {
-                if (float.TryParse(weightMetric[0], out float result))
-                {
-                    weight += result;
-                    return weight;
-                }
-            }
-            return weight;
         }
 
         private void SetStatus(Status status)
@@ -548,118 +481,6 @@ namespace Bot.Characters
                 }
                 return mods;
             }
-        }
-
-        [JsonConstructor]
-        public Character(
-            Guid id,
-            ulong user,
-            ulong guild,
-            string name,
-            string desc,
-            string rep,
-            uint age,
-            float height,
-            float weight,
-            int birthday,
-            Months birthMonth,
-            int birthYear,
-            string ancestry,
-            string heritage,
-            string charClass,
-            string background,
-            int generation,
-            uint level,
-            double gold,
-            int downtime,
-            string deity,
-            string gender,
-            string color,
-            string avatarURL,
-            ulong messageId,
-            List<string> notes,
-            int lastTokenTrade,
-            long createdOn,
-            long updatedOn,
-            Status status,
-            List<string> feats,
-            List<string> spells,
-            List<string> edicts,
-            List<string> anathema,
-            List<string> languages,
-            Dictionary<string, uint> skills,
-            Dictionary<string, uint> lore,
-            Dictionary<string, uint> saves,
-            uint perception,
-            Dictionary<string, uint> attributes
-        )
-        {
-            _id = id;
-            _user = user;
-            _guild = guild;
-            _name = name;
-            _desc = desc;
-            _rep = rep;
-            _age = age;
-            _height = height;
-            _weight = weight;
-            _birthDay = birthday;
-            _birthMonth = birthMonth;
-            _birthYear = birthYear;
-            _ancestry = ancestry;
-            _heritage = heritage;
-            _class = charClass;
-            _background = background;
-            _generation = generation;
-            _level = level;
-            _currency = gold;
-            _downtime = downtime;
-            _colorPref = color;
-            _avatars[0] = avatarURL;
-            _messageId = messageId;
-            _notes = notes;
-            _lastTokenTrade = lastTokenTrade;
-            _created = createdOn;
-            _updated = updatedOn;
-            _status = status;
-            _feats = feats;
-            _spells = spells;
-            _edicts = edicts;
-            _anathema = anathema;
-            _languages = languages;
-            _skills = skills;
-            _lore = lore;
-            _saves = saves;
-            _perception = perception;
-            _attributes = attributes;
-            _deity = deity;
-            _gender = gender;
-        }
-
-        public EmbedBuilder? GenerateEmbed()
-        {
-            Guild guild = BotManager.GetGuild(_guild);
-            IUser? player = BotManager.GetGuildUser(_guild, _user);
-            if (player == null)
-            {
-                return null;
-            }
-
-            var embed = new EmbedBuilder()
-                .WithTitle(Heritage + " " + Ancestry + " " + Class + " " + Level)
-                .WithAuthor(Name)
-                .WithDescription(Desc)
-                .WithFooter(player.Username)
-                .AddField("Reputation", Rep, false)
-                .AddField("Age", Age, true)
-                .AddField("Height", Height + " cm", true)
-                .AddField("Weight", Weight + " kg", true)
-                .AddField("PT", guild.GetPlayerTokenCount(User).ToString(), true)
-                .AddField("DT", Downtime.ToString(), true)
-                .AddField("Coin", Gold + " gp", true)
-                .WithImageUrl(AvatarURL);
-
-            return embed;
         }
     }
 }

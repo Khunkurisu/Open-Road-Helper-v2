@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace Bot.Helpers
 {
     public static class GenericHelpers
@@ -83,6 +85,71 @@ namespace Bot.Helpers
         public static DateTime DateTimeFromUnixSeconds(uint unixSeconds)
         {
             return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(unixSeconds);
+        }
+
+        public static float GetHeightFromString(string heightString)
+        {
+            float height = 0f;
+            string patternImperial = " ?\"| ?'";
+            string patternMetric = " ?cms?";
+
+            Regex regex = new(patternImperial);
+            string[] heightImperial = regex.Split(heightString);
+            if (regex.IsMatch(patternImperial) && heightImperial.Length > 1)
+            {
+                if (float.TryParse(heightImperial[0], out float resultFeet))
+                {
+                    height += GenericHelpers.FeetToCentimeters(resultFeet);
+                }
+                if (float.TryParse(heightImperial[1], out float resultInches))
+                {
+                    height += GenericHelpers.InchesToCentimeters(resultInches);
+                }
+                return height;
+            }
+
+            regex = new(patternMetric);
+            string[] heightMetric = regex.Split(heightString);
+            if (regex.IsMatch(patternMetric) && heightMetric.Length > 0)
+            {
+                if (float.TryParse(heightMetric[0], out float result))
+                {
+                    height += result;
+                    return height;
+                }
+            }
+
+            return height;
+        }
+
+        public static float GetWeightFromString(string weightString)
+        {
+            float weight = 0f;
+            string patternImperial = " ?lbs?";
+            string patternMetric = " ?kgs?";
+
+            Regex regex = new(patternImperial);
+            string[] weightImperial = regex.Split(weightString);
+            if (regex.IsMatch(patternImperial) && weightImperial.Length > 1)
+            {
+                if (float.TryParse(weightImperial[0], out float resultFeet))
+                {
+                    weight += GenericHelpers.PoundsToKilograms(resultFeet);
+                    return weight;
+                }
+            }
+
+            regex = new(patternMetric);
+            string[] weightMetric = regex.Split(weightString);
+            if (regex.IsMatch(patternMetric) && weightMetric.Length > 0)
+            {
+                if (float.TryParse(weightMetric[0], out float result))
+                {
+                    weight += result;
+                    return weight;
+                }
+            }
+            return weight;
         }
 
         public static float FeetToCentimeters(float feet)
