@@ -163,6 +163,20 @@ namespace Bot.Characters
             }
         }
 
+        public void CollateFeats(Dictionary<string, dynamic> jsonData)
+        {
+            List<List<dynamic>> feats = jsonData["feats"].ToObject<List<List<dynamic>>>();
+            foreach (List<dynamic> feat in feats)
+            {
+                string name = feat[0];
+                if (FeatsWithFollowup.Contains(name))
+                {
+                    name += " (" + feat[1] + ")";
+                }
+                _feats.Add(name);
+            }
+        }
+
         private readonly string _name;
         private uint _level = 1;
         private uint _age = 0;
@@ -209,11 +223,37 @@ namespace Bot.Characters
                 "castingPrimal",
                 "perception"
             };
+
+        private readonly List<string> FeatsWithFollowup =
+            new() { "Canny Acumen", "Assurance", "Additional Lore" };
         private readonly List<string> SaveKeys = new() { "reflex", "will", "fortitude" };
 
         public Dictionary<string, dynamic>? GetCharacterData()
         {
-            return null;
+            return new()
+            {
+                { "type", ImportType },
+                { "name", _name },
+                { "level", _level },
+                { "age", _age },
+                { "gender", _gender },
+                { "deity", _deity },
+                { "class", _class },
+                { "ancestry", _ancestry },
+                { "heritage", _heritage },
+                { "background", _background },
+                { "coin", _coin },
+                { "perception", _perception },
+                { "languages", _languages },
+                { "skills", _skills },
+                { "lore", _lore },
+                { "saves", _saves },
+                { "feats", _feats },
+                { "spells", _spells },
+                { "attributes", _attributes }
+            };
         }
+
+        public ImportType ImportType { get; } = ImportType.Pathbuilder;
     }
 }

@@ -318,6 +318,7 @@ namespace Bot.Characters
         {
             return new()
             {
+                { "type", ImportType },
                 { "name", _name },
                 { "level", _level },
                 { "description", _description },
