@@ -53,7 +53,7 @@ namespace Bot.Quests
                 .AddOption("Four", "4", "No fewer than four players in the party.");
         }
 
-        public SelectMenuBuilder PartySelector(string guildId, string gm, string name)
+        public static SelectMenuBuilder PartySelector(string guildId, string gm, string name)
         {
             SelectMenuBuilder partySelector = new SelectMenuBuilder()
                 .WithPlaceholder("Select Party")
