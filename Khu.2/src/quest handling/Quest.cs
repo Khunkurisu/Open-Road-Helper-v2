@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Bot.Quests
 {
-    public class Quest
+    public partial class Quest
     {
         public Guid Id;
         public string Name = "temp";
