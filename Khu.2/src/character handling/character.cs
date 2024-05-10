@@ -1,10 +1,12 @@
+using System.Text.RegularExpressions;
 using Bot.Guilds;
 using Bot.Helpers;
 using Discord;
+using Newtonsoft.Json;
 
 namespace Bot.Characters
 {
-    public class Character
+    public partial class Character
     {
         private readonly Guid _id;
         private readonly ulong _user;
@@ -14,6 +16,8 @@ namespace Bot.Characters
         private string _desc;
         private string _rep;
         private uint _age;
+        private string _deity;
+        private string _gender;
         private float _height;
         private float _weight;
         private int _birthDay;
@@ -25,28 +29,39 @@ namespace Bot.Characters
         private readonly string _class;
         private readonly string _background;
         private uint _level = 0;
-        private uint _generation = 1;
-        private float _currency = 0;
+        private int _generation = 1;
+        private double _currency = 0;
         private int _downtime = 0;
 
         private List<string> _languages;
         private Dictionary<string, uint> _skills;
         private Dictionary<string, uint> _lore;
         private Dictionary<string, uint> _saves;
+        private uint _perception;
         private List<string> _feats;
         private List<string> _spells;
-        private List<string> _edicts = new();
-        private List<string> _anathema = new();
+        private List<string> _edicts = new() { "" };
+        private List<string> _anathema = new() { "" };
+        private Dictionary<string, uint> _attributes =
+            new()
+            {
+                { "str", 10 },
+                { "dex", 10 },
+                { "con", 10 },
+                { "int", 10 },
+                { "wis", 10 },
+                { "cha", 10 }
+            };
 
         private string _colorPref = "#000000";
-        private readonly List<string> _avatars = new();
-        private readonly List<string> _notes = new();
+        private readonly List<string> _avatars = new() { "" };
+        private readonly List<string> _notes = new() { "" };
 
         private int _lastTokenTrade = 0;
         private ulong _messageId;
         private readonly long _created;
         private long _updated = 0;
-        private int _status = 0;
+        private Status _status = 0;
 
         public Character(
             IUser user,
@@ -57,6 +72,12 @@ namespace Bot.Characters
             Dictionary<string, dynamic> data
         )
         {
+            ImportType importType = data["type"];
+            if (importType == ImportType.Foundry)
+            {
+                _height = GetHeightFromString(data["height"]);
+                _weight = GetWeightFromString(data["weight"]);
+            }
             _id = Guid.NewGuid();
             _user = user.Id;
             _guild = guild.Id;
@@ -65,11 +86,18 @@ namespace Bot.Characters
             _rep = rep;
             _created = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
+            _level = guild.Generation;
+            _generation = guild.GenerationCount;
+
             _class = data["class"];
             _ancestry = data["ancestry"];
             _heritage = data["heritage"];
             _background = data["background"];
+            _deity = data["deity"];
+            _gender = data["gender"];
             _age = data["age"];
+            int perception = data["perception"];
+            _perception = (uint)perception;
             _currency = data["coin"];
             _languages = data["languages"];
             _skills = data["skills"];
@@ -77,6 +105,7 @@ namespace Bot.Characters
             _saves = data["saves"];
             _feats = data["feats"];
             _spells = data["spells"];
+            _attributes = data["attributes"];
 
             if (data.ContainsKey("edicts"))
             {
@@ -89,9 +118,98 @@ namespace Bot.Characters
             }
         }
 
+        private static float GetHeightFromString(string heightString)
+        {
+            float height = 0f;
+            string patternImperial = " ?\"| ?'";
+            string patternMetric = " ?cms?";
+
+            Regex regex = new(patternImperial);
+            string[] heightImperial = regex.Split(heightString);
+            if (regex.IsMatch(patternImperial) && heightImperial.Length > 1)
+            {
+                if (float.TryParse(heightImperial[0], out float resultFeet))
+                {
+                    height += GenericHelpers.FeetToCentimeters(resultFeet);
+                }
+                if (float.TryParse(heightImperial[1], out float resultInches))
+                {
+                    height += GenericHelpers.InchesToCentimeters(resultInches);
+                }
+                return height;
+            }
+
+            regex = new(patternMetric);
+            string[] heightMetric = regex.Split(heightString);
+            if (regex.IsMatch(patternMetric) && heightMetric.Length > 0)
+            {
+                if (float.TryParse(heightMetric[0], out float result))
+                {
+                    height += result;
+                    return height;
+                }
+            }
+
+            return height;
+        }
+
+        private static float GetWeightFromString(string weightString)
+        {
+            float weight = 0f;
+            string patternImperial = " ?lbs?";
+            string patternMetric = " ?kgs?";
+
+            Regex regex = new(patternImperial);
+            string[] weightImperial = regex.Split(weightString);
+            if (regex.IsMatch(patternImperial) && weightImperial.Length > 1)
+            {
+                if (float.TryParse(weightImperial[0], out float resultFeet))
+                {
+                    weight += GenericHelpers.PoundsToKilograms(resultFeet);
+                    return weight;
+                }
+            }
+
+            regex = new(patternMetric);
+            string[] weightMetric = regex.Split(weightString);
+            if (regex.IsMatch(patternMetric) && weightMetric.Length > 0)
+            {
+                if (float.TryParse(weightMetric[0], out float result))
+                {
+                    weight += result;
+                    return weight;
+                }
+            }
+            return weight;
+        }
+
         private void SetStatus(Status status)
         {
-            _status = (int)status;
+            _status = status;
+            _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        }
+
+        private void SetFeatsList(List<string> newFeats)
+        {
+            _feats = newFeats;
+            _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        }
+
+        private void SetSpellsList(List<string> newSpells)
+        {
+            _spells = newSpells;
+            _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        }
+
+        private void SetEdictsList(List<string> newEdicts)
+        {
+            _edicts = newEdicts;
+            _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        }
+
+        private void SetAnathemaList(List<string> newAnathema)
+        {
+            _anathema = newAnathema;
             _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
@@ -117,19 +235,19 @@ namespace Bot.Characters
 
         public Guid Id
         {
-            get { return _id; }
+            get => _id;
         }
         public ulong User
         {
-            get { return _user; }
+            get => _user;
         }
         public ulong Guild
         {
-            get { return _guild; }
+            get => _guild;
         }
         public string Name
         {
-            get { return _name; }
+            get => _name;
             set
             {
                 _name = value;
@@ -138,7 +256,7 @@ namespace Bot.Characters
         }
         public string Desc
         {
-            get { return _desc; }
+            get => _desc;
             set
             {
                 _desc = value;
@@ -147,16 +265,36 @@ namespace Bot.Characters
         }
         public string Rep
         {
-            get { return _rep; }
+            get => _rep;
             set
             {
                 _rep = value;
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
+
+        public string Deity
+        {
+            get => _deity;
+            set
+            {
+                _deity = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
+        }
+
+        public string Gender
+        {
+            get => _gender;
+            set
+            {
+                _gender = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
+        }
         public uint Age
         {
-            get { return _age; }
+            get => _age;
             set
             {
                 _age = value;
@@ -165,7 +303,7 @@ namespace Bot.Characters
         }
         public float Height
         {
-            get { return _height; }
+            get => MathF.Truncate(_height * 100) / 100;
             set
             {
                 _height = value;
@@ -174,7 +312,7 @@ namespace Bot.Characters
         }
         public float Weight
         {
-            get { return _weight; }
+            get => MathF.Truncate(_weight * 100) / 100;
             set
             {
                 _weight = value;
@@ -183,7 +321,7 @@ namespace Bot.Characters
         }
         public int Birthday
         {
-            get { return _birthDay; }
+            get => _birthDay;
             set
             {
                 _birthDay = value;
@@ -192,7 +330,7 @@ namespace Bot.Characters
         }
         public Months BirthMonth
         {
-            get { return _birthMonth; }
+            get => _birthMonth;
             set
             {
                 _birthMonth = value;
@@ -201,7 +339,7 @@ namespace Bot.Characters
         }
         public int BirthYear
         {
-            get { return _birthYear; }
+            get => _birthYear;
             set
             {
                 _birthYear = value;
@@ -210,39 +348,56 @@ namespace Bot.Characters
         }
         public string Ancestry
         {
-            get { return _ancestry; }
+            get => _ancestry;
         }
         public string Heritage
         {
-            get { return _heritage; }
+            get => _heritage;
         }
         public string Class
         {
-            get { return _class; }
+            get => _class;
         }
         public string Background
         {
-            get { return _background; }
+            get => _background;
         }
-        public uint Generation
+        public int Generation
         {
-            get { return _generation; }
+            get => _generation;
+            set
+            {
+                _generation = value;
+                Guild guild = BotManager.GetGuild(_guild);
+                _level = guild.Generations[_generation];
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
         }
         public uint Level
         {
-            get { return _level; }
+            get => _level;
         }
-        public float Gold
+        public double Gold
         {
-            get { return _currency; }
+            get => Math.Truncate(_currency * 100) / 100;
+            set
+            {
+                _currency = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
         }
         public int Downtime
         {
-            get { return _downtime; }
+            get => _downtime;
+            set
+            {
+                _downtime = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
         }
         public string Color
         {
-            get { return _colorPref; }
+            get => _colorPref;
             set
             {
                 _colorPref = value;
@@ -260,7 +415,7 @@ namespace Bot.Characters
         }
         public ulong MessageId
         {
-            get { return _messageId; }
+            get => _messageId;
             set
             {
                 _messageId = value;
@@ -269,24 +424,242 @@ namespace Bot.Characters
         }
         public List<string> Notes
         {
-            get { return _notes; }
+            get => _notes;
         }
         public int LastTokenTrade
         {
-            get { return _lastTokenTrade; }
+            get => _lastTokenTrade;
+            set
+            {
+                _lastTokenTrade = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
         }
         public long CreatedOn
         {
-            get { return _created; }
+            get => _created;
         }
         public long UpdatedOn
         {
-            get { return _updated; }
+            get => _updated;
         }
-        public int Status
+        public Status Status
         {
-            get { return _status; }
-            set { SetStatus((Status)value); }
+            get => _status;
+            set { SetStatus(value); }
+        }
+        public List<string> Feats
+        {
+            get => _feats;
+            set { SetFeatsList(value); }
+        }
+        public List<string> Spells
+        {
+            get => _spells;
+            set { SetSpellsList(value); }
+        }
+        public List<string> Edicts
+        {
+            get => _edicts;
+            set { SetEdictsList(value); }
+        }
+        public List<string> Anathema
+        {
+            get => _anathema;
+            set { SetAnathemaList(value); }
+        }
+
+        public List<string> Languages
+        {
+            get => _languages;
+            set
+            {
+                _languages = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
+        }
+        public Dictionary<string, uint> Skills
+        {
+            get => _skills;
+            set
+            {
+                _skills = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
+        }
+        public Dictionary<string, uint> Lore
+        {
+            get => _lore;
+            set
+            {
+                _lore = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
+        }
+        public Dictionary<string, uint> Saves
+        {
+            get => _saves;
+            set
+            {
+                _saves = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
+        }
+
+        public uint Perception
+        {
+            get => _perception;
+            set
+            {
+                _perception = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
+        }
+
+        public Dictionary<string, uint> Attributes
+        {
+            get => _attributes;
+            set
+            {
+                _attributes = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
+        }
+
+        public Dictionary<string, int> Modifiers
+        {
+            get
+            {
+                Dictionary<string, int> mods =
+                    new()
+                    {
+                        { "str", 0 },
+                        { "dex", 0 },
+                        { "con", 0 },
+                        { "int", 0 },
+                        { "wis", 0 },
+                        { "cha", 0 }
+                    };
+                foreach (string attribute in _attributes.Keys)
+                {
+                    uint score = _attributes[attribute];
+                    int mod = (int)MathF.Round((score - 10) / 2);
+                    mods[attribute] = mod;
+                }
+                return mods;
+            }
+        }
+
+        [JsonConstructor]
+        public Character(
+            Guid id,
+            ulong user,
+            ulong guild,
+            string name,
+            string desc,
+            string rep,
+            uint age,
+            float height,
+            float weight,
+            int birthday,
+            Months birthMonth,
+            int birthYear,
+            string ancestry,
+            string heritage,
+            string charClass,
+            string background,
+            int generation,
+            uint level,
+            double gold,
+            int downtime,
+            string deity,
+            string gender,
+            string color,
+            string avatarURL,
+            ulong messageId,
+            List<string> notes,
+            int lastTokenTrade,
+            long createdOn,
+            long updatedOn,
+            Status status,
+            List<string> feats,
+            List<string> spells,
+            List<string> edicts,
+            List<string> anathema,
+            List<string> languages,
+            Dictionary<string, uint> skills,
+            Dictionary<string, uint> lore,
+            Dictionary<string, uint> saves,
+            uint perception,
+            Dictionary<string, uint> attributes
+        )
+        {
+            _id = id;
+            _user = user;
+            _guild = guild;
+            _name = name;
+            _desc = desc;
+            _rep = rep;
+            _age = age;
+            _height = height;
+            _weight = weight;
+            _birthDay = birthday;
+            _birthMonth = birthMonth;
+            _birthYear = birthYear;
+            _ancestry = ancestry;
+            _heritage = heritage;
+            _class = charClass;
+            _background = background;
+            _generation = generation;
+            _level = level;
+            _currency = gold;
+            _downtime = downtime;
+            _colorPref = color;
+            _avatars[0] = avatarURL;
+            _messageId = messageId;
+            _notes = notes;
+            _lastTokenTrade = lastTokenTrade;
+            _created = createdOn;
+            _updated = updatedOn;
+            _status = status;
+            _feats = feats;
+            _spells = spells;
+            _edicts = edicts;
+            _anathema = anathema;
+            _languages = languages;
+            _skills = skills;
+            _lore = lore;
+            _saves = saves;
+            _perception = perception;
+            _attributes = attributes;
+            _deity = deity;
+            _gender = gender;
+        }
+
+        public EmbedBuilder? GenerateEmbed()
+        {
+            Guild guild = BotManager.GetGuild(_guild);
+            IUser? player = BotManager.GetGuildUser(_guild, _user);
+            if (player == null)
+            {
+                return null;
+            }
+
+            var embed = new EmbedBuilder()
+                .WithTitle(Heritage + " " + Ancestry + " " + Class + " " + Level)
+                .WithAuthor(Name)
+                .WithDescription(Desc)
+                .WithFooter(player.Username)
+                .AddField("Reputation", Rep, false)
+                .AddField("Age", Age, true)
+                .AddField("Height", Height + " cm", true)
+                .AddField("Weight", Weight + " kg", true)
+                .AddField("PT", guild.GetPlayerTokenCount(User).ToString(), true)
+                .AddField("DT", Downtime.ToString(), true)
+                .AddField("Coin", Gold + " gp", true)
+                .WithImageUrl(AvatarURL);
+
+            return embed;
         }
     }
 }
