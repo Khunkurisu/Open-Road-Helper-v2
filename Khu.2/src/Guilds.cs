@@ -47,6 +47,16 @@ namespace Bot.Guilds
             return _playerTokens[playerId];
         }
 
+        public int GetPlayerCharacterCount(ulong playerId)
+        {
+            if (_characters.ContainsKey(playerId))
+            {
+                List<Character> characters = _characters[playerId];
+                return characters.Count;
+            }
+            return 0;
+        }
+
         public void SetPlayerTokenCount(ulong playerId, uint tokenCount)
         {
             _playerTokens[playerId] = tokenCount;
@@ -79,7 +89,7 @@ namespace Bot.Guilds
         public Guild(ulong id)
         {
             _id = id;
-			LoadAll();
+            LoadAll();
         }
 
         public void LoadAll()
