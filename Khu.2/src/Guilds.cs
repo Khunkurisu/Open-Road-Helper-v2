@@ -102,7 +102,6 @@ namespace Bot.Guilds
         public Guild(ulong id)
         {
             _id = id;
-            LoadAll();
         }
 
         public bool IsGamemaster(IUser gm)
