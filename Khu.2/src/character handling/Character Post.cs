@@ -70,36 +70,7 @@ namespace Bot.Characters
                 return null;
             }
 
-            var buttons = new ComponentBuilder().WithButton(
-                "Edit",
-                "editCharacter+" + guild.Id + "+" + player.Id + "+" + Name,
-                ButtonStyle.Secondary
-            );
-
-            if (Status == Status.Pending)
-            {
-                buttons
-                    .WithButton(
-                        "Approve",
-                        "approveCharacter+" + guild.Id + "+" + player.Id + "+" + Name,
-                        ButtonStyle.Success
-                    )
-                    .WithButton(
-                        "Refund",
-                        "refundCharacter+" + guild.Id + "+" + player.Id + "+" + Name,
-                        ButtonStyle.Danger
-                    );
-            }
-            else if (Status == Status.Approved)
-            {
-                buttons.WithButton(
-                    "Retire",
-                    "retireCharacter+" + guild.Id + "+" + player.Id + "+" + Name,
-                    ButtonStyle.Danger
-                );
-            }
-
-            return buttons;
+            return GenerateButtons(guild.Id, player.Id);
         }
 
         public ComponentBuilder GenerateButtons(ulong guildId, ulong playerId)
@@ -112,16 +83,16 @@ namespace Bot.Characters
             var buttons = new ComponentBuilder().WithButton(
                 "Edit",
                 "editCharacter+" + guildId + "+" + playerId + "+" + Name,
-                ButtonStyle.Secondary
+                ButtonStyle.Primary
             );
 
             if (Status == Status.Pending)
             {
                 buttons
                     .WithButton(
-                        "Approve",
-                        "approveCharacter+" + guildId + "+" + playerId + "+" + Name,
-                        ButtonStyle.Success
+                        "Judge",
+                        "judgeCharacter+" + guildId + "+" + playerId + "+" + Name,
+                        ButtonStyle.Primary
                     )
                     .WithButton(
                         "Refund",
