@@ -9,7 +9,8 @@ namespace Bot.Characters
             Guid id,
             ulong user,
             ulong guild,
-            ulong thread,
+            ulong charThread,
+            ulong transThread,
             string? name,
             string? desc,
             string? rep,
@@ -52,7 +53,8 @@ namespace Bot.Characters
             _id = id;
             _user = user;
             _guild = guild;
-            _thread = thread;
+            _characterThread = charThread;
+            _transactionThread = transThread;
             _name = name;
             _desc = desc;
             _rep = rep;

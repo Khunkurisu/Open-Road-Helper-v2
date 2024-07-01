@@ -5,7 +5,8 @@ namespace Bot.Characters
         private readonly Guid _id;
         private readonly ulong _user;
         private readonly ulong _guild;
-        private ulong _thread;
+        private ulong _characterThread;
+        private ulong _transactionThread;
 
         private string? _name;
         private string? _desc;
@@ -49,8 +50,8 @@ namespace Bot.Characters
             };
 
         private string _colorPref = "#000000";
-        private readonly List<string> _avatars = new() { "" };
-        private readonly List<string> _notes = new() { "" };
+        private List<string> _avatars = new() { "" };
+        private List<string> _notes = new() { "" };
 
         private int _lastTokenTrade = 0;
         private readonly long _created;

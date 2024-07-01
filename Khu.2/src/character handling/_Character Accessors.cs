@@ -1,5 +1,6 @@
 using Bot.Guilds;
 using Bot.Helpers;
+using Bot.PF2;
 
 namespace Bot.Characters
 {
@@ -188,12 +189,22 @@ namespace Bot.Characters
             }
         }
 
-        public ulong Thread
+        public ulong CharacterThread
         {
-            get => _thread;
+            get => _characterThread;
             set
             {
-                _thread = value;
+                _characterThread = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
+        }
+
+        public ulong TransactionThread
+        {
+            get => _transactionThread;
+            set
+            {
+                _transactionThread = value;
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
@@ -215,18 +226,23 @@ namespace Bot.Characters
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
-        public string AvatarURL
+        public List<string> Avatars
         {
-            get { return _avatars[0]; }
+            get => _avatars;
             set
             {
-                _avatars[0] = value;
+                _avatars = value;
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
         public List<string> Notes
         {
             get => _notes;
+            set
+            {
+                _notes = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
         }
         public int LastTokenTrade
         {
@@ -364,9 +380,7 @@ namespace Bot.Characters
                     };
                 foreach (string attribute in _attributes.Keys)
                 {
-                    uint score = _attributes[attribute];
-                    int mod = (int)MathF.Round((score - 10) / 2);
-                    mods[attribute] = mod;
+                    mods[attribute] = Helper.AttributeToModifier(_attributes[attribute]);
                 }
                 return mods;
             }

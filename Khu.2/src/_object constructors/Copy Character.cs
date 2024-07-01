@@ -7,7 +7,8 @@ namespace Bot.Characters
             _id = template._id;
             _user = template._user;
             _guild = template._guild;
-            _thread = template._thread;
+            _characterThread = template._characterThread;
+            _transactionThread = template._transactionThread;
             _name = template._name;
             _desc = template._desc;
             _rep = template._rep;
