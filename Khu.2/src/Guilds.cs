@@ -47,12 +47,24 @@ namespace Bot.Guilds
             return _playerTokens[playerId];
         }
 
+        public int GetNewCharacterCost(ulong playerId)
+        {
+            if (!_characters.ContainsKey(playerId))
+            {
+                return 1;
+            }
+            return (
+                    (List<Character>)
+                        _characters[playerId].Where(x => x.Status != Bot.Characters.Status.Temp)
+                ).Count + 1;
+        }
+
         public int GetPlayerCharacterCount(ulong playerId)
         {
             if (_characters.ContainsKey(playerId))
             {
-                List<Character> characters = _characters[playerId];
-                return characters.Count;
+                List<Character> playersCharacters = _characters[playerId];
+                return playersCharacters.Count;
             }
             return 0;
         }
