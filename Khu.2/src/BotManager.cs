@@ -86,10 +86,16 @@ namespace Bot
         {
             string guildData = @".\data\guilds\";
             string[] guildIds = Directory.GetDirectories(guildData);
+            while (_client == null)
+            {
+                await Task.Yield();
+            }
             foreach (string guildId in guildIds)
             {
                 Guild guild = new(ulong.Parse(guildId.Replace(guildData, "")));
                 Guilds.Add(guild);
+                SocketGuild socketGuild = _client.GetGuild(guild.Id);
+                await socketGuild.DownloadUsersAsync();
                 guild.LoadAll();
                 await Task.Yield();
             }
