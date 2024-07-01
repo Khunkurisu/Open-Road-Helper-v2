@@ -1,6 +1,5 @@
 using Bot.Guilds;
 using Bot.Helpers;
-using Discord;
 
 namespace Bot.Characters
 {
@@ -372,5 +371,15 @@ namespace Bot.Characters
                 return mods;
             }
         }
+    }
+
+    public enum Status
+    {
+        Temp,
+        Pending,
+        Approved,
+        Retired,
+        Deceased,
+        Rejected
     }
 }

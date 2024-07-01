@@ -7,6 +7,12 @@ namespace Bot.Characters
 {
     public partial class Character
     {
+        private Color GetDiscordColor()
+        {
+            int[] colorValues = GenericHelpers.HexStringToRGB(_colorPref);
+            return new Color(colorValues[0], colorValues[1], colorValues[2]);
+        }
+
         public EmbedBuilder GenerateDetailsEmbed(IUser player)
         {
             Guild guild = BotManager.GetGuild(_guild);

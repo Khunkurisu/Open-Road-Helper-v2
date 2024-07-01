@@ -7,12 +7,6 @@ namespace Bot.Characters
 {
     public partial class Character
     {
-        private Color GetDiscordColor()
-        {
-            int[] colorValues = GenericHelpers.HexStringToRGB(_colorPref);
-            return new Color(colorValues[0], colorValues[1], colorValues[2]);
-        }
-
         public static ComponentBuilder ConfirmationButtons(
             string guildId,
             ulong playerId,
@@ -31,35 +25,6 @@ namespace Bot.Characters
                     context + "Character+" + guildId + "+" + playerId + "+" + charName + "+cancel",
                     ButtonStyle.Danger
                 );
-        }
-
-        public static SelectMenuBuilder CharacterDisplaySelector(
-            ulong guildId,
-            ulong userId,
-            string name
-        )
-        {
-            return new SelectMenuBuilder()
-                .WithCustomId("charDisplay+" + guildId + "+" + userId + "+" + name)
-                .AddOption("Details", "Details", isDefault: true)
-                .AddOption("Attributes", "Attributes")
-                .AddOption("Equipment", "Equipment")
-                .AddOption("Spells", "Spells")
-                .AddOption("Feats", "Feats");
-        }
-
-        public SelectMenuBuilder CharacterDisplaySelector(ulong guildId, ulong userId)
-        {
-            var menu = new SelectMenuBuilder().WithCustomId(
-                "charDisplay+" + guildId + "+" + userId + "+" + Name
-            );
-
-            foreach (string k in Enum.GetNames(typeof(Display)))
-            {
-                menu.AddOption(k, k, isDefault: DisplayMode.ToString() == k);
-            }
-
-            return menu;
         }
 
         public ComponentBuilder? GenerateButtons()
@@ -111,21 +76,6 @@ namespace Bot.Characters
             }
 
             return buttons;
-        }
-
-        public ComponentBuilder GenerateComponents(ulong guildId, ulong playerId)
-        {
-            return GenerateButtons(guildId, playerId)
-                .WithSelectMenu(CharacterDisplaySelector(guildId, playerId));
-        }
-
-        public enum Display
-        {
-            Details,
-            Attributes,
-            Equipment,
-            Spells,
-            Feats
         }
     }
 }
