@@ -31,7 +31,10 @@ namespace Bot
                 AlwaysDownloadUsers = true,
                 MessageCacheSize = 100,
                 UseInteractionSnowflakeDate = false,
-                GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
+                GatewayIntents =
+                    GatewayIntents.AllUnprivileged
+                    | GatewayIntents.MessageContent
+                    | GatewayIntents.GuildMembers
             };
             var collection = new ServiceCollection()
                 .AddSingleton(config)
