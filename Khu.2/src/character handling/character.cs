@@ -11,34 +11,34 @@ namespace Bot.Characters
         private readonly ulong _guild;
         private ulong _thread;
 
-        private string _name;
-        private string _desc;
-        private string _rep;
-        private uint _age;
-        private string _deity;
-        private string _gender;
-        private float _height;
-        private float _weight;
-        private int _birthDay;
+        private string? _name;
+        private string? _desc;
+        private string? _rep;
+        private uint _age = 18;
+        private string? _deity;
+        private string? _gender;
+        private float _height = 100;
+        private float _weight = 80;
+        private int _birthDay = 1;
         private Months _birthMonth;
-        private int _birthYear;
+        private int _birthYear = 4706;
 
-        private readonly string _ancestry;
-        private readonly string _heritage;
-        private readonly string _class;
-        private readonly string _background;
+        private string? _ancestry;
+        private string? _heritage;
+        private string? _class;
+        private string? _background;
         private uint _level = 0;
         private int _generation = 1;
         private double _currency = 0;
         private int _downtime = 0;
 
-        private List<string> _languages;
-        private Dictionary<string, uint> _skills;
-        private Dictionary<string, uint> _lore;
-        private Dictionary<string, uint> _saves;
-        private uint _perception;
-        private List<string> _feats;
-        private List<string> _spells;
+        private List<string> _languages = new() { "" };
+        private Dictionary<string, uint> _skills = new() { };
+        private Dictionary<string, uint> _lore = new() { };
+        private Dictionary<string, uint> _saves = new() { };
+        private uint _perception = 0;
+        private List<string> _feats = new() { "" };
+        private List<string> _spells = new() { "" };
         private List<string> _edicts = new() { "" };
         private List<string> _anathema = new() { "" };
         private Dictionary<string, uint> _attributes =
@@ -57,7 +57,6 @@ namespace Bot.Characters
         private readonly List<string> _notes = new() { "" };
 
         private int _lastTokenTrade = 0;
-        private ulong _messageId;
         private readonly long _created;
         private long _updated = 0;
         private Status _status = 0;
@@ -95,12 +94,6 @@ namespace Bot.Characters
 
         public Character(IUser user, Guild guild, Dictionary<string, dynamic> data)
         {
-            ImportType importType = data["type"];
-            if (importType == ImportType.Foundry)
-            {
-                _height = GenericHelpers.GetHeightFromString(data["height"]);
-                _weight = GenericHelpers.GetWeightFromString(data["weight"]);
-            }
             _id = Guid.NewGuid();
             _user = user.Id;
             _guild = guild.Id;
@@ -109,72 +102,7 @@ namespace Bot.Characters
             _level = guild.Generation;
             _generation = guild.GenerationCount;
 
-            _name = data["name"];
-            _desc = data["description"];
-            _rep = data["reputation"];
-            _class = data["class"];
-            _ancestry = data["ancestry"];
-            _heritage = data["heritage"];
-            _background = data["background"];
-            _deity = data["deity"];
-            _gender = data["gender"];
-            _age = data["age"];
-            int perception = data["perception"];
-            _perception = (uint)perception;
-            _currency = data["coin"];
-            _languages = data["languages"];
-            _skills = data["skills"];
-            _lore = data["lore"];
-            _saves = data["saves"];
-            _feats = data["feats"];
-            _spells = data["spells"];
-            _attributes = data["attributes"];
-
-            if (data.ContainsKey("edicts"))
-            {
-                _edicts = data["edicts"];
-            }
-
-            if (data.ContainsKey("anathema"))
-            {
-                _anathema = data["anathema"];
-            }
-
-            if (Heritage.Contains(_ancestry))
-            {
-                _heritage = _heritage.Replace(_ancestry, "");
-                _heritage = _heritage.TrimEnd();
-            }
-        }
-
-        private void SetStatus(Status status)
-        {
-            _status = status;
-            _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        }
-
-        private void SetFeatsList(List<string> newFeats)
-        {
-            _feats = newFeats;
-            _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        }
-
-        private void SetSpellsList(List<string> newSpells)
-        {
-            _spells = newSpells;
-            _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        }
-
-        private void SetEdictsList(List<string> newEdicts)
-        {
-            _edicts = newEdicts;
-            _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        }
-
-        private void SetAnathemaList(List<string> newAnathema)
-        {
-            _anathema = newAnathema;
-            _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            ParseImport(data);
         }
 
         public void AddNote(string note)
@@ -211,7 +139,7 @@ namespace Bot.Characters
         }
         public string Name
         {
-            get => _name;
+            get => _name ?? string.Empty;
             set
             {
                 _name = value;
@@ -220,7 +148,7 @@ namespace Bot.Characters
         }
         public string Description
         {
-            get => _desc;
+            get => _desc ?? string.Empty;
             set
             {
                 _desc = value;
@@ -229,7 +157,7 @@ namespace Bot.Characters
         }
         public string Reputation
         {
-            get => _rep;
+            get => _rep ?? string.Empty;
             set
             {
                 _rep = value;
@@ -239,7 +167,7 @@ namespace Bot.Characters
 
         public string Deity
         {
-            get => _deity;
+            get => _deity ?? string.Empty;
             set
             {
                 _deity = value;
@@ -249,7 +177,7 @@ namespace Bot.Characters
 
         public string Gender
         {
-            get => _gender;
+            get => _gender ?? string.Empty;
             set
             {
                 _gender = value;
@@ -312,19 +240,19 @@ namespace Bot.Characters
         }
         public string Ancestry
         {
-            get => _ancestry;
+            get => _ancestry ?? string.Empty;
         }
         public string Heritage
         {
-            get => _heritage;
+            get => _heritage ?? string.Empty;
         }
         public string Class
         {
-            get => _class;
+            get => _class ?? string.Empty;
         }
         public string Background
         {
-            get => _background;
+            get => _background ?? string.Empty;
         }
         public int Generation
         {
@@ -396,15 +324,6 @@ namespace Bot.Characters
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
-        public ulong MessageId
-        {
-            get => _messageId;
-            set
-            {
-                _messageId = value;
-                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            }
-        }
         public List<string> Notes
         {
             get => _notes;
@@ -429,27 +348,47 @@ namespace Bot.Characters
         public Status Status
         {
             get => _status;
-            set { SetStatus(value); }
+            set
+            {
+                _status = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
         }
         public List<string> Feats
         {
             get => _feats;
-            set { SetFeatsList(value); }
+            set
+            {
+                _feats = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
         }
         public List<string> Spells
         {
             get => _spells;
-            set { SetSpellsList(value); }
+            set
+            {
+                _spells = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
         }
         public List<string> Edicts
         {
             get => _edicts;
-            set { SetEdictsList(value); }
+            set
+            {
+                _edicts = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
         }
         public List<string> Anathema
         {
             get => _anathema;
-            set { SetAnathemaList(value); }
+            set
+            {
+                _anathema = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
         }
 
         public List<string> Languages
