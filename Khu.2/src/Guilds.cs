@@ -429,11 +429,29 @@ namespace Bot.Guilds
             if (_characters.ContainsKey(playerId))
             {
                 Character? character = GetCharacter(playerId, name);
-                if (character != null && _characters[playerId].Contains(character))
+                if (character != null)
                 {
-                    _characters[playerId].Remove(character);
-                    SaveCharacters();
+                    RemoveCharacter(character);
                 }
+            }
+        }
+
+        public void RemoveCharacter(Guid characterId)
+        {
+            Character? character = GetCharacter(characterId);
+            if (character != null)
+            {
+                RemoveCharacter(character);
+            }
+        }
+
+        public void RemoveCharacter(Character character)
+        {
+            ulong playerId = character.User;
+            if (_characters.ContainsKey(playerId) && _characters[playerId].Contains(character))
+            {
+                _characters[playerId].Remove(character);
+                SaveCharacters();
             }
         }
 
