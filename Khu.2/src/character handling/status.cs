@@ -6,6 +6,7 @@ namespace Bot.Characters
         Pending,
         Approved,
         Retired,
-        Deceased
+        Deceased,
+        Rejected
     }
 }
