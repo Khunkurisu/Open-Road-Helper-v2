@@ -32,9 +32,7 @@ namespace Bot
                     await messageComponent.UpdateAsync(x =>
                     {
                         x.Embed = character.GenerateEmbed(user).Build();
-                        x.Components = new ComponentBuilder()
-                            .WithSelectMenu(character.CharacterDisplaySelector(guild.Id, user.Id))
-                            .Build();
+                        x.Components = character.GenerateComponents(guild.Id, user.Id).Build();
                     });
                 }
             }
@@ -44,7 +42,7 @@ namespace Bot
         {
             IUser user = button.User;
             string player = button.Data.CustomId.Split("+")[2];
-            if ("" + user.Id == player)
+            if (user.Id.ToString() == player)
             {
                 string guildId = button.Data.CustomId.Split("+")[1];
                 Guild guild = GetGuild(ulong.Parse(guildId));
@@ -52,7 +50,7 @@ namespace Bot
                 guild.ClearTempCharacter(user.Id);
                 await button.UpdateAsync(x =>
                 {
-                    x.Content = "Character creation canceled.";
+                    x.Content = "Character edit canceled.";
                     x.Embed = null;
                     x.Components = null;
                 });
@@ -67,7 +65,7 @@ namespace Bot
         {
             IUser user = button.User;
             string player = button.Data.CustomId.Split("+")[2];
-            if ("" + user.Id == player)
+            if (user.Id.ToString() == player)
             {
                 string guildId = button.Data.CustomId.Split("+")[1];
                 Guild guild = GetGuild(ulong.Parse(guildId));
@@ -89,7 +87,7 @@ namespace Bot
         {
             IUser user = button.User;
             string player = button.Data.CustomId.Split("+")[2];
-            if ("" + user.Id == player)
+            if (user.Id.ToString() == player)
             {
                 string guildId = button.Data.CustomId.Split("+")[1];
                 Guild guild = GetGuild(ulong.Parse(guildId));

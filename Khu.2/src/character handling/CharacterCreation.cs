@@ -49,14 +49,13 @@ namespace Bot
                     charData = importedCharacter.GetCharacterData();
                     if (charData != null)
                     {
-                        int tokenCost = guild.GetPlayerCharacterCount(playerId) + 1;
+                        int tokenCost = guild.GetNewCharacterCost(playerId);
                         uint tokenCount = guild.GetPlayerTokenCount(playerId);
                         if (tokenCount < tokenCost)
                         {
                             await modal.RespondAsync(
-                                "You lack sufficient tokens to create a new character. ("
-                                    + tokenCost
-                                    + " PT required)"
+                                "You lack sufficient tokens to create a new character. "
+                                    + $"({tokenCost} PT required - {tokenCount} PT remaining.)"
                             );
                         }
                         else
@@ -70,12 +69,7 @@ namespace Bot
                             await modal.RespondAsync(
                                 "Ensure everything looks correct before continuing!",
                                 embed: character.GenerateEmbed(user).Build(),
-                                components: character
-                                    .GenerateButtons(guild.Id, user.Id)
-                                    .WithSelectMenu(
-                                        character.CharacterDisplaySelector(guild.Id, user.Id)
-                                    )
-                                    .Build()
+                                components: character.GenerateComponents(guild.Id, user.Id).Build()
                             );
                         }
                     }
@@ -109,14 +103,15 @@ namespace Bot
                 Guild guild = GetGuild(ulong.Parse(guildId));
 
                 string charName = button.Data.CustomId.Split("+")[3];
-                int tokenCost = guild.GetPlayerCharacterCount(user.Id) + 1;
+                int tokenCost = guild.GetNewCharacterCost(user.Id);
+                Console.WriteLine($"token cost: {tokenCost}");
                 uint tokenCount = guild.GetPlayerTokenCount(user.Id);
+                Console.WriteLine($"token count: {tokenCount}");
 
                 Character? character = guild.GetCharacter(user.Id, charName);
                 if (character != null)
                 {
-                    Console.WriteLine("character != null");
-                    guild.SetPlayerTokenCount(user.Id, (uint)(tokenCount - tokenCost));
+                    guild.DecreasePlayerTokenCount(user.Id, tokenCost);
                     character.Status = Status.Pending;
                     await PostCharacter(button, guild, character, user);
                 }
@@ -179,11 +174,9 @@ namespace Bot
                     ThreadArchiveDuration.OneWeek,
                     embed: character.GenerateEmbed(user).Build(),
                     tags: tags,
-                    components: character
-                        .GenerateButtons(guild.Id, user.Id)
-                        .WithSelectMenu(character.CharacterDisplaySelector(guild.Id, user.Id))
-                        .Build()
+                    components: character.GenerateComponents(guild.Id, user.Id).Build()
                 );
+                character.Thread = thread.Id;
                 await thread.AddUserAsync((IGuildUser)user);
                 await context.UpdateAsync(x =>
                 {
