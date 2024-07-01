@@ -9,6 +9,7 @@ namespace Bot.Characters
             Guid id,
             ulong user,
             ulong guild,
+            ulong thread,
             string name,
             string desc,
             string rep,
@@ -36,6 +37,7 @@ namespace Bot.Characters
             long createdOn,
             long updatedOn,
             Status status,
+            Display display,
             List<string> feats,
             List<string> spells,
             List<string> edicts,
@@ -70,12 +72,13 @@ namespace Bot.Characters
             _downtime = downtime;
             _colorPref = color;
             _avatars[0] = avatarURL;
-            _messageId = messageId;
             _notes = notes;
             _lastTokenTrade = lastTokenTrade;
             _created = createdOn;
             _updated = updatedOn;
             _status = status;
+            _display = display;
+            _thread = thread;
             _feats = feats;
             _spells = spells;
             _edicts = edicts;
