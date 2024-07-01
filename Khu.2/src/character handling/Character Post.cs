@@ -16,18 +16,19 @@ namespace Bot.Characters
         public static ComponentBuilder ConfirmationButtons(
             string guildId,
             ulong playerId,
-            string charName
+            string charName,
+            string context
         )
         {
             return new ComponentBuilder()
                 .WithButton(
                     "Confirm",
-                    "createCharacter+" + guildId + "+" + playerId + "+" + charName + "+confirm",
+                    context + "Character+" + guildId + "+" + playerId + "+" + charName + "+confirm",
                     ButtonStyle.Success
                 )
                 .WithButton(
                     "Cancel",
-                    "createCharacter+" + guildId + "+" + playerId + "+" + charName + "+cancel",
+                    context + "Character+" + guildId + "+" + playerId + "+" + charName + "+cancel",
                     ButtonStyle.Danger
                 );
         }
@@ -77,7 +78,7 @@ namespace Bot.Characters
         {
             if (Status == Status.Temp)
             {
-                return ConfirmationButtons("" + guildId, playerId, Name);
+                return ConfirmationButtons("" + guildId, playerId, Name, "create");
             }
 
             var buttons = new ComponentBuilder().WithButton(
