@@ -144,7 +144,10 @@ namespace Bot
             {
                 await JudgeCharacter(button);
             }
-            else if (customId.Contains("refundCharacter")) { }
+            else if (customId.Contains("refundCharacter"))
+            {
+                await PendingCharacterRefund(button);
+            }
         }
 
         private async Task OnSelectMenuExecuted(SocketMessageComponent selectMenu)

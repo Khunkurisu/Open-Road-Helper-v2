@@ -97,7 +97,7 @@ namespace Bot
         {
             IUser user = button.User;
             string player = button.Data.CustomId.Split("+")[2];
-            if ("" + user.Id == player)
+            if (user.Id.ToString() == player)
             {
                 string guildId = button.Data.CustomId.Split("+")[1];
                 Guild guild = GetGuild(ulong.Parse(guildId));
@@ -112,7 +112,6 @@ namespace Bot
                 if (character != null)
                 {
                     guild.DecreasePlayerTokenCount(user.Id, tokenCost);
-                    character.Status = Status.Pending;
                     await PostCharacter(button, guild, character, user);
                 }
                 else
@@ -133,7 +132,7 @@ namespace Bot
         {
             IUser user = button.User;
             string player = button.Data.CustomId.Split("+")[2];
-            if ("" + user.Id == player)
+            if (user.Id.ToString() == player)
             {
                 string guildId = button.Data.CustomId.Split("+")[1];
 
@@ -177,6 +176,7 @@ namespace Bot
                     components: character.GenerateComponents(guild.Id, user.Id).Build()
                 );
                 character.Thread = thread.Id;
+                character.Status = Status.Pending;
                 await thread.AddUserAsync((IGuildUser)user);
                 await context.UpdateAsync(x =>
                 {
@@ -191,6 +191,46 @@ namespace Bot
                 {
                     x.Content = "Character board has not been assigned.";
                 });
+            }
+        }
+
+        public static async Task PendingCharacterRefund(SocketMessageComponent button)
+        {
+            IUser user = button.User;
+            string player = button.Data.CustomId.Split("+")[2];
+
+            string guildId = button.Data.CustomId.Split("+")[1];
+            Guild guild = GetGuild(ulong.Parse(guildId));
+
+            IThreadChannel thread = (IThreadChannel)button.Channel;
+            if (user.Id.ToString() == player || guild.IsGamemaster(user))
+            {
+                string charName = button.Data.CustomId.Split("+")[3];
+                Character? character = guild.GetCharacter(user.Id, charName);
+                if (character != null && character.Status == Status.Pending)
+                {
+                    guild.RemoveCharacter(character);
+                    uint refundAmount = (uint)guild.GetNewCharacterCost(user.Id);
+                    guild.IncreasePlayerTokenCount(user.Id, refundAmount);
+                    await thread.DeleteAsync();
+                    await button.RespondAsync(
+                        $"Pending character refunded. ({refundAmount} PT gained - {guild.GetPlayerTokenCount(user.Id)} PT remaining)"
+                    );
+                }
+                else
+                {
+                    await button.RespondAsync(
+                        $"{charName} is not a valid character of {user.Username}.",
+                        ephemeral: true
+                    );
+                }
+            }
+            else
+            {
+                await button.RespondAsync(
+                    $"You ({user.Username}) lack permission to do this.",
+                    ephemeral: true
+                );
             }
         }
     }
