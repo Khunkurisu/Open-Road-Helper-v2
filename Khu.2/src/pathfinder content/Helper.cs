@@ -160,28 +160,21 @@ namespace Bot.PF2
 
         public static string AttributeNames(string attribute)
         {
-            switch (attribute)
-            {
-                case "str":
-                    return "Strength";
-                case "dex":
-                    return "Dexterity";
-                case "con":
-                    return "Constitution";
-                case "int":
-                    return "Intelligence";
-                case "wis":
-                    return "Wisdom";
-                case "cha":
-                    return "Charisma";
-                default:
-                    return "";
-            }
-        }
+			return attribute switch
+			{
+				"str" => "Strength",
+				"dex" => "Dexterity",
+				"con" => "Constitution",
+				"int" => "Intelligence",
+				"wis" => "Wisdom",
+				"cha" => "Charisma",
+				_ => "",
+			};
+		}
 
         public static int AttributeToModifier(uint attribute)
         {
-            return (int)Math.Floor((float)(attribute - 10) / 2);
+            return (int)MathF.Floor((attribute - 10) / 2);
         }
     }
 }
