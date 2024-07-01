@@ -140,6 +140,8 @@ namespace Bot
                     await CharacterEditStart(button);
                 }
             }
+            else if (customId.Contains("approveCharacter")) { }
+            else if (customId.Contains("refundCharacter")) { }
         }
 
         private async Task OnSelectMenuExecuted(SocketMessageComponent selectMenu)
