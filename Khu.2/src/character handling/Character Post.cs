@@ -49,14 +49,16 @@ namespace Bot.Characters
 
         public SelectMenuBuilder CharacterDisplaySelector(ulong guildId, ulong userId)
         {
-            return new SelectMenuBuilder()
-                .WithCustomId("charDisplay+" + guildId + "+" + userId + "+" + Name)
-                .WithPlaceholder(DisplayMode.ToString())
-                .AddOption("Details", "Details")
-                .AddOption("Attributes", "Attributes")
-                .AddOption("Equipment", "Equipment")
-                .AddOption("Spells", "Spells")
-                .AddOption("Feats", "Feats");
+            var menu = new SelectMenuBuilder().WithCustomId(
+                "charDisplay+" + guildId + "+" + userId + "+" + Name
+            );
+
+            foreach (string k in Enum.GetNames(typeof(Display)))
+            {
+                menu.AddOption(k, k, isDefault: DisplayMode.ToString() == k);
+            }
+
+            return menu;
         }
 
         public ComponentBuilder? GenerateButtons()
@@ -106,6 +108,7 @@ namespace Bot.Characters
             {
                 return ConfirmationButtons("" + guildId, playerId, Name);
             }
+
             var buttons = new ComponentBuilder().WithButton(
                 "Edit",
                 "editCharacter+" + guildId + "+" + playerId + "+" + Name,
@@ -136,6 +139,12 @@ namespace Bot.Characters
             }
 
             return buttons;
+        }
+
+        public ComponentBuilder GenerateComponents(ulong guildId, ulong playerId)
+        {
+            return GenerateButtons(guildId, playerId)
+                .WithSelectMenu(CharacterDisplaySelector(guildId, playerId));
         }
 
         public enum Display
