@@ -54,9 +54,8 @@ namespace Bot.Guilds
             {
                 return 1;
             }
-            return (
-                    (List<Character>)
-                        _characters[playerId].Where(x => x.Status == Bot.Characters.Status.Approved)
+            return new List<Character>(
+                    _characters[playerId].Where(x => x.Status == Bot.Characters.Status.Approved)
                 ).Count + 1;
         }
 
