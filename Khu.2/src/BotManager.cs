@@ -140,7 +140,7 @@ namespace Bot
                     await CharacterEditStart(button);
                 }
             }
-            else if (customId.Contains("approveCharacter")) { }
+            else if (customId.Contains("judgeCharacter")) { }
             else if (customId.Contains("refundCharacter")) { }
         }
 
