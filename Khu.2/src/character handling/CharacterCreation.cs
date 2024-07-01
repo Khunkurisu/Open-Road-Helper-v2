@@ -109,7 +109,7 @@ namespace Bot
                 Console.WriteLine($"token count: {tokenCount}");
 
                 Character? character = guild.GetCharacter(user.Id, charName);
-                if (character != null)
+                if (character != null && character.Status == Status.Temp)
                 {
                     guild.DecreasePlayerTokenCount(user.Id, tokenCost);
                     await PostCharacter(button, guild, character, user);
@@ -140,13 +140,17 @@ namespace Bot
 
                 guild.ClearTempCharacter(user.Id);
                 string charName = button.Data.CustomId.Split("+")[3];
-                guild.RemoveCharacter(user.Id, charName);
-                await button.UpdateAsync(x =>
+                Character? character = guild.GetCharacter(user.Id, charName);
+                if (character != null && character.Status == Status.Temp)
                 {
-                    x.Content = "Character creation canceled.";
-                    x.Embed = null;
-                    x.Components = null;
-                });
+                    guild.RemoveCharacter(character);
+                    await button.UpdateAsync(x =>
+                    {
+                        x.Content = "Character creation canceled.";
+                        x.Embed = null;
+                        x.Components = null;
+                    });
+                }
             }
             else
             {
@@ -161,26 +165,43 @@ namespace Bot
             IUser user
         )
         {
-            if (guild.CharacterBoard != null)
+            if (guild.CharacterBoard != null && guild.TransactionBoard != null)
             {
                 guild.ClearTempCharacter(user.Id);
                 ForumTag[] tags =
                 {
                     guild.CharacterBoard.Tags.First(x => x.Name == "Pending Approval")
                 };
-                IThreadChannel thread = await guild.CharacterBoard.CreatePostAsync(
+                character.Status = Status.Pending;
+
+                IThreadChannel charThread = await guild.CharacterBoard.CreatePostAsync(
                     character.Name,
                     ThreadArchiveDuration.OneWeek,
                     embed: character.GenerateEmbed(user).Build(),
                     tags: tags,
                     components: character.GenerateComponents(guild.Id, user.Id).Build()
                 );
-                character.Thread = thread.Id;
-                character.Status = Status.Pending;
-                await thread.AddUserAsync((IGuildUser)user);
+
+                IThreadChannel transThread = await guild.TransactionBoard.CreatePostAsync(
+                    character.Name,
+                    ThreadArchiveDuration.OneWeek,
+                    text: $"{character.Name} Transactions"
+                );
+
+                await transThread.SendMessageAsync(
+                    $"{character.Name} has been created and is pending approval."
+                );
+
+                character.CharacterThread = charThread.Id;
+                character.TransactionThread = transThread.Id;
+
+                await charThread.AddUserAsync((IGuildUser)user);
+                await transThread.AddUserAsync((IGuildUser)user);
+
                 await context.UpdateAsync(x =>
                 {
-                    x.Content = "Character posted! " + thread.Mention;
+                    x.Content =
+                        $"{character.Name} has been created and is pending approval. (Character: {charThread.Mention} | Transactions: {transThread.Mention})";
                     x.Embed = null;
                     x.Components = null;
                 });
@@ -189,7 +210,7 @@ namespace Bot
             {
                 await context.UpdateAsync(x =>
                 {
-                    x.Content = "Character board has not been assigned.";
+                    x.Content = "Server forum boards have not been assigned.";
                 });
             }
         }
@@ -202,20 +223,36 @@ namespace Bot
             string guildId = button.Data.CustomId.Split("+")[1];
             Guild guild = GetGuild(ulong.Parse(guildId));
 
-            IThreadChannel thread = (IThreadChannel)button.Channel;
+            IThreadChannel charThread = (IThreadChannel)button.Channel;
             if (user.Id.ToString() == player || guild.IsGamemaster(user))
             {
                 string charName = button.Data.CustomId.Split("+")[3];
                 Character? character = guild.GetCharacter(user.Id, charName);
                 if (character != null && character.Status == Status.Pending)
                 {
-                    guild.RemoveCharacter(character);
-                    uint refundAmount = (uint)guild.GetNewCharacterCost(user.Id);
-                    guild.IncreasePlayerTokenCount(user.Id, refundAmount);
-                    await thread.DeleteAsync();
-                    await button.RespondAsync(
-                        $"Pending character refunded. ({refundAmount} PT gained - {guild.GetPlayerTokenCount(user.Id)} PT remaining)"
+                    IThreadChannel? transactionChannel = (IThreadChannel?)GetChannel(
+                        guild.Id,
+                        character.TransactionThread
                     );
+
+                    if (transactionChannel != null && charThread != null)
+                    {
+                        guild.RemoveCharacter(character);
+                        uint refundAmount = (uint)guild.GetNewCharacterCost(user.Id);
+                        guild.IncreasePlayerTokenCount(user.Id, refundAmount);
+                        await charThread.DeleteAsync();
+
+                        await transactionChannel.SendMessageAsync(
+                            $"Pending character refunded and deleted. ({refundAmount} PT gained | {guild.GetPlayerTokenCount(user.Id)} PT remaining)"
+                        );
+                    }
+                    else
+                    {
+                        await button.RespondAsync(
+                            $"{charName} forum threads could not be found.",
+                            ephemeral: true
+                        );
+                    }
                 }
                 else
                 {
