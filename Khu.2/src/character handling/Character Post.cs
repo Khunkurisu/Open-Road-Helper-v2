@@ -33,21 +33,6 @@ namespace Bot.Characters
         }
 
         public static SelectMenuBuilder CharacterDisplaySelector(
-            string guildId,
-            string userId,
-            string name
-        )
-        {
-            return new SelectMenuBuilder()
-                .WithCustomId("charDisplay+" + guildId + "+" + userId + "+" + name)
-                .AddOption("Details", "Details", isDefault: true)
-                .AddOption("Attributes", "Attributes")
-                .AddOption("Equipment", "Equipment")
-                .AddOption("Spells", "Spells")
-                .AddOption("Feats", "Feats");
-        }
-
-        public static SelectMenuBuilder CharacterDisplaySelector(
             ulong guildId,
             ulong userId,
             string name
