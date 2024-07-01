@@ -15,7 +15,12 @@ namespace Bot.Characters
             _heritage = buildData["heritage"];
             _background = buildData["background"];
             _deity = buildData["deity"];
-            _age = uint.Parse(buildData["age"]);
+            _age =
+                buildData["age"] == "not set"
+                || buildData["age"] == "Not set"
+                || buildData["age"] == ""
+                    ? (uint)18
+                    : uint.Parse(buildData["age"]);
             _gender = buildData["gender"];
             long level = buildData["level"];
             _level = (uint)level;

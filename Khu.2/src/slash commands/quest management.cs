@@ -18,61 +18,94 @@ namespace Bot.Quests
             ulong guildId = Context.Guild.Id;
             IUser gm = Context.User;
 
-            var textBox = new ModalBuilder()
-                .WithTitle("Create Quest")
-                .WithCustomId("createQuest-" + guildId + "-" + gm.Username)
-                .AddTextInput("Name", "quest_name", placeholder: "Quest Name")
-                .AddTextInput(
-                    "Description",
-                    "quest_description",
-                    TextInputStyle.Paragraph,
-                    "Quest description."
-                )
-                .AddTextInput("Tags", "quest_tags", placeholder: "Comma, Separated, Tags");
+            if (BotManager.IsGamemaster(gm, guildId))
+            {
+                var textBox = new ModalBuilder()
+                    .WithTitle("Create Quest")
+                    .WithCustomId("createQuest+" + guildId + "+" + gm.Username)
+                    .AddTextInput("Name", "quest_name", placeholder: "Quest Name")
+                    .AddTextInput(
+                        "Description",
+                        "quest_description",
+                        TextInputStyle.Paragraph,
+                        "Quest description."
+                    )
+                    .AddTextInput("Tags", "quest_tags", placeholder: "Comma, Separated, Tags");
 
-            await Context.Interaction.RespondWithModalAsync(textBox.Build());
+                await Context.Interaction.RespondWithModalAsync(textBox.Build());
+            }
+            else
+            {
+                await Context.Interaction.RespondAsync(
+                    "Only GMs can use this command.",
+                    ephemeral: true
+                );
+            }
         }
 
         [SlashCommand("list", "List the quests currently stored.")]
         public async Task ListQuests()
         {
             ulong guildId = Context.Guild.Id;
-            Guild guild = BotManager.GetGuild(guildId);
-
             IUser gm = Context.User;
 
-            List<Embed> questEmbeds = new();
-            int count = 0;
-            foreach (Quest quest in guild.Quests)
+            if (BotManager.IsGamemaster(gm, guildId))
             {
-                questEmbeds.Add(quest.GenerateEmbed(gm).Build());
-                count++;
-                if (count >= 10)
-                {
-                    break;
-                }
-            }
+                Guild guild = BotManager.GetGuild(guildId);
 
-            await Context.Interaction.RespondAsync(embeds: questEmbeds.ToArray());
+                List<Embed> questEmbeds = new();
+                int count = 0;
+                foreach (Quest quest in guild.Quests)
+                {
+                    questEmbeds.Add(quest.GenerateEmbed(gm).Build());
+                    count++;
+                    if (count >= 10)
+                    {
+                        break;
+                    }
+                }
+
+                await Context.Interaction.RespondAsync(embeds: questEmbeds.ToArray());
+            }
+            else
+            {
+                await Context.Interaction.RespondAsync(
+                    "Only GMs can use this command.",
+                    ephemeral: true
+                );
+            }
         }
 
         [SlashCommand("availability", "Update your availability for GMing.")]
         public async Task ModifyAvailability(uint earlyStart, uint latestStart, uint cutoff)
         {
-            await RespondAsync("<t:" + earlyStart + ":F>");
-            await RespondAsync("<t:" + latestStart + ":F>");
-            await RespondAsync("<t:" + cutoff + ":F>");
             IUser gm = Context.User;
-            Timeframe newTimeframe =
-                new()
-                {
-                    EarliestStart = GenericHelpers.DateTimeFromUnixSeconds(earlyStart),
-                    LatestStart = GenericHelpers.DateTimeFromUnixSeconds(latestStart),
-                    Cutoff = GenericHelpers.DateTimeFromUnixSeconds(cutoff)
-                };
+            ulong guildId = Context.Guild.Id;
 
-            Guild guild = BotManager.GetGuild(Context.Guild.Id);
-            guild.AddAvailability(gm, newTimeframe);
+            if (BotManager.IsGamemaster(gm, guildId))
+            {
+                await RespondAsync("<t:" + earlyStart + ":F>");
+                await RespondAsync("<t:" + latestStart + ":F>");
+                await RespondAsync("<t:" + cutoff + ":F>");
+
+                Timeframe newTimeframe =
+                    new()
+                    {
+                        EarliestStart = GenericHelpers.DateTimeFromUnixSeconds(earlyStart),
+                        LatestStart = GenericHelpers.DateTimeFromUnixSeconds(latestStart),
+                        Cutoff = GenericHelpers.DateTimeFromUnixSeconds(cutoff)
+                    };
+
+                Guild guild = BotManager.GetGuild(Context.Guild.Id);
+                guild.AddAvailability(gm, newTimeframe);
+            }
+            else
+            {
+                await Context.Interaction.RespondAsync(
+                    "Only GMs can use this command.",
+                    ephemeral: true
+                );
+            }
         }
     }
 }

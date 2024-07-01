@@ -1,3 +1,4 @@
+using System.Drawing;
 using System.Text.RegularExpressions;
 
 namespace Bot.Helpers
@@ -122,6 +123,17 @@ namespace Bot.Helpers
             return height;
         }
 
+        public static int[] HexStringToRGB(string hexColor)
+        {
+            Color color = ColorTranslator.FromHtml(hexColor);
+            return new int[]
+            {
+                Convert.ToInt16(color.R),
+                Convert.ToInt16(color.G),
+                Convert.ToInt16(color.B)
+            };
+        }
+
         public static float GetWeightFromString(string weightString)
         {
             float weight = 0f;
@@ -166,5 +178,25 @@ namespace Bot.Helpers
         {
             return 0.45359237f * lbs;
         }
+
+        public static string ModifierToString(int mod)
+        {
+            return mod < 0 ? "-" + mod : "+" + mod;
+        }
+    }
+
+    public static class StringExtensions
+    {
+        public static string FirstCharToUpper(this string input) =>
+            input switch
+            {
+                null => throw new ArgumentNullException(nameof(input)),
+                ""
+                    => throw new ArgumentException(
+                        $"{nameof(input)} cannot be empty",
+                        nameof(input)
+                    ),
+                _ => string.Concat(input[0].ToString().ToUpper(), input.AsSpan(1))
+            };
     }
 }

@@ -60,15 +60,39 @@ namespace Bot.Characters
         private readonly long _created;
         private long _updated = 0;
         private Status _status = 0;
+        private Display _display = 0;
 
-        public Character(
-            IUser user,
-            Guild guild,
-            string name,
-            string desc,
-            string rep,
-            Dictionary<string, dynamic> data
-        )
+        public Character(Character template)
+        {
+            _id = template.Id;
+            _user = template.User;
+            _guild = template.Guild;
+            _created = template.CreatedOn;
+            _level = template.Level;
+            _generation = template.Generation;
+
+            _name = template.Name;
+            _desc = template.Description;
+            _rep = template.Reputation;
+            _class = template.Class;
+            _ancestry = template.Ancestry;
+            _heritage = template.Heritage;
+            _background = template.Background;
+            _deity = template.Deity;
+            _gender = template.Gender;
+            _age = template.Age;
+            _perception = template.Perception;
+            _currency = template.Gold;
+            _languages = template.Languages;
+            _skills = template.Skills;
+            _lore = template.Lore;
+            _saves = template.Saves;
+            _feats = template.Feats;
+            _spells = template.Spells;
+            _attributes = template.Attributes;
+        }
+
+        public Character(IUser user, Guild guild, Dictionary<string, dynamic> data)
         {
             ImportType importType = data["type"];
             if (importType == ImportType.Foundry)
@@ -79,14 +103,14 @@ namespace Bot.Characters
             _id = Guid.NewGuid();
             _user = user.Id;
             _guild = guild.Id;
-            _name = name;
-            _desc = desc;
-            _rep = rep;
             _created = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             _level = guild.Generation;
             _generation = guild.GenerationCount;
 
+            _name = data["name"];
+            _desc = data["description"];
+            _rep = data["reputation"];
             _class = data["class"];
             _ancestry = data["ancestry"];
             _heritage = data["heritage"];
@@ -113,6 +137,12 @@ namespace Bot.Characters
             if (data.ContainsKey("anathema"))
             {
                 _anathema = data["anathema"];
+            }
+
+            if (Heritage.Contains(_ancestry))
+            {
+                _heritage = _heritage.Replace(_ancestry, "");
+                _heritage = _heritage.TrimEnd();
             }
         }
 
@@ -187,7 +217,7 @@ namespace Bot.Characters
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
-        public string Desc
+        public string Description
         {
             get => _desc;
             set
@@ -196,7 +226,7 @@ namespace Bot.Characters
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
-        public string Rep
+        public string Reputation
         {
             get => _rep;
             set
@@ -316,6 +346,15 @@ namespace Bot.Characters
             set
             {
                 _currency = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
+        }
+        public Display DisplayMode
+        {
+            get => _display;
+            set
+            {
+                _display = value;
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }

@@ -58,7 +58,7 @@ namespace Bot.Characters
 
                     var textBox = new ModalBuilder()
                         .WithTitle("Create Character")
-                        .WithCustomId("createCharacter-" + guildId + "-" + player.Id)
+                        .WithCustomId("createCharacter+" + guildId + "+" + player.Id)
                         .AddTextInput("Name", "character_name", placeholder: "Character Name")
                         .AddTextInput(
                             "Description",
@@ -103,7 +103,7 @@ namespace Bot.Characters
 
             var textBox = new ModalBuilder()
                 .WithTitle("Roleplay Post")
-                .WithCustomId("createRP-" + guildId + "-" + player.Username + "-" + name)
+                .WithCustomId("createRP+" + guildId + "+" + player.Username + "+" + name)
                 .AddTextInput("Display Name", "display_name", placeholder: name, required: false)
                 .AddTextInput(
                     "Roleplay",

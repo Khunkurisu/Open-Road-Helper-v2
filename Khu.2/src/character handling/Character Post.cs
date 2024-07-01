@@ -1,11 +1,80 @@
 using Bot.Guilds;
+using Bot.Helpers;
+using Bot.PF2;
 using Discord;
 
 namespace Bot.Characters
 {
     public partial class Character
     {
-        public EmbedBuilder? GenerateEmbed()
+        private Color GetDiscordColor()
+        {
+            int[] colorValues = GenericHelpers.HexStringToRGB(_colorPref);
+            return new Color(colorValues[0], colorValues[1], colorValues[2]);
+        }
+
+        public static ComponentBuilder ConfirmationButtons(
+            string guildId,
+            ulong playerId,
+            string charName
+        )
+        {
+            return new ComponentBuilder()
+                .WithButton(
+                    "Confirm",
+                    "createCharacter+" + guildId + "+" + playerId + "+" + charName + "+confirm",
+                    ButtonStyle.Success
+                )
+                .WithButton(
+                    "Cancel",
+                    "createCharacter+" + guildId + "+" + playerId + "+" + charName + "+cancel",
+                    ButtonStyle.Danger
+                );
+        }
+
+        public static SelectMenuBuilder CharacterDisplaySelector(
+            string guildId,
+            string userId,
+            string name
+        )
+        {
+            return new SelectMenuBuilder()
+                .WithCustomId("charDisplay+" + guildId + "+" + userId + "+" + name)
+                .AddOption("Details", "Details", isDefault: true)
+                .AddOption("Attributes", "Attributes")
+                .AddOption("Equipment", "Equipment")
+                .AddOption("Spells", "Spells")
+                .AddOption("Feats", "Feats");
+        }
+
+        public static SelectMenuBuilder CharacterDisplaySelector(
+            ulong guildId,
+            ulong userId,
+            string name
+        )
+        {
+            return new SelectMenuBuilder()
+                .WithCustomId("charDisplay+" + guildId + "+" + userId + "+" + name)
+                .AddOption("Details", "Details", isDefault: true)
+                .AddOption("Attributes", "Attributes")
+                .AddOption("Equipment", "Equipment")
+                .AddOption("Spells", "Spells")
+                .AddOption("Feats", "Feats");
+        }
+
+        public SelectMenuBuilder CharacterDisplaySelector(ulong guildId, ulong userId)
+        {
+            return new SelectMenuBuilder()
+                .WithCustomId("charDisplay+" + guildId + "+" + userId + "+" + Name)
+                .WithPlaceholder(DisplayMode.ToString())
+                .AddOption("Details", "Details")
+                .AddOption("Attributes", "Attributes")
+                .AddOption("Equipment", "Equipment")
+                .AddOption("Spells", "Spells")
+                .AddOption("Feats", "Feats");
+        }
+
+        public ComponentBuilder? GenerateButtons()
         {
             Guild guild = BotManager.GetGuild(_guild);
             IUser? player = BotManager.GetGuildUser(_guild, _user);
@@ -14,21 +83,83 @@ namespace Bot.Characters
                 return null;
             }
 
-            var embed = new EmbedBuilder()
-                .WithTitle(Heritage + " " + Ancestry + " " + Class + " " + Level)
-                .WithAuthor(Name)
-                .WithDescription(Desc)
-                .WithFooter(player.Username)
-                .AddField("Reputation", Rep, false)
-                .AddField("Age", Age, true)
-                .AddField("Height", Height + " cm", true)
-                .AddField("Weight", Weight + " kg", true)
-                .AddField("PT", guild.GetPlayerTokenCount(User).ToString(), true)
-                .AddField("DT", Downtime.ToString(), true)
-                .AddField("Coin", Gold + " gp", true)
-                .WithImageUrl(AvatarURL);
+            var buttons = new ComponentBuilder().WithButton(
+                "Edit",
+                "editCharacter+" + guild.Id + "+" + player.Id + "+" + Name,
+                ButtonStyle.Secondary
+            );
 
-            return embed;
+            if (Status == Status.Pending)
+            {
+                buttons
+                    .WithButton(
+                        "Approve",
+                        "approveCharacter+" + guild.Id + "+" + player.Id + "+" + Name,
+                        ButtonStyle.Success
+                    )
+                    .WithButton(
+                        "Refund",
+                        "refundCharacter+" + guild.Id + "+" + player.Id + "+" + Name,
+                        ButtonStyle.Danger
+                    );
+            }
+            else if (Status == Status.Approved)
+            {
+                buttons.WithButton(
+                    "Retire",
+                    "retireCharacter+" + guild.Id + "+" + player.Id + "+" + Name,
+                    ButtonStyle.Danger
+                );
+            }
+
+            return buttons;
+        }
+
+        public ComponentBuilder GenerateButtons(ulong guildId, ulong playerId)
+        {
+            if (Status == Status.Temp)
+            {
+                return ConfirmationButtons("" + guildId, playerId, Name);
+            }
+            var buttons = new ComponentBuilder().WithButton(
+                "Edit",
+                "editCharacter+" + guildId + "+" + playerId + "+" + Name,
+                ButtonStyle.Secondary
+            );
+
+            if (Status == Status.Pending)
+            {
+                buttons
+                    .WithButton(
+                        "Approve",
+                        "approveCharacter+" + guildId + "+" + playerId + "+" + Name,
+                        ButtonStyle.Success
+                    )
+                    .WithButton(
+                        "Refund",
+                        "refundCharacter+" + guildId + "+" + playerId + "+" + Name,
+                        ButtonStyle.Danger
+                    );
+            }
+            else if (Status == Status.Approved)
+            {
+                buttons.WithButton(
+                    "Retire",
+                    "retireCharacter+" + guildId + "+" + playerId + "+" + Name,
+                    ButtonStyle.Danger
+                );
+            }
+
+            return buttons;
+        }
+
+        public enum Display
+        {
+            Details,
+            Attributes,
+            Equipment,
+            Spells,
+            Feats
         }
     }
 }

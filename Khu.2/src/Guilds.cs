@@ -21,7 +21,7 @@ namespace Bot.Guilds
 
         private readonly List<Quest> _quests = new();
         private readonly Dictionary<ulong, List<Character>> _characters = new();
-        private readonly Dictionary<ulong, IImportable> _characterValues = new();
+        private readonly Dictionary<ulong, IImportable?> _characterValues = new();
         private readonly Dictionary<string, Availability> _gmAvailabilities = new();
         private readonly List<Party> _parties = new();
         private readonly Dictionary<ulong, uint> _playerTokens = new();
@@ -92,6 +92,11 @@ namespace Bot.Guilds
             LoadAll();
         }
 
+        public bool IsGamemaster(IUser gm)
+        {
+            return false;
+        }
+
         public void LoadAll()
         {
             if (!Directory.Exists(_guildDataPath + _id))
@@ -141,23 +146,6 @@ namespace Bot.Guilds
                     _characters[playerId] = characters[playerId];
                 }
             }
-        }
-
-        public void StoreTempCharacter(ulong playerId, IImportable characterImport)
-        {
-            if (!_characterValues.ContainsKey(playerId))
-            {
-                _characterValues.Add(playerId, characterImport);
-            }
-            else
-            {
-                _characterValues[playerId] = characterImport;
-            }
-        }
-
-        public IImportable? GetCharacterJson(ulong playerId)
-        {
-            return _characterValues.ContainsKey(playerId) ? _characterValues[playerId] : null;
         }
 
         private void LoadBoards()
@@ -219,6 +207,31 @@ namespace Bot.Guilds
                     _parties.Add(party);
                 }
             }
+        }
+
+        public void StoreTempCharacter(ulong playerId, IImportable characterImport)
+        {
+            if (!_characterValues.ContainsKey(playerId))
+            {
+                _characterValues.Add(playerId, characterImport);
+            }
+            else
+            {
+                _characterValues[playerId] = characterImport;
+            }
+        }
+
+        public void ClearTempCharacter(ulong playerId)
+        {
+            if (_characterValues.ContainsKey(playerId))
+            {
+                _characterValues[playerId] = null;
+            }
+        }
+
+        public IImportable? GetCharacterJson(ulong playerId)
+        {
+            return _characterValues.ContainsKey(playerId) ? _characterValues[playerId] : null;
         }
 
         public void SaveAll()
@@ -367,6 +380,19 @@ namespace Bot.Guilds
             }
         }
 
+        public void RemoveCharacter(ulong playerId, string name)
+        {
+            if (_characters.ContainsKey(playerId))
+            {
+                Character? character = GetCharacter(playerId, name);
+                if (character != null && _characters[playerId].Contains(character))
+                {
+                    _characters[playerId].Remove(character);
+                    SaveCharacters();
+                }
+            }
+        }
+
         public void RemoveQuest(int index)
         {
             _quests.RemoveAt(index);
@@ -389,11 +415,11 @@ namespace Bot.Guilds
             return Quests.First(x => x.Id == id);
         }
 
-        public Character? GetCharacter(ulong playerId, Guid characterId)
+        public Character? GetCharacter(ulong playerId, string charName)
         {
             if (_characters.ContainsKey(playerId) && _characters[playerId].Count > 0)
             {
-                return _characters[playerId].First(x => x.Id == characterId);
+                return _characters[playerId].First(x => x.Name == charName);
             }
             return null;
         }

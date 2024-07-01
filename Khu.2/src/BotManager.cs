@@ -16,9 +16,9 @@ namespace Bot
             return GetGuild(guildId).GetQuest(questId);
         }
 
-        public static Character? GetCharacter(ulong guildId, ulong playerId, Guid characterId)
+        public static Character? GetCharacter(ulong guildId, ulong playerId, string charName)
         {
-            return GetGuild(guildId).GetCharacter(playerId, characterId);
+            return GetGuild(guildId).GetCharacter(playerId, charName);
         }
 
         public static Character? GetCharacter(ulong guildId, Guid characterId)
@@ -68,6 +68,11 @@ namespace Bot
             return guild;
         }
 
+        public static bool IsGamemaster(IUser gm, ulong guild)
+        {
+            return GetGuild(guild).IsGamemaster(gm);
+        }
+
         public BotManager(DiscordSocketClient client)
         {
             _client = client;
@@ -109,6 +114,32 @@ namespace Bot
                     await QuestCreateConfirm(button);
                 }
             }
+            else if (customId.Contains("createCharacter"))
+            {
+                if (customId.Contains("cancel"))
+                {
+                    await CharacterCreateCancel(button);
+                }
+                else if (customId.Contains("confirm"))
+                {
+                    await CharacterCreateConfirm(button);
+                }
+            }
+            else if (customId.Contains("editCharacter"))
+            {
+                if (customId.Contains("cancel"))
+                {
+                    await CharacterEditCancel(button);
+                }
+                else if (customId.Contains("confirm"))
+                {
+                    await CharacterEditConfirm(button);
+                }
+                else
+                {
+                    await CharacterEditStart(button);
+                }
+            }
         }
 
         private async Task OnSelectMenuExecuted(SocketMessageComponent selectMenu)
@@ -116,6 +147,10 @@ namespace Bot
             if (selectMenu.Data.CustomId.Contains("createQuest"))
             {
                 await QuestCreate(selectMenu);
+            }
+            else if (selectMenu.Data.CustomId.Contains("charDisplay"))
+            {
+                await DrawCharacterPost(selectMenu);
             }
         }
 

@@ -157,5 +157,31 @@ namespace Bot.PF2
             float multiplier = ThreatMults[(int)threat];
             return gold * multiplier;
         }
+
+        public static string AttributeNames(string attribute)
+        {
+            switch (attribute)
+            {
+                case "str":
+                    return "Strength";
+                case "dex":
+                    return "Dexterity";
+                case "con":
+                    return "Constitution";
+                case "int":
+                    return "Intelligence";
+                case "wis":
+                    return "Wisdom";
+                case "cha":
+                    return "Charisma";
+                default:
+                    return "";
+            }
+        }
+
+        public static int AttributeToModifier(uint attribute)
+        {
+            return (int)Math.Floor((float)(attribute - 10) / 2);
+        }
     }
 }

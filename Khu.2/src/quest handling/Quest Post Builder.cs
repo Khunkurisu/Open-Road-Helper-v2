@@ -22,7 +22,7 @@ namespace Bot.Quests
         {
             return new SelectMenuBuilder()
                 .WithPlaceholder("Quest Threat")
-                .WithCustomId("createQuest-" + guildId + "-" + gm + "-" + name + "-questThreat")
+                .WithCustomId("createQuest+" + guildId + "+" + gm + "+" + name + "+questThreat")
                 .WithMinValues(1)
                 .AddOption("Trivial", "Trivial", "Highest threat encounter is trivial.")
                 .AddOption("Low", "Low", "Highest threat encounter is low.")
@@ -35,18 +35,18 @@ namespace Bot.Quests
         {
             return new SelectMenuBuilder()
                 .WithPlaceholder("Max Players")
-                .WithCustomId("createQuest-" + guildId + "-" + gm + "-" + name + "-questPlayerMax")
+                .WithCustomId("createQuest+" + guildId + "+" + gm + "+" + name + "+questPlayerMax")
                 .WithMinValues(1)
                 .AddOption("Four", "4", "No more than four players in the party.")
                 .AddOption("Five", "5", "No more than five players in the party.")
                 .AddOption("Six", "6", "No more than six players in the party.");
         }
 
-        public static SelectMenuBuilder PlayerMindSelector(string guildId, string gm, string name)
+        public static SelectMenuBuilder PlayerMinSelector(string guildId, string gm, string name)
         {
             return new SelectMenuBuilder()
-                .WithPlaceholder("Mind Players")
-                .WithCustomId("createQuest-" + guildId + "-" + gm + "-" + name + "-questPlayerMind")
+                .WithPlaceholder("Min Players")
+                .WithCustomId("createQuest+" + guildId + "+" + gm + "+" + name + "+questPlayerMin")
                 .WithMinValues(1)
                 .AddOption("Two", "2", "No fewer than two players in the party.")
                 .AddOption("Three", "3", "No fewer than three players in the party.")
@@ -57,7 +57,7 @@ namespace Bot.Quests
         {
             SelectMenuBuilder partySelector = new SelectMenuBuilder()
                 .WithPlaceholder("Select Party")
-                .WithCustomId("editQuest-" + guildId + "-" + gm + "-" + name + "-questPartySelect")
+                .WithCustomId("editQuest+" + guildId + "+" + gm + "+" + name + "+questPartySelect")
                 .WithMinValues(1);
             Guild guild = BotManager.GetGuild(ulong.Parse(guildId));
             return partySelector;
@@ -68,12 +68,12 @@ namespace Bot.Quests
             return new ComponentBuilder()
                 .WithButton(
                     "Confirm",
-                    "createQuest-" + guildId + "-" + gm + "-" + name + "-confirm",
+                    "createQuest+" + guildId + "+" + gm + "+" + name + "+confirm",
                     ButtonStyle.Success
                 )
                 .WithButton(
                     "Cancel",
-                    "createQuest-" + guildId + "-" + gm + "-" + name + "-cancel",
+                    "createQuest+" + guildId + "+" + gm + "+" + name + "+cancel",
                     ButtonStyle.Danger
                 );
         }

@@ -21,19 +21,14 @@ namespace Bot
             guild.StoreTempCharacter(player.Id, characterImport);
         }
 
-        /* private async Task CharacterCreate(
-            SocketModal modal,
-            List<SocketMessageComponentData> components
-        ) { } */
-
         private static async Task CharacterCreate(
             SocketModal modal,
             List<SocketMessageComponentData> components
         )
         {
-            string guildId = modal.Data.CustomId.Split("-")[1];
+            string guildId = modal.Data.CustomId.Split("+")[1];
             Guild guild = GetGuild(ulong.Parse(guildId));
-            string playerIdString = modal.Data.CustomId.Split("-")[2];
+            string playerIdString = modal.Data.CustomId.Split("+")[2];
             ulong playerId = ulong.Parse(playerIdString);
             IUser user = modal.User;
             IUser? player = _client?.GetUser(playerId);
@@ -66,30 +61,22 @@ namespace Bot
                         }
                         else
                         {
-                            Character character =
-                                new(
-                                    player,
-                                    guild,
-                                    charName,
-                                    charDescription,
-                                    charReputation,
-                                    charData
-                                );
+                            charData["name"] = charName;
+                            charData["description"] = charDescription;
+                            charData["reputation"] = charReputation;
+                            Character character = new(player, guild, charData);
+                            guild.AddCharacter(user.Id, character);
 
-                            /* guild.SetPlayerTokenCount(playerId, (uint)(tokenCount - tokenCost));
-                            guild.AddCharacter(playerId, character); */
-                            EmbedBuilder? charEmbed = character.GenerateEmbed();
-                            if (charEmbed != null)
-                            {
-                                await modal.RespondAsync(
-                                    "Ensure everything looks correct before continuing!",
-                                    embed: charEmbed.Build()
-                                );
-                            }
-                            else
-                            {
-                                await modal.RespondAsync("failed to create embed");
-                            }
+                            await modal.RespondAsync(
+                                "Ensure everything looks correct before continuing!",
+                                embed: character.GenerateEmbed(user).Build(),
+                                components: character
+                                    .GenerateButtons(guild.Id, user.Id)
+                                    .WithSelectMenu(
+                                        character.CharacterDisplaySelector(guild.Id, user.Id)
+                                    )
+                                    .Build()
+                            );
                         }
                     }
                     else
@@ -109,6 +96,108 @@ namespace Bot
             else
             {
                 await modal.RespondAsync("something went terribly wrong");
+            }
+        }
+
+        private static async Task CharacterCreateConfirm(SocketMessageComponent button)
+        {
+            IUser user = button.User;
+            string player = button.Data.CustomId.Split("+")[2];
+            if ("" + user.Id == player)
+            {
+                string guildId = button.Data.CustomId.Split("+")[1];
+                Guild guild = GetGuild(ulong.Parse(guildId));
+
+                string charName = button.Data.CustomId.Split("+")[3];
+                int tokenCost = guild.GetPlayerCharacterCount(user.Id) + 1;
+                uint tokenCount = guild.GetPlayerTokenCount(user.Id);
+
+                Character? character = guild.GetCharacter(user.Id, charName);
+                if (character != null)
+                {
+                    Console.WriteLine("character != null");
+                    guild.SetPlayerTokenCount(user.Id, (uint)(tokenCount - tokenCost));
+                    character.Status = Status.Pending;
+                    await PostCharacter(button, guild, character, user);
+                }
+                else
+                {
+                    await button.UpdateAsync(x =>
+                    {
+                        x.Content = "Somehow character was null.";
+                    });
+                }
+            }
+            else
+            {
+                await button.UpdateAsync(x => { });
+            }
+        }
+
+        private static async Task CharacterCreateCancel(SocketMessageComponent button)
+        {
+            IUser user = button.User;
+            string player = button.Data.CustomId.Split("+")[2];
+            if ("" + user.Id == player)
+            {
+                string guildId = button.Data.CustomId.Split("+")[1];
+
+                Guild guild = GetGuild(ulong.Parse(guildId));
+
+                guild.ClearTempCharacter(user.Id);
+                string charName = button.Data.CustomId.Split("+")[3];
+                guild.RemoveCharacter(user.Id, charName);
+                await button.UpdateAsync(x =>
+                {
+                    x.Content = "Character creation canceled.";
+                    x.Embed = null;
+                    x.Components = null;
+                });
+            }
+            else
+            {
+                await button.UpdateAsync(x => { });
+            }
+        }
+
+        private static async Task PostCharacter(
+            SocketMessageComponent context,
+            Guild guild,
+            Character character,
+            IUser user
+        )
+        {
+            if (guild.CharacterBoard != null)
+            {
+                guild.ClearTempCharacter(user.Id);
+                ForumTag[] tags =
+                {
+                    guild.CharacterBoard.Tags.First(x => x.Name == "Pending Approval")
+                };
+                IThreadChannel thread = await guild.CharacterBoard.CreatePostAsync(
+                    character.Name,
+                    ThreadArchiveDuration.OneWeek,
+                    embed: character.GenerateEmbed(user).Build(),
+                    tags: tags,
+                    components: character
+                        .GenerateButtons(guild.Id, user.Id)
+                        .WithSelectMenu(character.CharacterDisplaySelector(guild.Id, user.Id))
+                        .Build()
+                );
+                await thread.AddUserAsync((IGuildUser)user);
+                await context.UpdateAsync(x =>
+                {
+                    x.Content = "Character posted! " + thread.Mention;
+                    x.Embed = null;
+                    x.Components = null;
+                });
+            }
+            else
+            {
+                await context.UpdateAsync(x =>
+                {
+                    x.Content = "Character board has not been assigned.";
+                });
             }
         }
     }

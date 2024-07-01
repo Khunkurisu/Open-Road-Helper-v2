@@ -9,15 +9,15 @@ namespace Bot
     {
         private static async Task QuestCreate(SocketMessageComponent selectMenu)
         {
-            string gm = selectMenu.Data.CustomId.Split("-")[2];
+            string gm = selectMenu.Data.CustomId.Split("+")[2];
             IUser user = selectMenu.User;
             if (user.Username == gm)
             {
-                string guildId = selectMenu.Data.CustomId.Split("-")[1];
+                string guildId = selectMenu.Data.CustomId.Split("+")[1];
                 Guild guild = GetGuild(ulong.Parse(guildId));
 
-                string name = selectMenu.Data.CustomId.Split("-")[3];
-                string menuType = selectMenu.Data.CustomId.Split("-")[4];
+                string name = selectMenu.Data.CustomId.Split("+")[3];
+                string menuType = selectMenu.Data.CustomId.Split("+")[4];
                 string value = string.Join(", ", selectMenu.Data.Values);
                 var maxPlayerMenu = Quest.PlayerMaxSelector(guildId, gm, name);
                 var messageComponents = new ComponentBuilder();
@@ -40,7 +40,7 @@ namespace Bot
                                 .WithSelectMenu(maxPlayerMenu)
                                 .WithButton(
                                     "Back",
-                                    "createQuest-" + guildId + "-" + gm + "-" + name + "-back",
+                                    "createQuest+" + guildId + "+" + gm + "+" + name + "+back",
                                     ButtonStyle.Danger
                                 );
                             break;
@@ -80,9 +80,9 @@ namespace Bot
             List<SocketMessageComponentData> components
         )
         {
-            string gm = modal.Data.CustomId.Split("-")[2];
+            string gm = modal.Data.CustomId.Split("+")[2];
             IUser gamemaster = modal.User;
-            string guildId = modal.Data.CustomId.Split("-")[1];
+            string guildId = modal.Data.CustomId.Split("+")[1];
             Guild guild = GetGuild(ulong.Parse(guildId));
 
             string name = components.First(x => x.CustomId == "quest_name").Value;
@@ -102,7 +102,7 @@ namespace Bot
                 .WithSelectMenu(threatMenu)
                 .WithButton(
                     "Cancel",
-                    "createQuest-" + guildId + "-" + gm + "-" + name + "-cancel",
+                    "createQuest+" + guildId + "+" + gm + "+" + name + "+cancel",
                     ButtonStyle.Danger
                 );
 
@@ -128,7 +128,7 @@ namespace Bot
                 ForumTag[] tags = { guild.QuestBoard.Tags.First(x => x.Name == "Pending") };
                 ComponentBuilder components = new ComponentBuilder().WithButton(
                     "Edit",
-                    "editQuest-" + guild.Id + "-" + quest.Name + "-editStart",
+                    "editQuest+" + guild.Id + "+" + quest.Name + "+editStart",
                     ButtonStyle.Secondary
                 );
                 IThreadChannel thread = await guild.QuestBoard.CreatePostAsync(
@@ -151,13 +151,13 @@ namespace Bot
         private static async Task QuestCreateConfirm(SocketMessageComponent button)
         {
             IUser user = button.User;
-            string gm = button.Data.CustomId.Split("-")[2];
+            string gm = button.Data.CustomId.Split("+")[2];
             if (user.Username == gm)
             {
-                string guildId = button.Data.CustomId.Split("-")[1];
+                string guildId = button.Data.CustomId.Split("+")[1];
                 Guild guild = GetGuild(ulong.Parse(guildId));
 
-                string name = button.Data.CustomId.Split("-")[3];
+                string name = button.Data.CustomId.Split("+")[3];
 
                 Quest? quest = guild.GetQuest(name, user);
                 if (quest != null)
@@ -181,13 +181,13 @@ namespace Bot
         private static async Task QuestCreateBack(SocketMessageComponent button)
         {
             IUser user = button.User;
-            string gm = button.Data.CustomId.Split("-")[2];
+            string gm = button.Data.CustomId.Split("+")[2];
             if (user.Username == gm)
             {
-                string guildId = button.Data.CustomId.Split("-")[1];
+                string guildId = button.Data.CustomId.Split("+")[1];
                 Guild guild = GetGuild(ulong.Parse(guildId));
 
-                string name = button.Data.CustomId.Split("-")[3];
+                string name = button.Data.CustomId.Split("+")[3];
 
                 Quest? quest = guild.GetQuest(name, user);
                 if (quest != null)
@@ -197,7 +197,7 @@ namespace Bot
                         .WithSelectMenu(threatMenu)
                         .WithButton(
                             "Back",
-                            "createQuest-" + guildId + "-" + gm + "-" + name + "-back",
+                            "createQuest+" + guildId + "+" + gm + "+" + name + "+back",
                             ButtonStyle.Danger
                         );
                     var questEmbed = quest.GenerateEmbed(user);
@@ -224,13 +224,13 @@ namespace Bot
         private static async Task QuestCreateCancel(SocketMessageComponent button)
         {
             IUser user = button.User;
-            string gm = button.Data.CustomId.Split("-")[2];
+            string gm = button.Data.CustomId.Split("+")[2];
             if (user.Username == gm)
             {
-                string guildId = button.Data.CustomId.Split("-")[1];
+                string guildId = button.Data.CustomId.Split("+")[1];
                 Guild guild = GetGuild(ulong.Parse(guildId));
 
-                string name = button.Data.CustomId.Split("-")[3];
+                string name = button.Data.CustomId.Split("+")[3];
 
                 Quest? quest = guild.GetQuest(name, user);
                 if (quest != null)
