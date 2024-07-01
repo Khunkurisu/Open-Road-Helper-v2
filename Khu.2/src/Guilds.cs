@@ -16,6 +16,7 @@ namespace Bot.Guilds
         private const string _questsPath = @"\quests.json";
         private const string _partiesPath = @"\parties.json";
         private const string _boardsPath = @"\boards.json";
+        private const string _tokensPath = @"\tokens.json";
 
         private const uint _initialTokens = 1;
 
@@ -120,6 +121,26 @@ namespace Bot.Guilds
             LoadAvailability();
             LoadParties();
             LoadBoards();
+            LoadTokens();
+        }
+
+        private void LoadTokens()
+        {
+            if (!File.Exists(_guildDataPath + _id + _tokensPath))
+            {
+                return;
+            }
+            string jsonString = File.ReadAllText(_guildDataPath + _id + _tokensPath);
+            Dictionary<ulong, uint>? playerTokens = JsonConvert.DeserializeObject<
+                Dictionary<ulong, uint>
+            >(jsonString);
+            if (playerTokens != null)
+            {
+                foreach (ulong playerId in playerTokens.Keys)
+                {
+                    _playerTokens.Add(playerId, playerTokens[playerId]);
+                }
+            }
         }
 
         private void LoadAvailability()
@@ -257,6 +278,16 @@ namespace Bot.Guilds
             SaveAvailability();
             SaveParties();
             SaveBoards();
+            SaveTokens();
+        }
+
+        private void SaveTokens()
+        {
+            if (_playerTokens.Count > 0)
+            {
+                string json = JsonConvert.SerializeObject(_playerTokens);
+                File.WriteAllText(_guildDataPath + _id + _tokensPath, json);
+            }
         }
 
         private void SaveBoards()
