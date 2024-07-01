@@ -30,7 +30,7 @@ namespace Bot.Characters
                 .AddField("PT", guild.GetPlayerTokenCount(User).ToString(), true)
                 .AddField("DT", Downtime.ToString(), true)
                 .AddField("Coin", Gold + " gp", true)
-                .WithImageUrl(AvatarURL);
+                .WithImageUrl(Avatars.Count > 0 ? Avatars[0] : string.Empty);
 
             return detailsEmbed;
         }
@@ -50,7 +50,7 @@ namespace Bot.Characters
                     "**"
                         + StringExtensions.FirstCharToUpper(k)
                         + "** "
-                        + GenericHelpers.ModifierToString(Helper.AttributeToModifier(Attributes[k]))
+                        + GenericHelpers.ModifierToString(Modifiers[k])
                 );
             }
             attributesEmbed.AddField("Attributes", string.Join(", ", attributes));
