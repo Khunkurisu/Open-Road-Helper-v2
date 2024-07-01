@@ -10,87 +10,86 @@ namespace Bot.Characters
             ulong user,
             ulong guild,
             ulong thread,
-            string name,
-            string desc,
-            string rep,
+            string? name,
+            string? desc,
+            string? rep,
             uint age,
+            string? deity,
+            string? gender,
             float height,
             float weight,
-            int birthday,
+            int birthDay,
             Months birthMonth,
             int birthYear,
-            string ancestry,
-            string heritage,
-            string charClass,
-            string background,
-            int generation,
+            string? ancestry,
+            string? heritage,
+            string? charClass,
+            string? background,
             uint level,
-            double gold,
+            int generation,
+            double currency,
             int downtime,
-            string deity,
-            string gender,
-            string color,
-            string avatarURL,
-            ulong messageId,
-            List<string> notes,
-            int lastTokenTrade,
-            long createdOn,
-            long updatedOn,
-            Status status,
-            Display display,
-            List<string> feats,
-            List<string> spells,
-            List<string> edicts,
-            List<string> anathema,
             List<string> languages,
             Dictionary<string, uint> skills,
             Dictionary<string, uint> lore,
             Dictionary<string, uint> saves,
             uint perception,
-            Dictionary<string, uint> attributes
+            List<string> feats,
+            List<string> spells,
+            List<string> edicts,
+            List<string> anathema,
+            Dictionary<string, uint> attributes,
+            string colorPref,
+            List<string> avatars,
+            List<string> notes,
+            int lastTokenTrade,
+            long created,
+            long updated,
+            Status status,
+            Display display
         )
         {
             _id = id;
             _user = user;
             _guild = guild;
+            _thread = thread;
             _name = name;
             _desc = desc;
             _rep = rep;
             _age = age;
+            _deity = deity;
+            _gender = gender;
             _height = height;
             _weight = weight;
-            _birthDay = birthday;
+            _birthDay = birthDay;
             _birthMonth = birthMonth;
             _birthYear = birthYear;
             _ancestry = ancestry;
             _heritage = heritage;
             _class = charClass;
             _background = background;
-            _generation = generation;
             _level = level;
-            _currency = gold;
+            _generation = generation;
+            _currency = currency;
             _downtime = downtime;
-            _colorPref = color;
-            _avatars[0] = avatarURL;
-            _notes = notes;
-            _lastTokenTrade = lastTokenTrade;
-            _created = createdOn;
-            _updated = updatedOn;
-            _status = status;
-            _display = display;
-            _thread = thread;
-            _feats = feats;
-            _spells = spells;
-            _edicts = edicts;
-            _anathema = anathema;
             _languages = languages;
             _skills = skills;
             _lore = lore;
             _saves = saves;
             _perception = perception;
+            _feats = feats;
+            _spells = spells;
+            _edicts = edicts;
+            _anathema = anathema;
             _attributes = attributes;
-            _deity = deity;
-            _gender = gender;
+            _colorPref = colorPref;
+            _avatars = avatars;
+            _notes = notes;
+            _lastTokenTrade = lastTokenTrade;
+            _created = created;
+            _updated = updated;
+            _status = status;
+            _display = display;
         }
     }
 }
