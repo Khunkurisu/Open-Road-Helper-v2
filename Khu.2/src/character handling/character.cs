@@ -9,6 +9,7 @@ namespace Bot.Characters
         private readonly Guid _id;
         private readonly ulong _user;
         private readonly ulong _guild;
+        private ulong _thread;
 
         private string _name;
         private string _desc;
@@ -355,6 +356,16 @@ namespace Bot.Characters
             set
             {
                 _display = value;
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
+        }
+
+        public ulong Thread
+        {
+            get => _thread;
+            set
+            {
+                _thread = value;
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
