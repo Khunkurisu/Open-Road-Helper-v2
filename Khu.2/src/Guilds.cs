@@ -56,7 +56,7 @@ namespace Bot.Guilds
             }
             return (
                     (List<Character>)
-                        _characters[playerId].Where(x => x.Status != Bot.Characters.Status.Temp)
+                        _characters[playerId].Where(x => x.Status == Bot.Characters.Status.Approved)
                 ).Count + 1;
         }
 
@@ -80,16 +80,17 @@ namespace Bot.Guilds
             SetPlayerTokenCount(playerId, GetPlayerTokenCount(playerId) + tokenCount);
         }
 
-        public bool DecreasePlayerTokenCount(ulong playerId, int tokenCount)
+        public bool DecreasePlayerTokenCount(ulong playerId, int amount)
         {
             int currentTokens = (int)GetPlayerTokenCount(playerId);
 
-            if (currentTokens - tokenCount < 0)
+            int newTokens = currentTokens - amount;
+
+            if (newTokens < 0)
             {
                 return false;
             }
 
-            int newTokens = currentTokens - tokenCount;
             SetPlayerTokenCount(playerId, (uint)newTokens);
 
             return true;
