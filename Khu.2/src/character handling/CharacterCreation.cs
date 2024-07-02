@@ -10,6 +10,22 @@ namespace Bot
         public static void StoreTempCharacter(
             IImportable characterImport,
             ulong guildId,
+            IUser player,
+            float height,
+            float weight
+        )
+        {
+            Guild guild = GetGuild(guildId);
+            if (guild == null)
+            {
+                return;
+            }
+            guild.StoreTempCharacter(player.Id, characterImport, height, weight);
+        }
+
+        public static void StoreTempCharacter(
+            IImportable characterImport,
+            ulong guildId,
             IUser player
         )
         {
@@ -69,7 +85,7 @@ namespace Bot
                             await modal.RespondAsync(
                                 "Ensure everything looks correct before continuing!",
                                 embed: character.GenerateEmbed(user).Build(),
-                                components: character.GenerateComponents(guild.Id, user.Id).Build()
+                                components: character.GenerateComponents().Build()
                             );
                         }
                     }
@@ -104,9 +120,7 @@ namespace Bot
 
                 string charName = button.Data.CustomId.Split("+")[3];
                 int tokenCost = guild.GetNewCharacterCost(user.Id);
-                Console.WriteLine($"token cost: {tokenCost}");
                 uint tokenCount = guild.GetPlayerTokenCount(user.Id);
-                Console.WriteLine($"token count: {tokenCount}");
 
                 Character? character = guild.GetCharacter(user.Id, charName);
                 if (character != null && character.Status == Status.Temp)
@@ -179,7 +193,7 @@ namespace Bot
                     ThreadArchiveDuration.OneWeek,
                     embed: character.GenerateEmbed(user).Build(),
                     tags: tags,
-                    components: character.GenerateComponents(guild.Id, user.Id).Build()
+                    components: character.GenerateComponents().Build()
                 );
 
                 IThreadChannel transThread = await guild.TransactionBoard.CreatePostAsync(
@@ -230,7 +244,7 @@ namespace Bot
                 Character? character = guild.GetCharacter(user.Id, charName);
                 if (character != null && character.Status == Status.Pending)
                 {
-                    IThreadChannel? transactionChannel = (IThreadChannel?)GetChannel(
+                    IThreadChannel? transactionChannel = (IThreadChannel?)GetTextChannel(
                         guild.Id,
                         character.TransactionThread
                     );
