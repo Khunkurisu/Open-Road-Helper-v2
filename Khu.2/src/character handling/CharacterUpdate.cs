@@ -32,9 +32,25 @@ namespace Bot
                     await messageComponent.UpdateAsync(x =>
                     {
                         x.Embed = character.GenerateEmbed(user).Build();
-                        x.Components = character.GenerateComponents(guild.Id, user.Id).Build();
+                        x.Components = character.GenerateComponents().Build();
                     });
                 }
+            }
+        }
+
+        public static void DrawCharacterPost(Character character)
+        {
+            IThreadChannel? forumChannel = GetThreadChannel(
+                character.Guild,
+                character.CharacterThread
+            );
+            IUser? user = GetGuildUser(character.Guild, character.User);
+            if (user != null)
+            {
+                forumChannel?.SendMessageAsync(
+                    embed: character.GenerateEmbed(user).Build(),
+                    components: character.GenerateComponents().Build()
+                );
             }
         }
 
