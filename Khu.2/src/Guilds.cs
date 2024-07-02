@@ -241,6 +241,25 @@ namespace Bot.Guilds
             }
         }
 
+        public void StoreTempCharacter(
+            ulong playerId,
+            IImportable characterImport,
+            float height,
+            float weight
+        )
+        {
+            characterImport.AddValue("height", height);
+            characterImport.AddValue("weight", weight);
+            if (!_characterValues.ContainsKey(playerId))
+            {
+                _characterValues.Add(playerId, characterImport);
+            }
+            else
+            {
+                _characterValues[playerId] = characterImport;
+            }
+        }
+
         public void StoreTempCharacter(ulong playerId, IImportable characterImport)
         {
             if (!_characterValues.ContainsKey(playerId))
@@ -259,6 +278,23 @@ namespace Bot.Guilds
             {
                 _characterValues[playerId] = null;
             }
+        }
+
+        public async Task RefreshCharacterPosts()
+        {
+            foreach (ulong playerId in _characters.Keys)
+            {
+                foreach (Character character in _characters[playerId])
+                {
+                    BotManager.DrawCharacterPost(character);
+                    await Task.Yield();
+                }
+            }
+        }
+
+        public async Task RefreshQuestPosts()
+        {
+            await Task.CompletedTask;
         }
 
         public IImportable? GetCharacterJson(ulong playerId)
