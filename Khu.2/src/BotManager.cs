@@ -35,11 +35,20 @@ namespace Bot
             return null;
         }
 
-        public static IGuildChannel? GetChannel(ulong guildId, ulong channelId)
+        public static SocketThreadChannel? GetThreadChannel(ulong guildId, ulong channelId)
         {
             if (_client != null)
             {
-                return _client.GetGuild(guildId).GetChannel(channelId);
+                return _client.GetGuild(guildId).GetThreadChannel(channelId);
+            }
+            return null;
+        }
+
+        public static SocketTextChannel? GetTextChannel(ulong guildId, ulong channelId)
+        {
+            if (_client != null)
+            {
+                return _client.GetGuild(guildId).GetTextChannel(channelId);
             }
             return null;
         }
