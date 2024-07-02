@@ -1,6 +1,5 @@
 using Bot.Guilds;
 using Bot.Helpers;
-using Bot.PF2;
 using Discord;
 
 namespace Bot.Characters
@@ -18,7 +17,7 @@ namespace Bot.Characters
             Guild guild = BotManager.GetGuild(_guild);
 
             var detailsEmbed = new EmbedBuilder()
-                .WithTitle(Heritage + " " + Ancestry + " " + Class + " " + Level)
+                .WithTitle($"{Heritage} {Ancestry} {Class} {Level}")
                 .WithAuthor(Name)
                 .WithDescription(Description)
                 .WithColor(GetDiscordColor())
@@ -27,7 +26,8 @@ namespace Bot.Characters
                 .AddField("Age", Age, true)
                 .AddField("Height", Height + " cm", true)
                 .AddField("Weight", Weight + " kg", true)
-                .AddField("PT", guild.GetPlayerTokenCount(User).ToString(), true)
+                .AddField("Gender", Gender, true)
+                .AddField("PT", guild.GetPlayerTokenCount(User).ToString())
                 .AddField("DT", Downtime.ToString(), true)
                 .AddField("Coin", Gold + " gp", true)
                 .WithImageUrl(Avatars.Count > 0 ? Avatars[0] : string.Empty);
