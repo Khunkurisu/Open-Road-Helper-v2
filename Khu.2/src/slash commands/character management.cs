@@ -1,7 +1,3 @@
-using System.Net;
-using Bot.Guilds;
-using Bot.Helpers;
-using Bot.PF2;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -13,7 +9,12 @@ namespace Bot.Characters
     public class CharacterManagement : InteractionModuleBase<SocketInteractionContext>
     {
         [SlashCommand("create", "Create a character.")]
-        public async Task CreateCharacter(IAttachment? sheet = null, int pathbuilderId = -1)
+        public async Task CreateCharacter(
+            float height,
+            float weight,
+            IAttachment? sheet = null,
+            int pathbuilderId = -1
+        )
         {
             ulong guildId = Context.Guild.Id;
             IUser player = Context.User;
@@ -49,7 +50,13 @@ namespace Bot.Characters
                     else if (sheetType == 2)
                     {
                         PathbuilderImport characterImport = new(importData);
-                        BotManager.StoreTempCharacter(characterImport, guildId, player);
+                        BotManager.StoreTempCharacter(
+                            characterImport,
+                            guildId,
+                            player,
+                            height,
+                            weight
+                        );
                     }
                     else
                     {
