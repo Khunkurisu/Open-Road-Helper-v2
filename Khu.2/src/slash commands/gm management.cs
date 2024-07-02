@@ -12,6 +12,23 @@ namespace Bot.GameMaster
     [Group("gm", "Perform gm related tasks with these commands.")]
     public class GameMasterManagement : InteractionModuleBase<SocketInteractionContext>
     {
+        [Group("refresh", "Refresh posts for the given list.")]
+        public class RefreshListing : InteractionModuleBase<SocketInteractionContext>
+        {
+            [SlashCommand("characters", "Refresh all character posts with database values.")]
+            public async Task RefreshCharacterPosts()
+            {
+                Guild guild = BotManager.GetGuild(Context.Guild.Id);
+                await guild.RefreshCharacterPosts();
+            }
+            [SlashCommand("quests", "Refresh all character posts with database values.")]
+            public async Task RefreshQuestPosts()
+            {
+                Guild guild = BotManager.GetGuild(Context.Guild.Id);
+                await guild.RefreshQuestPosts();
+            }
+        }
+
         [Group("board", "Perform management of the forum boards which the bot posts in.")]
         public class BoardManagement : InteractionModuleBase<SocketInteractionContext>
         {
@@ -52,31 +69,6 @@ namespace Bot.GameMaster
                 await Context.Interaction.RespondAsync(
                     "Transaction board has been assigned to " + forumChannel.Mention
                 );
-            }
-
-            [SlashCommand("list", "List the quests currently stored.")]
-            public async Task ListQuests()
-            {
-                Guild guild = BotManager.GetGuild(Context.Guild.Id);
-                string message = "";
-                if (guild.QuestBoard != null)
-                {
-                    message += "## Quest Board\n" + guild.QuestBoard.Mention + "\n";
-                }
-                if (guild.CharacterBoard != null)
-                {
-                    message += "## Character Board\n" + guild.CharacterBoard.Mention + "\n";
-                }
-                if (guild.TransactionBoard != null)
-                {
-                    message += "## Transaction Board\n" + guild.TransactionBoard.Mention + "\n";
-                }
-                if (message == "")
-                {
-                    message = "No boards have been assigned.";
-                }
-
-                await Context.Interaction.RespondAsync(message.TrimEnd());
             }
         }
     }
