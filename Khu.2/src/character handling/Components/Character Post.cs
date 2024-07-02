@@ -6,10 +6,10 @@ namespace Bot.Characters
 {
     public partial class Character
     {
-        public ComponentBuilder GenerateComponents(ulong guildId, ulong playerId)
+        public ComponentBuilder GenerateComponents()
         {
-            return GenerateButtons(guildId, playerId)
-                .WithSelectMenu(CharacterDisplaySelector(guildId, playerId));
+            return GenerateButtons(_guild, _user)
+                .WithSelectMenu(CharacterDisplaySelector(_guild, _user));
         }
 
         public static SelectMenuBuilder CharacterDisplaySelector(
