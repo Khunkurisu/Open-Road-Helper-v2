@@ -12,7 +12,7 @@ namespace Bot.Quests
                 .WithAuthor(gm.Username)
                 .WithDescription(Description)
                 .WithFooter(GetTags())
-                .AddField("Threat", ((Threats)Threat).ToString(), true)
+                .AddField("Threat", Threat.ToString(), true)
                 .AddField("Player Count", MinPlayers + " to " + MaxPlayers, true);
 
             return embed;
