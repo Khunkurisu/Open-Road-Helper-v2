@@ -349,6 +349,23 @@ namespace Bot.Characters
             };
         }
 
+        public void AddValue(string key, dynamic value)
+        {
+            switch (key)
+            {
+                case "height":
+                {
+                    _height = value;
+                    break;
+                }
+                case "weight":
+                {
+                    _weight = value;
+                    break;
+                }
+            }
+        }
+
         public ImportType ImportType { get; } = ImportType.Foundry;
     }
 }

@@ -190,6 +190,8 @@ namespace Bot.Characters
         private string _class = "";
         private string _ancestry = "";
         private string _heritage = "";
+        private float _height = 0;
+        private float _weight = 0;
         private string _background = "";
         private double _coin = 0;
         private int _perception = 0;
@@ -246,6 +248,8 @@ namespace Bot.Characters
                 { "class", _class },
                 { "ancestry", _ancestry },
                 { "heritage", _heritage },
+                { "height", _height },
+                { "weight", _weight },
                 { "background", _background },
                 { "coin", _coin },
                 { "perception", _perception },
@@ -257,6 +261,23 @@ namespace Bot.Characters
                 { "spells", _spells },
                 { "attributes", _attributes }
             };
+        }
+
+        public void AddValue(string key, dynamic value)
+        {
+            switch (key)
+            {
+                case "height":
+                {
+                    _height = value;
+                    break;
+                }
+                case "weight":
+                {
+                    _weight = value;
+                    break;
+                }
+            }
         }
 
         public ImportType ImportType { get; } = ImportType.Pathbuilder;

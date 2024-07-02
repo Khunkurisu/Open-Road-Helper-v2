@@ -4,6 +4,8 @@ namespace Bot.Characters
     {
         public Dictionary<string, dynamic>? GetCharacterData();
 
+        public void AddValue(string key, dynamic value);
+
         public ImportType ImportType { get; }
     }
 
