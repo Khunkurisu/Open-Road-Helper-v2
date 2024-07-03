@@ -234,56 +234,62 @@ namespace Bot
         {
             IUser user = button.User;
             string player = button.Data.CustomId.Split("+")[2];
-
             string guildId = button.Data.CustomId.Split("+")[1];
             Guild guild = GetGuild(ulong.Parse(guildId));
-
-            IThreadChannel charThread = (IThreadChannel)button.Channel;
-            if (user.Id.ToString() == player || guild.IsGamemaster(user))
-            {
-                string charName = button.Data.CustomId.Split("+")[3];
-                Character? character = guild.GetCharacter(user.Id, charName);
-                if (character != null && character.Status == Status.Pending)
-                {
-                    IThreadChannel? transactionChannel = (IThreadChannel?)GetTextChannel(
-                        guild.Id,
-                        character.TransactionThread
-                    );
-
-                    if (transactionChannel != null && charThread != null)
-                    {
-                        guild.RemoveCharacter(character);
-                        uint refundAmount = (uint)guild.GetNewCharacterCost(user.Id);
-                        guild.IncreasePlayerTokenCount(user.Id, refundAmount);
-                        await charThread.DeleteAsync();
-
-                        await transactionChannel.SendMessageAsync(
-                            $"Pending character refunded and deleted. ({refundAmount} PT gained | {guild.GetPlayerTokenCount(user.Id)} PT remaining)"
-                        );
-                    }
-                    else
-                    {
-                        await button.RespondAsync(
-                            $"{charName} forum threads could not be found.",
-                            ephemeral: true
-                        );
-                    }
-                }
-                else
-                {
-                    await button.RespondAsync(
-                        $"{charName} is not a valid character of {user.Username}.",
-                        ephemeral: true
-                    );
-                }
-            }
-            else
+            if (user.Id.ToString() != player && !guild.IsGamemaster(user))
             {
                 await button.RespondAsync(
                     $"You ({user.Username}) lack permission to do this.",
                     ephemeral: true
                 );
+                return;
             }
+
+            string charName = button.Data.CustomId.Split("+")[3];
+            Character? character = guild.GetCharacter(user.Id, charName);
+            if (character == null)
+            {
+                await button.RespondAsync(
+                    $"{charName} could not be found in database for {user.Username}.",
+                    ephemeral: true
+                );
+                return;
+            }
+            if (character.Status != Status.Pending || character.Status != Status.Rejected)
+            {
+                await button.RespondAsync(
+                    $"{charName} could not be refunded due to incorrect status.",
+                    ephemeral: true
+                );
+                return;
+            }
+
+            IThreadChannel charThread = (IThreadChannel)button.Channel;
+            IThreadChannel? transactionChannel = (IThreadChannel?)GetTextChannel(
+                guild.Id,
+                character.TransactionThread
+            );
+            if (transactionChannel == null || charThread == null)
+            {
+                await button.RespondAsync(
+                    $"{charName} forum threads could not be found.",
+                    ephemeral: true
+                );
+                return;
+            }
+
+            Console.WriteLine(
+                $"refund amount before remove: {guild.GetNewCharacterCost(user.Id)} PT"
+            );
+            guild.RemoveCharacter(character);
+            uint refundAmount = (uint)guild.GetNewCharacterCost(user.Id);
+            Console.WriteLine($"refund amount after remove: {refundAmount} PT");
+            guild.IncreasePlayerTokenCount(user.Id, refundAmount);
+            await charThread.DeleteAsync();
+
+            await transactionChannel.SendMessageAsync(
+                $"Pending character refunded and deleted. ({refundAmount} PT gained | {guild.GetPlayerTokenCount(user.Id)} PT remaining)"
+            );
         }
     }
 }
