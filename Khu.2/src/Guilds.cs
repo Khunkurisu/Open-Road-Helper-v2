@@ -21,8 +21,7 @@ namespace Bot.Guilds
 
         private const uint _initialTokens = 1;
 
-        private readonly List<string> _gmRoles =
-            new() { "Game Master", "GM", "Dungeon Master", "DM" };
+        private readonly List<string> _gmRoles = new();
 
         private readonly List<Quest> _quests = new();
         private readonly Dictionary<ulong, List<Character>> _characters = new();
