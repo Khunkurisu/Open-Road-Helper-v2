@@ -14,6 +14,7 @@ namespace Bot.Quests
         private Guid? _selectedParty;
         private Status _status = 0;
         private ulong _thread;
+		private ulong _message;
         private readonly long _createdAt;
         private long _lastUpdated;
     }

@@ -16,6 +16,7 @@ namespace Bot.Quests
             _selectedParty = template._selectedParty;
             _status = template._status;
             _thread = template._thread;
+            _message = template._message;
             _createdAt = template._createdAt;
             _lastUpdated = template._lastUpdated;
         }

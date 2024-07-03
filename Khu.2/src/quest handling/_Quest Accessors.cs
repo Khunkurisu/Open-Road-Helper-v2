@@ -95,6 +95,15 @@ namespace Bot.Quests
                 _lastUpdated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
+        public ulong MessageId
+        {
+            get => _message;
+            set
+            {
+                _message = value;
+                _lastUpdated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
+        }
         public long CreatedAt
         {
             get => _createdAt;

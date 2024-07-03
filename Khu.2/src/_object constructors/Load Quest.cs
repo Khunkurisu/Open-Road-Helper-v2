@@ -18,6 +18,7 @@ namespace Bot.Quests
             Guid? selectedParty,
             Status status,
             ulong thread,
+            ulong message,
             long createdAt,
             long lastUpdated
         )
@@ -34,6 +35,7 @@ namespace Bot.Quests
             _selectedParty = selectedParty;
             _status = status;
             _thread = thread;
+            _message = message;
             _createdAt = createdAt;
             _lastUpdated = lastUpdated;
         }
