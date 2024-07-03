@@ -5,7 +5,7 @@ using Discord.WebSocket;
 
 namespace Bot
 {
-    public partial class BotManager
+    public partial class Manager
     {
         private static async Task QuestCreateConfirm(SocketMessageComponent button)
         {

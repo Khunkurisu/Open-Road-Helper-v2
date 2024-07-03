@@ -29,8 +29,8 @@ namespace Bot.Characters
 
         public ComponentBuilder? GenerateButtons()
         {
-            Guild guild = BotManager.GetGuild(_guild);
-            IUser? player = BotManager.GetGuildUser(_guild, _user);
+            Guild guild = Manager.GetGuild(_guild);
+            IUser? player = Manager.GetGuildUser(_guild, _user);
             if (player == null)
             {
                 return null;

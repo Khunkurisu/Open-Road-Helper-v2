@@ -161,7 +161,7 @@ namespace Bot.Characters
             set
             {
                 _generation = value;
-                Guild guild = BotManager.GetGuild(_guild);
+                Guild guild = Manager.GetGuild(_guild);
                 _level = guild.Generations[_generation];
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }

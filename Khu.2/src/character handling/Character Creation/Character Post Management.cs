@@ -6,7 +6,7 @@ using Discord.WebSocket;
 
 namespace Bot
 {
-    public partial class BotManager
+    public partial class Manager
     {
         public static async Task DrawCharacterPost(SocketMessageComponent messageComponent)
         {

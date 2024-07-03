@@ -18,13 +18,13 @@ namespace Bot.GameMaster
             [SlashCommand("characters", "Refresh all character posts with database values.")]
             public async Task RefreshCharacterPosts()
             {
-                Guild guild = BotManager.GetGuild(Context.Guild.Id);
+                Guild guild = Manager.GetGuild(Context.Guild.Id);
                 await guild.RefreshCharacterPosts();
             }
             [SlashCommand("quests", "Refresh all character posts with database values.")]
             public async Task RefreshQuestPosts()
             {
-                Guild guild = BotManager.GetGuild(Context.Guild.Id);
+                Guild guild = Manager.GetGuild(Context.Guild.Id);
                 await guild.RefreshQuestPosts();
             }
         }
@@ -35,7 +35,7 @@ namespace Bot.GameMaster
             [SlashCommand("quest", "Assign the forum board for quest posts by the bot.")]
             public async Task AssignQuestBoard(IForumChannel forumChannel)
             {
-                Guild guild = BotManager.GetGuild(Context.Guild.Id);
+                Guild guild = Manager.GetGuild(Context.Guild.Id);
                 guild.QuestBoard = forumChannel;
                 guild.SaveAll();
 
@@ -47,7 +47,7 @@ namespace Bot.GameMaster
             [SlashCommand("character", "Assign the forum board for character posts by the bot.")]
             public async Task AssignCharacterBoard(IForumChannel forumChannel)
             {
-                Guild guild = BotManager.GetGuild(Context.Guild.Id);
+                Guild guild = Manager.GetGuild(Context.Guild.Id);
                 guild.CharacterBoard = forumChannel;
                 guild.SaveAll();
 
@@ -62,7 +62,7 @@ namespace Bot.GameMaster
             )]
             public async Task AssignTransactionBoard(IForumChannel forumChannel)
             {
-                Guild guild = BotManager.GetGuild(Context.Guild.Id);
+                Guild guild = Manager.GetGuild(Context.Guild.Id);
                 guild.TransactionBoard = forumChannel;
                 guild.SaveAll();
 

@@ -5,7 +5,7 @@ using Discord.WebSocket;
 
 namespace Bot
 {
-    public partial class BotManager
+    public partial class Manager
     {
         private static async Task QuestCreate(SocketMessageComponent selectMenu)
         {
@@ -128,7 +128,7 @@ namespace Bot
                 ForumTag[] tags = { guild.QuestBoard.Tags.First(x => x.Name == "Pending") };
                 ComponentBuilder components = new ComponentBuilder().WithButton(
                     "Edit",
-                    "editQuest+" + guild.Id + "+" + quest.Name + "+editStart",
+                    $"editQuest+{guild.Id}+{quest.Name}+editStart",
                     ButtonStyle.Secondary
                 );
                 IThreadChannel thread = await guild.QuestBoard.CreatePostAsync(
@@ -147,7 +147,5 @@ namespace Bot
                 });
             }
         }
-
-
     }
 }

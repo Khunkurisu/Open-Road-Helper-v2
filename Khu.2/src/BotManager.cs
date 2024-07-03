@@ -6,7 +6,7 @@ using Discord.WebSocket;
 
 namespace Bot
 {
-    public partial class BotManager
+    public partial class Manager
     {
         private static DiscordSocketClient? _client;
         public static readonly List<Guild> Guilds = new();
@@ -82,7 +82,7 @@ namespace Bot
             return GetGuild(guild).IsGamemaster(gm);
         }
 
-        public BotManager(DiscordSocketClient client)
+        public Manager(DiscordSocketClient client)
         {
             _client = client;
             _client.ModalSubmitted += OnModalSubmit;
@@ -157,7 +157,18 @@ namespace Bot
             }
             else if (customId.Contains("judgeCharacter"))
             {
-                await JudgeCharacter(button);
+                if (customId.Contains("approve"))
+                {
+                    await ApproveCharacter(button);
+                }
+                else if (customId.Contains("reject"))
+                {
+                    await RejectCharacter(button);
+                }
+                else
+                {
+                    await JudgeCharacter(button);
+                }
             }
             else if (customId.Contains("refundCharacter"))
             {

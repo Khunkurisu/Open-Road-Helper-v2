@@ -59,7 +59,7 @@ namespace Bot.Quests
                 .WithPlaceholder("Select Party")
                 .WithCustomId("editQuest+" + guildId + "+" + gm + "+" + name + "+questPartySelect")
                 .WithMinValues(1);
-            Guild guild = BotManager.GetGuild(ulong.Parse(guildId));
+            Guild guild = Manager.GetGuild(ulong.Parse(guildId));
             return partySelector;
         }
 

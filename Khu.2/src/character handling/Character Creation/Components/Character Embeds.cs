@@ -14,7 +14,7 @@ namespace Bot.Characters
 
         public EmbedBuilder GenerateDetailsEmbed(IUser player)
         {
-            Guild guild = BotManager.GetGuild(_guild);
+            Guild guild = Manager.GetGuild(_guild);
 
             var detailsEmbed = new EmbedBuilder()
                 .WithTitle($"{Heritage} {Ancestry} {Class} {Level}")

@@ -194,15 +194,15 @@ namespace Bot.Guilds
             {
                 if (boards.ContainsKey("Characters"))
                 {
-                    CharacterBoard = BotManager.GetForumChannel(Id, boards["Characters"]);
+                    CharacterBoard = Manager.GetForumChannel(Id, boards["Characters"]);
                 }
                 if (boards.ContainsKey("Quests"))
                 {
-                    QuestBoard = BotManager.GetForumChannel(Id, boards["Quests"]);
+                    QuestBoard = Manager.GetForumChannel(Id, boards["Quests"]);
                 }
                 if (boards.ContainsKey("Transactions"))
                 {
-                    TransactionBoard = BotManager.GetForumChannel(Id, boards["Transactions"]);
+                    TransactionBoard = Manager.GetForumChannel(Id, boards["Transactions"]);
                 }
             }
         }
@@ -286,7 +286,7 @@ namespace Bot.Guilds
             {
                 foreach (Character character in _characters[playerId])
                 {
-                    BotManager.DrawCharacterPost(character);
+                    Manager.DrawCharacterPost(character);
                     await Task.Yield();
                 }
             }

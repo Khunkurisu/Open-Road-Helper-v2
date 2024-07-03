@@ -11,7 +11,7 @@ namespace Bot
     {
         public static Task Main(string[] args) => new Program().MainAsync();
 
-        public BotManager? Bot;
+        public Manager? Bot;
 
         public Program()
         {

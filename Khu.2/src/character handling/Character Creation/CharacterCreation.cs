@@ -5,7 +5,7 @@ using Discord.WebSocket;
 
 namespace Bot
 {
-    public partial class BotManager
+    public partial class Manager
     {
         public static void StoreTempCharacter(
             IImportable characterImport,

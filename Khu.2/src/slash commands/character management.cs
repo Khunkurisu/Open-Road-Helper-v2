@@ -45,12 +45,12 @@ namespace Bot.Characters
                     if (sheetType == 1)
                     {
                         FoundryImport characterImport = new(importData);
-                        BotManager.StoreTempCharacter(characterImport, guildId, player);
+                        Manager.StoreTempCharacter(characterImport, guildId, player);
                     }
                     else if (sheetType == 2)
                     {
                         PathbuilderImport characterImport = new(importData);
-                        BotManager.StoreTempCharacter(
+                        Manager.StoreTempCharacter(
                             characterImport,
                             guildId,
                             player,

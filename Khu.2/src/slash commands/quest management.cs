@@ -18,7 +18,7 @@ namespace Bot.Quests
             ulong guildId = Context.Guild.Id;
             IUser gm = Context.User;
 
-            if (BotManager.IsGamemaster(gm, guildId))
+            if (Manager.IsGamemaster(gm, guildId))
             {
                 var textBox = new ModalBuilder()
                     .WithTitle("Create Quest")
@@ -49,9 +49,9 @@ namespace Bot.Quests
             ulong guildId = Context.Guild.Id;
             IUser gm = Context.User;
 
-            if (BotManager.IsGamemaster(gm, guildId))
+            if (Manager.IsGamemaster(gm, guildId))
             {
-                Guild guild = BotManager.GetGuild(guildId);
+                Guild guild = Manager.GetGuild(guildId);
 
                 List<Embed> questEmbeds = new();
                 int count = 0;
@@ -82,7 +82,7 @@ namespace Bot.Quests
             IUser gm = Context.User;
             ulong guildId = Context.Guild.Id;
 
-            if (BotManager.IsGamemaster(gm, guildId))
+            if (Manager.IsGamemaster(gm, guildId))
             {
                 await RespondAsync("<t:" + earlyStart + ":F>");
                 await RespondAsync("<t:" + latestStart + ":F>");
@@ -96,7 +96,7 @@ namespace Bot.Quests
                         Cutoff = GenericHelpers.DateTimeFromUnixSeconds(cutoff)
                     };
 
-                Guild guild = BotManager.GetGuild(Context.Guild.Id);
+                Guild guild = Manager.GetGuild(Context.Guild.Id);
                 guild.AddAvailability(gm, newTimeframe);
             }
             else
