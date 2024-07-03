@@ -11,6 +11,7 @@ namespace Bot.Characters
             ulong guild,
             ulong charThread,
             ulong transThread,
+			ulong embedMessageId,
             string? name,
             string? desc,
             string? rep,
@@ -55,6 +56,7 @@ namespace Bot.Characters
             _guild = guild;
             _characterThread = charThread;
             _transactionThread = transThread;
+            _embedMessageId = embedMessageId;
             _name = name;
             _desc = desc;
             _rep = rep;
