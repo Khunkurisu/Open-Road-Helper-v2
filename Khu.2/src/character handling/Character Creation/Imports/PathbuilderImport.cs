@@ -118,11 +118,11 @@ namespace Bot.Characters
             {
                 if (SaveKeys.Contains(p))
                 {
-                    _saves[p] = (uint)proficiencies[p];
+                    _saves[p] = proficiencies[p];
                 }
                 else
                 {
-                    _skills[p] = (uint)proficiencies[p];
+                    _skills[p] = proficiencies[p];
                 }
             }
 
@@ -132,7 +132,7 @@ namespace Bot.Characters
             {
                 string loreName = entry[0];
                 long loreValue = entry[1];
-                _lore[loreName] = (uint)loreValue;
+                _lore[loreName] = (int)loreValue;
             }
         }
 
@@ -196,9 +196,9 @@ namespace Bot.Characters
         private double _coin = 0;
         private int _perception = 0;
         private readonly List<string> _languages = new();
-        private readonly Dictionary<string, uint> _skills = new();
-        private readonly Dictionary<string, uint> _lore = new();
-        private readonly Dictionary<string, uint> _saves = new();
+        private readonly Dictionary<string, int> _skills = new();
+        private readonly Dictionary<string, int> _lore = new();
+        private readonly Dictionary<string, int> _saves = new();
         private readonly List<string> _feats = new();
         private readonly List<string> _spells = new();
         private readonly Dictionary<string, uint> _attributes =

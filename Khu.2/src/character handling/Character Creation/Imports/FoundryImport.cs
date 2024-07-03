@@ -1,4 +1,5 @@
 using Bot.Helpers;
+using Bot.PF2;
 
 namespace Bot.Characters
 {
@@ -27,13 +28,12 @@ namespace Bot.Characters
             systemData.Remove("abilities");
             systemData.Remove("pfs");
             systemData.Remove("exploration");
-            CollateSystemData(systemData);
 
-            List<Dictionary<string, dynamic>> itemData = jsonData["items"].ToObject<
-                List<Dictionary<string, dynamic>>
-            >();
+            _buildData = systemData["build"].ToObject<Dictionary<string, dynamic>>();
+            _itemData = jsonData["items"].ToObject<List<Dictionary<string, dynamic>>>();
+
             List<Dictionary<string, dynamic>> toRemove = new();
-            foreach (Dictionary<string, dynamic> dict in itemData)
+            foreach (Dictionary<string, dynamic> dict in _itemData)
             {
                 if (dict.ContainsKey("type"))
                 {
@@ -46,10 +46,20 @@ namespace Bot.Characters
             }
             foreach (Dictionary<string, dynamic> dict in toRemove)
             {
-                itemData.Remove(dict);
+                _itemData.Remove(dict);
             }
-            CollateItemData(itemData);
+
             CollateAttributeData();
+            CollateItemData(_itemData);
+            CollateSystemData(systemData);
+            foreach (string k in _skills.Keys)
+            {
+                _skills[k] = SkillBonus(k);
+            }
+            foreach (string k in _saves.Keys)
+            {
+                _saves[k] = SaveBonus(k);
+            }
         }
 
         private void CollateAttributeData()
@@ -61,9 +71,9 @@ namespace Bot.Characters
                 Dictionary<string, List<string>>
             >();
 
-            foreach (string l in boostData.Keys)
+            foreach (string level in boostData.Keys)
             {
-                foreach (string attribute in boostData[l])
+                foreach (string attribute in boostData[level])
                 {
                     uint mod = 2;
                     if (_attributes[attribute] >= 18)
@@ -74,15 +84,16 @@ namespace Bot.Characters
                 }
             }
 
+            _ancestryData = _itemData.First(x => x["type"] == "ancestry");
             Dictionary<string, dynamic> systemData = _ancestryData["system"].ToObject<
                 Dictionary<string, dynamic>
             >();
             Dictionary<string, dynamic> boostsData = systemData["boosts"].ToObject<
                 Dictionary<string, dynamic>
             >();
-            foreach (string l in boostsData.Keys)
+            foreach (string level in boostsData.Keys)
             {
-                Dictionary<string, dynamic> levelData = boostsData[l].ToObject<
+                Dictionary<string, dynamic> levelData = boostsData[level].ToObject<
                     Dictionary<string, dynamic>
                 >();
 
@@ -98,12 +109,12 @@ namespace Bot.Characters
                 }
             }
 
-            Dictionary<string, dynamic> flawsData = systemData["boosts"].ToObject<
+            Dictionary<string, dynamic> flawsData = systemData["flaws"].ToObject<
                 Dictionary<string, dynamic>
             >();
-            foreach (string l in flawsData.Keys)
+            foreach (string level in flawsData.Keys)
             {
-                Dictionary<string, dynamic> levelData = flawsData[l].ToObject<
+                Dictionary<string, dynamic> levelData = flawsData[level].ToObject<
                     Dictionary<string, dynamic>
                 >();
 
@@ -122,8 +133,6 @@ namespace Bot.Characters
 
         private void CollateSystemData(Dictionary<string, dynamic> systemData)
         {
-            _buildData = systemData["build"].ToObject<Dictionary<string, dynamic>>();
-
             Dictionary<string, dynamic> details = systemData["details"].ToObject<
                 Dictionary<string, dynamic>
             >();
@@ -169,17 +178,17 @@ namespace Bot.Characters
             >();
             foreach (string skill in skills.Keys)
             {
-                uint skillRank = skills[skill]["rank"];
                 string skillName = GenericHelpers.ExpandSkillAbbreviation(skill);
-                _skills.Add(skillName, skillRank);
+                uint skillRank = skills[skill]["rank"];
+                _skills.Add(skillName, (int)skillRank);
             }
 
-            Dictionary<string, Dictionary<string, uint>> saves = systemData["saves"].ToObject<
-                Dictionary<string, Dictionary<string, uint>>
+            Dictionary<string, Dictionary<string, int>> saves = systemData["saves"].ToObject<
+                Dictionary<string, Dictionary<string, int>>
             >();
             foreach (string save in saves.Keys)
             {
-                Dictionary<string, uint> saveHolder = saves[save];
+                Dictionary<string, int> saveHolder = saves[save];
                 string valueKey = "value";
                 if (!saveHolder.ContainsKey("value"))
                 {
@@ -192,7 +201,7 @@ namespace Bot.Characters
                         valueKey = "tank";
                     }
                 }
-                uint saveRank = saves[save][valueKey];
+                int saveRank = saves[save][valueKey];
                 _saves.Add(save, saveRank);
             }
         }
@@ -204,24 +213,93 @@ namespace Bot.Characters
             Dictionary<string, dynamic> classSystem = classData["system"].ToObject<
                 Dictionary<string, dynamic>
             >();
-            long perception = classSystem["perception"];
-            _perception = (int)perception;
+            int perceptionRank = (int)classSystem["perception"];
 
-            _ancestryData = itemData.First(x => x["type"] == "ancestry");
+            if (classSystem.ContainsKey("boosts"))
+            {
+                Dictionary<string, dynamic> boostsData = classSystem["keyability"].ToObject<
+                    Dictionary<string, dynamic>
+                >();
+
+                if (boostsData.ContainsKey("selected"))
+                {
+                    string attribute = boostsData["selected"];
+                    uint mod = 2;
+                    if (_attributes[attribute] >= 18)
+                    {
+                        mod = 1;
+                    }
+                    _attributes[attribute] += mod;
+                }
+                else if (boostsData.ContainsKey("value") && boostsData["value"].Any())
+                {
+                    string[] attributes = boostsData["value"];
+                    string attribute = attributes[0];
+                    uint mod = 2;
+                    if (_attributes[attribute] >= 18)
+                    {
+                        mod = 1;
+                    }
+                    _attributes[attribute] += mod;
+                }
+            }
+
             _ancestry = _ancestryData["name"];
             Dictionary<string, dynamic> heritageData = itemData.First(x => x["type"] == "heritage");
             _heritage = heritageData["name"];
             Dictionary<string, dynamic> backgroundData = itemData.First(
                 x => x["type"] == "background"
             );
+            Dictionary<string, dynamic> backgroundSystem = backgroundData["system"].ToObject<
+                Dictionary<string, dynamic>
+            >();
             _background = backgroundData["name"];
+
+            if (backgroundSystem.ContainsKey("boosts"))
+            {
+                Dictionary<string, dynamic> boostsData = backgroundSystem["boosts"].ToObject<
+                    Dictionary<string, dynamic>
+                >();
+                foreach (string level in boostsData.Keys)
+                {
+                    Dictionary<string, dynamic> levelData = boostsData[level].ToObject<
+                        Dictionary<string, dynamic>
+                    >();
+
+                    if (levelData.ContainsKey("selected"))
+                    {
+                        string attribute = levelData["selected"];
+                        uint mod = 2;
+                        if (_attributes[attribute] >= 18)
+                        {
+                            mod = 1;
+                        }
+                        _attributes[attribute] += mod;
+                    }
+                }
+            }
 
             foreach (var item in itemData)
             {
                 if (item["type"] == "lore")
                 {
-                    uint loreRank = item["system"]["proficient"]["value"];
-                    _lore.Add(item["name"], loreRank);
+                    int loreRank = item["system"]["proficient"]["value"];
+                    Console.WriteLine(
+                        $"{item["name"]} rank is {((Helper.Proficiency)loreRank).ToString()}"
+                    );
+                    int loreModifier = (int)
+                        Enum.Parse<Helper.ProficiencyBonus>(
+                            ((Helper.Proficiency)loreRank).ToString()
+                        );
+                    Console.WriteLine(
+                        $"{item["name"]} modifier is {Helper.ModifierToString(loreModifier)}"
+                    );
+                    int attributeBonus = Helper.AttributeToModifier(_attributes["int"]);
+                    Console.WriteLine($"{item["name"]} attribute bonus is {attributeBonus}");
+                    int loreValue =
+                        loreModifier + (loreModifier > 0 ? (int)_level : 0) + attributeBonus;
+                    Console.WriteLine($"{item["name"]} final value is {loreValue}");
+                    _lore.Add(item["name"], loreValue);
                 }
             }
 
@@ -259,12 +337,114 @@ namespace Bot.Characters
                 if (item["type"] == "feat")
                 {
                     _feats.Add(item["name"]);
+                    if (item["name"].Contains("Canny Acumen"))
+                    {
+                        if (item["name"].Contains("Perception") && perceptionRank < 2)
+                        {
+                            perceptionRank = 2;
+                        }
+                        else if (item["name"].Contains("will") && _saves["will"] < 2)
+                        {
+                            _saves["will"] = 2;
+                        }
+                        else if (item["name"].Contains("fortitude") && _saves["fortitude"] < 2)
+                        {
+                            _saves["fortitude"] = 2;
+                        }
+                        else if (item["name"].Contains("reflex") && _saves["reflex"] < 2)
+                        {
+                            _saves["reflex"] = 2;
+                        }
+                    }
                 }
             }
+
+            int perceptionModifier = (int)
+                Enum.Parse<Helper.ProficiencyBonus>(
+                    ((Helper.Proficiency)perceptionRank).ToString()
+                );
+            _perception = perceptionModifier + (int)_level + GetAttributeBonus("perception");
+        }
+
+        private int GetAttributeBonus(string skillName)
+        {
+            if (new List<string> { "athletics" }.Contains(skillName))
+            {
+                return Helper.AttributeToModifier(_attributes["str"]);
+            }
+            else if (new List<string> { "acrobatics", "stealth", "thievery" }.Contains(skillName))
+            {
+                return Helper.AttributeToModifier(_attributes["dex"]);
+            }
+            else if (
+                new List<string> { "arcana", "crafting", "occultism", "society" }.Contains(
+                    skillName
+                )
+            )
+            {
+                return Helper.AttributeToModifier(_attributes["int"]);
+            }
+            else if (
+                new List<string> { "medicine", "nature", "religion", "survival" }.Contains(
+                    skillName
+                )
+            )
+            {
+                return Helper.AttributeToModifier(_attributes["wis"]);
+            }
+            else if (
+                new List<string>
+                {
+                    "deception",
+                    "diplomacy",
+                    "intimidation",
+                    "performance"
+                }.Contains(skillName)
+            )
+            {
+                return Helper.AttributeToModifier(_attributes["cha"]);
+            }
+            else if (skillName == "fortitude")
+            {
+                return Helper.AttributeToModifier(_attributes["con"]);
+            }
+            else if (skillName == "will")
+            {
+                return Helper.AttributeToModifier(_attributes["wis"]);
+            }
+            else if (skillName == "reflex")
+            {
+                return Helper.AttributeToModifier(_attributes["dex"]);
+            }
+            else if (skillName == "perception")
+            {
+                return Helper.AttributeToModifier(_attributes["wis"]);
+            }
+
+            return 0;
+        }
+
+        private int SkillBonus(string skillName)
+        {
+            int skillRank = _skills[skillName];
+            int skillModifier = (int)
+                Enum.Parse<Helper.ProficiencyBonus>(((Helper.Proficiency)skillRank).ToString());
+            int attributeBonus = GetAttributeBonus(skillName);
+            return skillModifier + (skillRank > 0 ? (int)_level : 0) + attributeBonus;
+        }
+
+        private int SaveBonus(string saveName)
+        {
+            int saveRank = _saves[saveName];
+            int saveModifier = (int)
+                Enum.Parse<Helper.ProficiencyBonus>(((Helper.Proficiency)saveRank).ToString());
+            int attributeBonus = GetAttributeBonus(saveName);
+            return saveModifier + (int)_level + attributeBonus;
         }
 
         private Dictionary<string, dynamic> _buildData = new();
         private Dictionary<string, dynamic> _ancestryData = new();
+        private List<Dictionary<string, dynamic>> _itemData = new();
 
         private readonly string _name;
         private uint _level = 1;
@@ -287,9 +467,9 @@ namespace Bot.Characters
         private readonly List<string> _languages = new();
         private readonly List<string> _edicts = new();
         private readonly List<string> _anathema = new();
-        private readonly Dictionary<string, uint> _skills = new();
-        private readonly Dictionary<string, uint> _lore = new();
-        private readonly Dictionary<string, uint> _saves = new();
+        private readonly Dictionary<string, int> _skills = new();
+        private readonly Dictionary<string, int> _lore = new();
+        private readonly Dictionary<string, int> _saves = new();
         private readonly List<string> _feats = new();
         private readonly List<string> _spells = new();
         private readonly Dictionary<string, uint> _attributes =

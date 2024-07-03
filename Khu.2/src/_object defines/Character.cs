@@ -27,12 +27,12 @@ namespace Bot.Characters
         private uint _level = 0;
         private int _generation = 1;
         private double _currency = 0;
-        private int _downtime = 0;
+        private uint _downtime = 0;
 
         private List<string> _languages = new() { "" };
-        private Dictionary<string, uint> _skills = new() { };
-        private Dictionary<string, uint> _lore = new() { };
-        private Dictionary<string, uint> _saves = new() { };
+        private Dictionary<string, int> _skills = new() { };
+        private Dictionary<string, int> _lore = new() { };
+        private Dictionary<string, int> _saves = new() { };
         private uint _perception = 0;
         private List<string> _feats = new() { "" };
         private List<string> _spells = new() { "" };

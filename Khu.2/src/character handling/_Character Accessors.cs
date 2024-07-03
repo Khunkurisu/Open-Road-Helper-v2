@@ -208,7 +208,7 @@ namespace Bot.Characters
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
-        public int Downtime
+        public uint Downtime
         {
             get => _downtime;
             set
@@ -316,7 +316,7 @@ namespace Bot.Characters
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
-        public Dictionary<string, uint> Skills
+        public Dictionary<string, int> Skills
         {
             get => _skills;
             set
@@ -325,7 +325,7 @@ namespace Bot.Characters
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
-        public Dictionary<string, uint> Lore
+        public Dictionary<string, int> Lore
         {
             get => _lore;
             set
@@ -334,7 +334,7 @@ namespace Bot.Characters
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
-        public Dictionary<string, uint> Saves
+        public Dictionary<string, int> Saves
         {
             get => _saves;
             set
