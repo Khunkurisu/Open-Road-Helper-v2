@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using Bot.Characters;
 using Bot.Quests;
 using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 
@@ -318,14 +319,13 @@ namespace Bot.Guilds
             }
         }
 
-        public async Task RefreshCharacterPosts()
+        public async Task RefreshCharacterPosts(SocketInteractionContext context)
         {
             foreach (ulong playerId in _characters.Keys)
             {
                 foreach (Character character in _characters[playerId])
                 {
-                    Manager.DrawCharacterPost(character);
-                    await Task.Yield();
+                    await Manager.DrawCharacterPost(character, context.Interaction);
                 }
             }
         }

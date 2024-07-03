@@ -52,87 +52,82 @@ namespace Bot
         {
             string guildId = messageComponent.Data.CustomId.Split("+")[1];
             Guild guild = GetGuild(ulong.Parse(guildId));
-            if (guild.CharacterBoard != null && guild.TransactionBoard != null)
-            {
-                string userId = messageComponent.Data.CustomId.Split("+")[2];
-                IUser? user = GetGuildUser(guild.Id, ulong.Parse(userId));
-                if (user == null)
-                {
-                    await messageComponent.RespondAsync(
-                        $"<@{userId}> could not be found in database.",
-                        ephemeral: true
-                    );
-                    return;
-                }
-
-                if (!IsGamemaster(user, guild.Id))
-                {
-                    await messageComponent.RespondAsync(
-                        "Only Game Masters may access this feature.",
-                        ephemeral: true
-                    );
-                    return;
-                }
-
-                string charName = messageComponent.Data.CustomId.Split("+")[3];
-                Character? character = GetCharacter(guild.Id, user.Id, charName);
-                if (character == null)
-                {
-                    await messageComponent.RespondAsync(
-                        $"{charName} could not be found in database.",
-                        ephemeral: true
-                    );
-                    return;
-                }
-                IThreadChannel? threadChannel = GetThreadChannel(
-                    guild.Id,
-                    character.CharacterThread
-                );
-                if (threadChannel == null)
-                {
-                    await messageComponent.RespondAsync(
-                        $"Character thread for {charName} could not be found.",
-                        ephemeral: true
-                    );
-                    return;
-                }
-
-                IThreadChannel? transactions = GetThreadChannel(
-                    guild.Id,
-                    character.TransactionThread
-                );
-                if (transactions == null)
-                {
-                    await messageComponent.RespondAsync(
-                        $"Thread for transactions could not be found.",
-                        ephemeral: true
-                    );
-                    return;
-                }
-
-                character.Status = Status.Approved;
-
-                var msg = await transactions.SendMessageAsync($"{charName} has been approved.");
-                string msgLink =
-                    $"https://discord.com/channels/{guildId}/{msg.Channel.Id}/{msg.Id}";
-                await messageComponent.RespondAsync(
-                    $"{charName} has been approved. ({msgLink})",
-                    ephemeral: true
-                );
-
-                ulong[] tags = { guild.CharacterBoard.Tags.First(x => x.Name == "Approved").Id };
-                await threadChannel.ModifyAsync(x =>
-                {
-                    x.AppliedTags = tags;
-                });
-            }
-            else
+            if (guild.CharacterBoard == null || guild.TransactionBoard == null)
             {
                 await messageComponent.RespondAsync(
                     "Server forum boards have not been assigned.",
                     ephemeral: true
                 );
+                return;
             }
+
+            string userId = messageComponent.Data.CustomId.Split("+")[2];
+            IUser? user = GetGuildUser(guild.Id, ulong.Parse(userId));
+            if (user == null)
+            {
+                await messageComponent.RespondAsync(
+                    $"<@{userId}> could not be found in database.",
+                    ephemeral: true
+                );
+                return;
+            }
+
+            if (!IsGamemaster(user, guild.Id))
+            {
+                await messageComponent.RespondAsync(
+                    "Only Game Masters may access this feature.",
+                    ephemeral: true
+                );
+                return;
+            }
+
+            string charName = messageComponent.Data.CustomId.Split("+")[3];
+            Character? character = GetCharacter(guild.Id, user.Id, charName);
+            if (character == null)
+            {
+                await messageComponent.RespondAsync(
+                    $"{charName} could not be found in database.",
+                    ephemeral: true
+                );
+                return;
+            }
+
+            IThreadChannel? threadChannel = GetThreadChannel(guild.Id, character.CharacterThread);
+            if (threadChannel == null)
+            {
+                await messageComponent.RespondAsync(
+                    $"Character thread for {charName} could not be found.",
+                    ephemeral: true
+                );
+                return;
+            }
+
+            IThreadChannel? transactions = GetThreadChannel(guild.Id, character.TransactionThread);
+            if (transactions == null)
+            {
+                await messageComponent.RespondAsync(
+                    $"Thread for transactions could not be found.",
+                    ephemeral: true
+                );
+                return;
+            }
+
+            character.Status = Status.Approved;
+
+            var msg = await transactions.SendMessageAsync($"{charName} has been approved.");
+            string msgLink = $"https://discord.com/channels/{guildId}/{msg.Channel.Id}/{msg.Id}";
+            await messageComponent.RespondAsync(
+                $"{charName} has been approved. ({msgLink})",
+                ephemeral: true
+            );
+
+            ulong[] tags = { guild.CharacterBoard.Tags.First(x => x.Name == "Approved").Id };
+            await threadChannel.ModifyAsync(x =>
+            {
+                x.AppliedTags = tags;
+            });
+            await messageComponent.DeleteOriginalResponseAsync();
+            await DrawCharacterPost(character, messageComponent);
         }
 
         private static async Task RejectCharacter(SocketMessageComponent messageComponent)
@@ -181,6 +176,7 @@ namespace Bot
                 );
 
             await messageComponent.RespondWithModalAsync(modal.Build());
+            await messageComponent.DeleteOriginalResponseAsync();
         }
 
         private static async Task RejectCharacter(
@@ -274,6 +270,7 @@ namespace Bot
                     $"{charName} has been rejected. ({msgLink})",
                     ephemeral: true
                 );
+                await DrawCharacterPost(character, modal);
             }
         }
 

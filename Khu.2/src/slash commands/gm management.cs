@@ -19,7 +19,7 @@ namespace Bot.GameMaster
             public async Task RefreshCharacterPosts()
             {
                 Guild guild = Manager.GetGuild(Context.Guild.Id);
-                await guild.RefreshCharacterPosts();
+                await guild.RefreshCharacterPosts(Context);
                 await Context.Interaction.RespondAsync("Character posts refreshed!");
             }
 

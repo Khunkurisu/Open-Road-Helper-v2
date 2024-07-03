@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Bot.Characters;
 using Bot.Guilds;
 using Discord;
@@ -38,20 +37,38 @@ namespace Bot
             }
         }
 
-        public static void DrawCharacterPost(Character character)
+        public static async Task DrawCharacterPost(
+            Character character,
+            SocketInteraction context
+        )
         {
             IThreadChannel? threadChannel = GetThreadChannel(
                 character.Guild,
                 character.CharacterThread
             );
-            IUser? user = GetGuildUser(character.Guild, character.User);
-            if (user != null)
+            if (threadChannel == null)
             {
-                threadChannel?.SendMessageAsync(
-                    embed: character.GenerateEmbed(user).Build(),
-                    components: character.GenerateComponents().Build()
+                await context.RespondAsync(
+                    $"Character thread for {character.Name} could not be located."
                 );
+                return;
             }
+            IUser? user = GetGuildUser(character.Guild, character.User);
+            if (user == null)
+            {
+                await context.RespondAsync(
+                    $"User <@{character.User}> could not be found in database."
+                );
+                return;
+            }
+            await threadChannel.ModifyMessageAsync(
+                character.EmbedMessageId,
+                msg =>
+                {
+                    msg.Embed = character.GenerateEmbed(user).Build();
+                    msg.Components = character.GenerateComponents().Build();
+                }
+            );
         }
 
         private static async Task CharacterEditStart(SocketMessageComponent button)
