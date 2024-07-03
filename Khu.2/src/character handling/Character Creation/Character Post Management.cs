@@ -40,14 +40,14 @@ namespace Bot
 
         public static void DrawCharacterPost(Character character)
         {
-            IThreadChannel? forumChannel = GetThreadChannel(
+            IThreadChannel? threadChannel = GetThreadChannel(
                 character.Guild,
                 character.CharacterThread
             );
             IUser? user = GetGuildUser(character.Guild, character.User);
             if (user != null)
             {
-                forumChannel?.SendMessageAsync(
+                threadChannel?.SendMessageAsync(
                     embed: character.GenerateEmbed(user).Build(),
                     components: character.GenerateComponents().Build()
                 );
