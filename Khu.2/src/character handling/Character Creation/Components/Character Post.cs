@@ -6,9 +6,9 @@ namespace Bot.Characters
 {
     public partial class Character
     {
-        public ComponentBuilder GenerateComponents()
+        public ComponentBuilder GenerateComponents(bool isForced = false)
         {
-            return GenerateButtons(_guild, _user)
+            return GenerateButtons(_guild, _user, isForced)
                 .WithSelectMenu(CharacterDisplaySelector(_guild, _user));
         }
 

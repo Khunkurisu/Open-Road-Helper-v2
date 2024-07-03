@@ -39,11 +39,19 @@ namespace Bot.Characters
             return GenerateButtons(guild.Id, player.Id);
         }
 
-        public ComponentBuilder GenerateButtons(ulong guildId, ulong playerId)
+        public ComponentBuilder GenerateButtons(
+            ulong guildId,
+            ulong playerId,
+            bool isForced = false
+        )
         {
-            if (Status == Status.Temp)
+            if (!isForced && Status == Status.Temp)
             {
                 return ConfirmationButtons("" + guildId, playerId, Name, "create");
+            }
+            if (isForced && Status == Status.Temp)
+            {
+                return ConfirmationButtons("" + guildId, playerId, Name, "forceCreate");
             }
 
             var buttons = new ComponentBuilder().WithButton(
@@ -52,35 +60,63 @@ namespace Bot.Characters
                 ButtonStyle.Primary
             );
 
-            if (Status == Status.Pending)
+            if (isForced)
             {
-                buttons
-                    .WithButton(
-                        "Judge",
-                        "judgeCharacter+" + guildId + "+" + playerId + "+" + Name,
-                        ButtonStyle.Primary
-                    )
-                    .WithButton(
+                if (Status == Status.Pending)
+                {
+                    buttons
+                        .WithButton(
+                            "Judge",
+                            "judgeCharacter+" + guildId + "+" + playerId + "+" + Name,
+                            ButtonStyle.Primary
+                        )
+                        .WithButton(
+                            "Refund",
+                            "refundCharacterFromForced+" + guildId + "+" + playerId + "+" + Name,
+                            ButtonStyle.Danger
+                        );
+                }
+                else if (Status == Status.Rejected)
+                {
+                    buttons.WithButton(
+                        "Refund",
+                        "refundCharacterFromForced+" + guildId + "+" + playerId + "+" + Name,
+                        ButtonStyle.Danger
+                    );
+                }
+            }
+            else
+            {
+                if (Status == Status.Pending)
+                {
+                    buttons
+                        .WithButton(
+                            "Judge",
+                            "judgeCharacter+" + guildId + "+" + playerId + "+" + Name,
+                            ButtonStyle.Primary
+                        )
+                        .WithButton(
+                            "Refund",
+                            "refundCharacter+" + guildId + "+" + playerId + "+" + Name,
+                            ButtonStyle.Danger
+                        );
+                }
+                else if (Status == Status.Rejected)
+                {
+                    buttons.WithButton(
                         "Refund",
                         "refundCharacter+" + guildId + "+" + playerId + "+" + Name,
                         ButtonStyle.Danger
                     );
-            }
-            else if (Status == Status.Rejected)
-            {
-                buttons.WithButton(
-                    "Refund",
-                    "refundCharacter+" + guildId + "+" + playerId + "+" + Name,
-                    ButtonStyle.Danger
-                );
-            }
-            else if (Status == Status.Approved)
-            {
-                buttons.WithButton(
-                    "Retire",
-                    "retireCharacter+" + guildId + "+" + playerId + "+" + Name,
-                    ButtonStyle.Danger
-                );
+                }
+                else if (Status == Status.Approved)
+                {
+                    buttons.WithButton(
+                        "Retire",
+                        "retireCharacter+" + guildId + "+" + playerId + "+" + Name,
+                        ButtonStyle.Danger
+                    );
+                }
             }
 
             return buttons;

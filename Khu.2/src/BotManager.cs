@@ -157,6 +157,17 @@ namespace Bot
                     await CharacterCreateConfirm(button);
                 }
             }
+            else if (customId.Contains("forceCreateCharacter"))
+            {
+                if (customId.Contains("cancel"))
+                {
+                    await CharacterCreateCancel(button, true);
+                }
+                else if (customId.Contains("confirm"))
+                {
+                    await CharacterCreateConfirm(button, true);
+                }
+            }
             else if (customId.Contains("editCharacter"))
             {
                 if (customId.Contains("cancel"))
@@ -190,6 +201,10 @@ namespace Bot
             else if (customId.Contains("refundCharacter"))
             {
                 await PendingCharacterRefund(button);
+            }
+            else if (customId.Contains("refundCharacterFromForced"))
+            {
+                await PendingCharacterRefund(button, true);
             }
         }
 
@@ -248,6 +263,10 @@ namespace Bot
             else if (modal.Data.CustomId.Contains("createCharacter"))
             {
                 await CharacterCreate(modal, components);
+            }
+            else if (modal.Data.CustomId.Contains("forceCreateCharacter"))
+            {
+                await CharacterCreate(modal, components, true);
             }
             else if (modal.Data.CustomId.Contains("rejectCharacter"))
             {

@@ -39,7 +39,8 @@ namespace Bot
 
         private static async Task CharacterCreate(
             SocketModal modal,
-            List<SocketMessageComponentData> components
+            List<SocketMessageComponentData> components,
+            bool isForced = false
         )
         {
             string guildId = modal.Data.CustomId.Split("+")[1];
@@ -67,27 +68,26 @@ namespace Bot
                     {
                         int tokenCost = guild.GetNewCharacterCost(playerId);
                         uint tokenCount = guild.GetPlayerTokenCount(playerId);
-                        if (tokenCount < tokenCost)
+                        if (!isForced && tokenCount < tokenCost)
                         {
                             await modal.RespondAsync(
                                 "You lack sufficient tokens to create a new character. "
                                     + $"({tokenCost} PT required - {tokenCount} PT remaining.)"
                             );
+                            return;
                         }
-                        else
-                        {
-                            charData["name"] = charName;
-                            charData["description"] = charDescription;
-                            charData["reputation"] = charReputation;
-                            Character character = new(player, guild, charData);
-                            guild.AddCharacter(user.Id, character);
+                        charData["name"] = charName;
+                        charData["description"] = charDescription;
+                        charData["reputation"] = charReputation;
+                        Character character = new(player, guild, charData);
+                        guild.AddCharacter(user.Id, character);
 
-                            await modal.RespondAsync(
-                                "Ensure everything looks correct before continuing!",
-                                embed: character.GenerateEmbed(user).Build(),
-                                components: character.GenerateComponents().Build()
-                            );
-                        }
+                        await modal.RespondAsync(
+                            "Ensure everything looks correct before continuing!",
+                            embed: character.GenerateEmbed(user).Build(),
+                            components: character.GenerateComponents().Build(),
+                            ephemeral: true
+                        );
                     }
                     else
                     {
@@ -109,15 +109,17 @@ namespace Bot
             }
         }
 
-        private static async Task CharacterCreateConfirm(SocketMessageComponent button)
+        private static async Task CharacterCreateConfirm(
+            SocketMessageComponent button,
+            bool isForced = false
+        )
         {
+            string guildId = button.Data.CustomId.Split("+")[1];
+            Guild guild = GetGuild(ulong.Parse(guildId));
             IUser user = button.User;
             string player = button.Data.CustomId.Split("+")[2];
-            if (user.Id.ToString() == player)
+            if (user.Id.ToString() == player || guild.IsGamemaster(user))
             {
-                string guildId = button.Data.CustomId.Split("+")[1];
-                Guild guild = GetGuild(ulong.Parse(guildId));
-
                 string charName = button.Data.CustomId.Split("+")[3];
                 uint tokenCost = (uint)guild.GetNewCharacterCost(user.Id);
                 uint tokenCount = guild.GetPlayerTokenCount(user.Id);
@@ -125,7 +127,10 @@ namespace Bot
                 Character? character = guild.GetCharacter(user.Id, charName);
                 if (character != null && character.Status == Status.Temp)
                 {
-                    guild.DecreasePlayerTokenCount(user.Id, tokenCost);
+                    if (!isForced)
+                    {
+                        guild.DecreasePlayerTokenCount(user.Id, tokenCost);
+                    }
                     await PostCharacter(button, guild, character, user);
                 }
                 else
@@ -142,16 +147,17 @@ namespace Bot
             }
         }
 
-        private static async Task CharacterCreateCancel(SocketMessageComponent button)
+        private static async Task CharacterCreateCancel(
+            SocketMessageComponent button,
+            bool isForced = false
+        )
         {
+            string guildId = button.Data.CustomId.Split("+")[1];
+            Guild guild = GetGuild(ulong.Parse(guildId));
             IUser user = button.User;
             string player = button.Data.CustomId.Split("+")[2];
-            if (user.Id.ToString() == player)
+            if (user.Id.ToString() == player || guild.IsGamemaster(user))
             {
-                string guildId = button.Data.CustomId.Split("+")[1];
-
-                Guild guild = GetGuild(ulong.Parse(guildId));
-
                 guild.ClearTempCharacter(user.Id);
                 string charName = button.Data.CustomId.Split("+")[3];
                 Character? character = guild.GetCharacter(user.Id, charName);
@@ -230,7 +236,10 @@ namespace Bot
             }
         }
 
-        public static async Task PendingCharacterRefund(SocketMessageComponent button)
+        public static async Task PendingCharacterRefund(
+            SocketMessageComponent button,
+            bool isForced = false
+        )
         {
             IUser user = button.User;
             string player = button.Data.CustomId.Split("+")[2];
@@ -255,7 +264,7 @@ namespace Bot
                 );
                 return;
             }
-            if (character.Status != Status.Pending || character.Status != Status.Rejected)
+            if (character.Status != Status.Pending && character.Status != Status.Rejected)
             {
                 await button.RespondAsync(
                     $"{charName} could not be refunded due to incorrect status.",
@@ -278,18 +287,18 @@ namespace Bot
                 return;
             }
 
-            Console.WriteLine(
-                $"refund amount before remove: {guild.GetNewCharacterCost(user.Id)} PT"
-            );
             guild.RemoveCharacter(character);
-            uint refundAmount = (uint)guild.GetNewCharacterCost(user.Id);
-            Console.WriteLine($"refund amount after remove: {refundAmount} PT");
-            guild.IncreasePlayerTokenCount(user.Id, refundAmount);
+            string transactionMessage = "Forced character creation canceled.";
+            if (!isForced)
+            {
+                uint refundAmount = (uint)guild.GetNewCharacterCost(user.Id);
+                guild.IncreasePlayerTokenCount(user.Id, refundAmount);
+                transactionMessage =
+                    $"Pending character refunded and deleted. ({refundAmount} PT gained | {guild.GetPlayerTokenCount(user.Id)} PT remaining)";
+            }
             await charThread.DeleteAsync();
 
-            await transactionChannel.SendMessageAsync(
-                $"Pending character refunded and deleted. ({refundAmount} PT gained | {guild.GetPlayerTokenCount(user.Id)} PT remaining)"
-            );
+            await transactionChannel.SendMessageAsync(transactionMessage);
         }
     }
 }

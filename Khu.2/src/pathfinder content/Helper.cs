@@ -73,6 +73,11 @@ namespace Bot.PF2
             CritSuccess
         }
 
+        public static int RankToBonus(int rank)
+        {
+            return (int)Enum.Parse<ProficiencyBonus>(((Proficiency)rank).ToString());
+        }
+
         public enum Proficiency
         {
             Untrained,
