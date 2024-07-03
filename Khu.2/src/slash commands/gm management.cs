@@ -74,6 +74,10 @@ namespace Bot.GameMaster
             {
                 Guild guild = Manager.GetGuild(Context.Guild.Id);
                 string roles = string.Join("\n", guild.GMRoles);
+                if (roles == null || roles == string.Empty)
+                {
+                    roles = "_n/a_";
+                }
                 await Context.Interaction.RespondAsync(
                     embed: new EmbedBuilder().WithDescription(roles).WithTitle("GM Roles").Build()
                 );
