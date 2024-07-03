@@ -3,6 +3,7 @@ using Bot.Characters;
 using Bot.Helpers;
 using Bot.Quests;
 using Discord;
+using Discord.WebSocket;
 using Newtonsoft.Json;
 
 namespace Bot.Guilds
@@ -17,8 +18,12 @@ namespace Bot.Guilds
         private const string _partiesPath = @"\parties.json";
         private const string _boardsPath = @"\boards.json";
         private const string _tokensPath = @"\tokens.json";
+        private const string _rolesPath = @"\roles.json";
 
         private const uint _initialTokens = 1;
+
+        private readonly List<string> _gmRoles =
+            new() { "Game Master", "GM", "Dungeon Master", "DM" };
 
         private readonly List<Quest> _quests = new();
         private readonly Dictionary<ulong, List<Character>> _characters = new();
@@ -104,9 +109,17 @@ namespace Bot.Guilds
             _id = id;
         }
 
-        public bool IsGamemaster(IUser gm)
+        public bool IsGamemaster(IUser potentialGM)
         {
-            return false;
+            if (potentialGM is not SocketGuildUser user)
+            {
+                return false;
+            }
+
+            var gmRole = (user as IGuildUser).Guild.Roles.FirstOrDefault(
+                x => _gmRoles.Contains(x.Name)
+            );
+            return user.Roles.Contains(gmRole);
         }
 
         public void LoadAll()
@@ -121,6 +134,24 @@ namespace Bot.Guilds
             LoadParties();
             LoadBoards();
             LoadTokens();
+            LoadRoles();
+        }
+
+        private void LoadRoles()
+        {
+            if (!File.Exists(_guildDataPath + _id + _rolesPath))
+            {
+                return;
+            }
+            string jsonString = File.ReadAllText(_guildDataPath + _id + _rolesPath);
+            List<string>? gmRoles = JsonConvert.DeserializeObject<List<string>>(jsonString);
+            if (gmRoles != null)
+            {
+                foreach (string roleName in gmRoles)
+                {
+                    _gmRoles.Add(roleName);
+                }
+            }
         }
 
         private void LoadTokens()
@@ -314,6 +345,16 @@ namespace Bot.Guilds
             SaveParties();
             SaveBoards();
             SaveTokens();
+            SaveRoles();
+        }
+
+        private void SaveRoles()
+        {
+            if (_gmRoles.Count > 0)
+            {
+                string json = JsonConvert.SerializeObject(_gmRoles);
+                File.WriteAllText(_guildDataPath + _id + _rolesPath, json);
+            }
         }
 
         private void SaveTokens()
