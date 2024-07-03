@@ -11,6 +11,8 @@ namespace Bot.Guilds
     public class Guild
     {
         private readonly ulong _id;
+        private long _lastSave;
+        private bool _saveQueued;
         private readonly Dictionary<string, bool> _shouldSave =
             new()
             {
@@ -65,7 +67,7 @@ namespace Bot.Guilds
 
         public int GetNewCharacterCost(ulong playerId)
         {
-            if (!_characters.ContainsKey(playerId))
+            if (!_characters.ContainsKey(playerId) || !_characters[playerId].Any())
             {
                 return 1;
             }
@@ -87,6 +89,7 @@ namespace Bot.Guilds
         public void SetPlayerTokenCount(ulong playerId, uint tokenCount)
         {
             _playerTokens[playerId] = tokenCount;
+            QueueSave("tokens");
         }
 
         public void IncreasePlayerTokenCount(ulong playerId, uint tokenCount)
@@ -117,6 +120,7 @@ namespace Bot.Guilds
         public Guild(ulong id)
         {
             _id = id;
+            _lastSave = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
         public bool IsGamemaster(IUser potentialGM)
@@ -217,6 +221,8 @@ namespace Bot.Guilds
                     _characters[playerId] = characters[playerId];
                 }
             }
+
+            Task.Run(() => RefreshCharacterPosts());
         }
 
         private void LoadBoards()
@@ -261,6 +267,8 @@ namespace Bot.Guilds
                     _quests.Add(quest);
                 }
             }
+
+            Task.Run(() => RefreshQuestPosts());
         }
 
         private void LoadParties()
@@ -330,6 +338,17 @@ namespace Bot.Guilds
             }
         }
 
+        public async Task RefreshCharacterPosts()
+        {
+            foreach (ulong playerId in _characters.Keys)
+            {
+                foreach (Character character in _characters[playerId])
+                {
+                    await Manager.DrawCharacterPost(character);
+                }
+            }
+        }
+
         public async Task RefreshQuestPosts()
         {
             await Task.CompletedTask;
@@ -353,6 +372,7 @@ namespace Bot.Guilds
             SaveBoards();
             SaveTokens();
             SaveRoles();
+            _lastSave = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
         private bool ShouldSave(string save)
@@ -368,12 +388,19 @@ namespace Bot.Guilds
             {
                 _shouldSave[save] = true;
             }
+            Task.Run(() => SaveWithDelay(DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _lastSave));
         }
 
-        public async Task SaveLoop()
+        private async Task SaveWithDelay(long delay)
         {
-            await Task.Delay(TimeSpan.FromSeconds(5));
+            if (_saveQueued)
+            {
+                return;
+            }
+            _saveQueued = true;
+            await Task.Delay(TimeSpan.FromSeconds(delay));
             SaveAll();
+            _saveQueued = false;
         }
 
         private void SaveRoles()
