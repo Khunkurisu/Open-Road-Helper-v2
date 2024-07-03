@@ -186,7 +186,6 @@ namespace Bot
                 {
                     guild.CharacterBoard.Tags.First(x => x.Name == "Pending Approval")
                 };
-                character.Status = Status.Pending;
 
                 IThreadChannel charThread = await guild.CharacterBoard.CreatePostAsync(
                     character.Name,
@@ -203,11 +202,12 @@ namespace Bot
                 );
 
                 await transThread.SendMessageAsync(
-                    $"{character.Name} has been created and is pending approval."
+                    $"{charThread.Mention} has been created and is pending approval."
                 );
 
                 character.CharacterThread = charThread.Id;
                 character.TransactionThread = transThread.Id;
+                character.Status = Status.Pending;
                 guild.QueueSave("characters");
 
                 await charThread.AddUserAsync((IGuildUser)user);
