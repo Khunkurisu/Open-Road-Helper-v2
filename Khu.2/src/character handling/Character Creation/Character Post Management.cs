@@ -71,6 +71,33 @@ namespace Bot
             );
         }
 
+        public static async Task DrawCharacterPost(
+            Character character
+        )
+        {
+            IThreadChannel? threadChannel = GetThreadChannel(
+                character.Guild,
+                character.CharacterThread
+            );
+            if (threadChannel == null)
+            {
+                return;
+            }
+            IUser? user = GetGuildUser(character.Guild, character.User);
+            if (user == null)
+            {
+                return;
+            }
+            await threadChannel.ModifyMessageAsync(
+                character.EmbedMessageId,
+                msg =>
+                {
+                    msg.Embed = character.GenerateEmbed(user).Build();
+                    msg.Components = character.GenerateComponents().Build();
+                }
+            );
+        }
+
         private static async Task CharacterEditStart(SocketMessageComponent button)
         {
             IUser user = button.User;
