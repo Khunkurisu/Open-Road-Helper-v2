@@ -135,6 +135,8 @@ namespace Bot.Characters
                 Dictionary<string, dynamic>
             >();
             _description = biography["appearance"];
+            _description = _description.Replace("<p>", "");
+            _description = _description.Replace("</p>", "\n");
             _birthplace = biography["birthPlace"];
             _backstory = biography["backstory"];
             foreach (string edict in biography["edicts"])
