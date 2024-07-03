@@ -108,7 +108,24 @@ namespace Bot
                 guild.LoadAll();
                 await Task.Yield();
             }
+            await Task.Run(RefreshLoop);
             await Task.CompletedTask;
+        }
+
+        private long _lastRefresh;
+
+        private async Task RefreshLoop()
+        {
+            if (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _lastRefresh >= 300)
+            {
+                _lastRefresh = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                foreach (Guild guild in Guilds)
+                {
+                    await guild.RefreshCharacterPosts();
+                    await guild.RefreshQuestPosts();
+                }
+            }
+            await Task.Delay(TimeSpan.FromSeconds(0.5));
         }
 
         private async Task OnButtonExecuted(SocketMessageComponent button)
@@ -208,7 +225,17 @@ namespace Bot
 
         public static async Task AwakenThread(Quest quest)
         {
-            await Task.CompletedTask;
+            IThreadChannel? threadChannel = GetThreadChannel(quest.GuildId, quest.ThreadId);
+            if (threadChannel == null)
+            {
+                return;
+            }
+            IUser? user = GetGuildUser(quest.GuildId, quest.GameMaster);
+            if (user == null)
+            {
+                return;
+            }
+            await threadChannel.ModifyAsync(x => x.Archived = false);
         }
 
         private async Task OnModalSubmit(SocketModal modal)

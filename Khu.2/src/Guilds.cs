@@ -345,12 +345,17 @@ namespace Bot.Guilds
                 foreach (Character character in _characters[playerId])
                 {
                     await Manager.DrawCharacterPost(character);
+                    await Manager.AwakenThread(character);
                 }
             }
         }
 
         public async Task RefreshQuestPosts()
         {
+            foreach (Quest quest in _quests)
+            {
+                await Manager.AwakenThread(quest);
+            }
             await Task.CompletedTask;
         }
 
