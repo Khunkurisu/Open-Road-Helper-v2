@@ -97,7 +97,7 @@ namespace Bot
             string[] guildIds = Directory.GetDirectories(guildData);
             while (_client == null)
             {
-                await Task.Yield();
+                await Task.Delay(TimeSpan.FromSeconds(0.5));
             }
             foreach (string guildId in guildIds)
             {
@@ -106,7 +106,6 @@ namespace Bot
                 SocketGuild socketGuild = _client.GetGuild(guild.Id);
                 await socketGuild.DownloadUsersAsync();
                 guild.LoadAll();
-                await guild.SaveLoop();
                 await Task.Yield();
             }
             await Task.CompletedTask;
