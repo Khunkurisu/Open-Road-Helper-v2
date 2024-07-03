@@ -10,6 +10,17 @@ namespace Bot.Guilds
     public class Guild
     {
         private readonly ulong _id;
+        private readonly Dictionary<string, bool> _shouldSave =
+            new()
+            {
+                { "characters", false },
+                { "quests", false },
+                { "parties", false },
+                { "availability", false },
+                { "boards", false },
+                { "tokens", false },
+                { "roles", false }
+            };
         private const string _guildDataPath = @".\data\guilds\";
         private const string _availabilityPath = @"\availability.json";
         private const string _charactersPath = @"\characters.json";
@@ -344,9 +355,30 @@ namespace Bot.Guilds
             SaveRoles();
         }
 
+        private bool ShouldSave(string save)
+        {
+            save = save.ToLower();
+            return _shouldSave.ContainsKey(save) && _shouldSave[save];
+        }
+
+        public void QueueSave(string save)
+        {
+            save = save.ToLower();
+            if (_shouldSave.ContainsKey(save) && !_shouldSave[save])
+            {
+                _shouldSave[save] = true;
+            }
+        }
+
+        public async Task SaveLoop()
+        {
+            await Task.Delay(TimeSpan.FromSeconds(5));
+            SaveAll();
+        }
+
         private void SaveRoles()
         {
-            if (_gmRoles.Count > 0)
+            if (_gmRoles.Count > 0 && ShouldSave("Roles"))
             {
                 string json = JsonConvert.SerializeObject(_gmRoles);
                 File.WriteAllText(_guildDataPath + _id + _rolesPath, json);
@@ -355,7 +387,7 @@ namespace Bot.Guilds
 
         private void SaveTokens()
         {
-            if (_playerTokens.Count > 0)
+            if (_playerTokens.Count > 0 && ShouldSave("tokens"))
             {
                 string json = JsonConvert.SerializeObject(_playerTokens);
                 File.WriteAllText(_guildDataPath + _id + _tokensPath, json);
@@ -377,7 +409,7 @@ namespace Bot.Guilds
             {
                 boards.Add("Transactions", TransactionBoard.Id);
             }
-            if (boards.Count > 0)
+            if (boards.Count > 0 && ShouldSave("boards"))
             {
                 string json = JsonConvert.SerializeObject(boards);
                 File.WriteAllText(_guildDataPath + _id + _boardsPath, json);
@@ -386,7 +418,7 @@ namespace Bot.Guilds
 
         private void SaveAvailability()
         {
-            if (_gmAvailabilities.Count > 0)
+            if (_gmAvailabilities.Count > 0 && ShouldSave("availability"))
             {
                 string json = JsonConvert.SerializeObject(_gmAvailabilities);
                 File.WriteAllText(_guildDataPath + _id + _availabilityPath, json);
@@ -395,7 +427,7 @@ namespace Bot.Guilds
 
         private void SaveCharacters()
         {
-            if (_characters.Count > 0)
+            if (_characters.Count > 0 && ShouldSave("characters"))
             {
                 string json = JsonConvert.SerializeObject(_characters);
                 File.WriteAllText(_guildDataPath + _id + _charactersPath, json);
@@ -404,7 +436,7 @@ namespace Bot.Guilds
 
         private void SaveQuests()
         {
-            if (_quests.Count > 0)
+            if (_quests.Count > 0 && ShouldSave("quests"))
             {
                 string json = JsonConvert.SerializeObject(_quests);
                 File.WriteAllText(_guildDataPath + _id + _questsPath, json);
@@ -413,7 +445,7 @@ namespace Bot.Guilds
 
         private void SaveParties()
         {
-            if (_parties.Count > 0)
+            if (_parties.Count > 0 && ShouldSave("parties"))
             {
                 string json = JsonConvert.SerializeObject(_parties);
                 File.WriteAllText(_guildDataPath + _id + _partiesPath, json);
@@ -427,13 +459,13 @@ namespace Bot.Guilds
                 _characters[playerId] = new();
             }
             _characters[playerId].Add(character);
-            SaveCharacters();
+            QueueSave("characters");
         }
 
         public void AddQuest(Quest quest)
         {
             _quests.Add(quest);
-            SaveQuests();
+            QueueSave("quests");
         }
 
         public bool FormParty(Guid creator)
@@ -443,7 +475,7 @@ namespace Bot.Guilds
             {
                 _parties.Add(new(partyCreator));
 
-                SaveParties();
+                QueueSave("parties");
                 return true;
             }
             return false;
@@ -453,7 +485,7 @@ namespace Bot.Guilds
         {
             _parties.Add(new(members));
 
-            SaveParties();
+            QueueSave("parties");
             return true;
         }
 
@@ -461,7 +493,7 @@ namespace Bot.Guilds
         {
             _parties.Add(new(creator));
 
-            SaveParties();
+            QueueSave("parties");
             return true;
         }
 
@@ -480,7 +512,7 @@ namespace Bot.Guilds
             {
                 _parties.Add(new(partyMembers));
 
-                SaveParties();
+                QueueSave("parties");
                 return true;
             }
             return false;
@@ -491,7 +523,7 @@ namespace Bot.Guilds
             if (_characters.ContainsKey(playerId))
             {
                 _characters[playerId].RemoveAt(index);
-                SaveCharacters();
+                QueueSave("characters");
             }
         }
 
@@ -522,20 +554,20 @@ namespace Bot.Guilds
             if (_characters.ContainsKey(playerId) && _characters[playerId].Contains(character))
             {
                 _characters[playerId].Remove(character);
-                SaveCharacters();
+                QueueSave("characters");
             }
         }
 
         public void RemoveQuest(int index)
         {
             _quests.RemoveAt(index);
-            SaveQuests();
+            QueueSave("quests");
         }
 
         public void RemoveQuest(Quest quest)
         {
             _quests.Remove(quest);
-            SaveQuests();
+            QueueSave("quests");
         }
 
         public Quest? GetQuest(string name, IUser gm)
@@ -584,7 +616,7 @@ namespace Bot.Guilds
                 _gmAvailabilities.Add(gm.Username, new(gm));
             }
 
-            SaveAvailability();
+            QueueSave("availability");
             return _gmAvailabilities[gm.Username];
         }
 
@@ -627,14 +659,14 @@ namespace Bot.Guilds
                 return false;
             }
             _gmRoles.Add(role.Name);
-            SaveRoles();
+            QueueSave("roles");
             return true;
         }
 
         public bool RemoveGMRole(IRole role)
         {
             bool success = _gmRoles.Remove(role.Name);
-            SaveRoles();
+            QueueSave("roles");
             return success;
         }
 

@@ -106,6 +106,7 @@ namespace Bot
                 SocketGuild socketGuild = _client.GetGuild(guild.Id);
                 await socketGuild.DownloadUsersAsync();
                 guild.LoadAll();
+                await guild.SaveLoop();
                 await Task.Yield();
             }
             await Task.CompletedTask;

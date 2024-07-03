@@ -92,7 +92,7 @@ namespace Bot.GameMaster
             {
                 Guild guild = Manager.GetGuild(Context.Guild.Id);
                 guild.QuestBoard = forumChannel;
-                guild.SaveAll();
+                guild.QueueSave("boards");
 
                 await Context.Interaction.RespondAsync(
                     "Quest board has been assigned to " + forumChannel.Mention
@@ -104,7 +104,7 @@ namespace Bot.GameMaster
             {
                 Guild guild = Manager.GetGuild(Context.Guild.Id);
                 guild.CharacterBoard = forumChannel;
-                guild.SaveAll();
+                guild.QueueSave("boards");
 
                 await Context.Interaction.RespondAsync(
                     "Character board has been assigned to " + forumChannel.Mention

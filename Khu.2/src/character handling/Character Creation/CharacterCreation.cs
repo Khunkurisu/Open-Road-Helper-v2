@@ -208,6 +208,7 @@ namespace Bot
 
                 character.CharacterThread = charThread.Id;
                 character.TransactionThread = transThread.Id;
+                guild.QueueSave("characters");
 
                 await charThread.AddUserAsync((IGuildUser)user);
                 await transThread.AddUserAsync((IGuildUser)user);
