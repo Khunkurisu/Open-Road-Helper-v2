@@ -1,3 +1,4 @@
+using Bot.Guilds;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -61,17 +62,38 @@ namespace Bot.Characters
                     else
                     {
                         await RespondAsync("Please upload a valid json file or import code.");
+                        return;
+                    }
+                    Guild guild = Manager.GetGuild(guildId);
+                    Dictionary<string, dynamic>? charData = guild
+                        .GetCharacterJson(player.Id)
+                        ?.GetCharacterData();
+                    string charName = string.Empty;
+                    if (charData != null && charData.ContainsKey("name"))
+                    {
+                        charName = charData["name"];
+                    }
+                    string charDesc = string.Empty;
+                    if (charData != null && charData.ContainsKey("description"))
+                    {
+                        charDesc = charData["description"];
                     }
 
                     var textBox = new ModalBuilder()
                         .WithTitle("Create Character")
                         .WithCustomId("createCharacter+" + guildId + "+" + player.Id)
-                        .AddTextInput("Name", "character_name", placeholder: "Character Name")
+                        .AddTextInput(
+                            "Name",
+                            "character_name",
+                            placeholder: "Character Name",
+                            value: charName == string.Empty ? null : charName
+                        )
                         .AddTextInput(
                             "Description",
                             "character_description",
                             TextInputStyle.Paragraph,
-                            "The character's outward appearance and general description."
+                            "The character's outward appearance and general description.",
+                            value: charDesc == string.Empty ? null : charDesc
                         )
                         .AddTextInput(
                             "Reputation",
