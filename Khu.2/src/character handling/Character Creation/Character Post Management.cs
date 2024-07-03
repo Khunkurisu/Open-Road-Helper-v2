@@ -62,7 +62,7 @@ namespace Bot
                 return;
             }
             await threadChannel.ModifyMessageAsync(
-                character.EmbedMessageId,
+                character.CharacterThread,
                 msg =>
                 {
                     msg.Embed = character.GenerateEmbed(user).Build();
@@ -89,7 +89,7 @@ namespace Bot
                 return;
             }
             await threadChannel.ModifyMessageAsync(
-                character.EmbedMessageId,
+                character.CharacterThread,
                 msg =>
                 {
                     msg.Embed = character.GenerateEmbed(user).Build();

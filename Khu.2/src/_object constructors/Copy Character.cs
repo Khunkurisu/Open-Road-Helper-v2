@@ -9,7 +9,6 @@ namespace Bot.Characters
             _guild = template._guild;
             _characterThread = template._characterThread;
             _transactionThread = template._transactionThread;
-            _embedMessageId = template._embedMessageId;
             _name = template._name;
             _desc = template._desc;
             _rep = template._rep;

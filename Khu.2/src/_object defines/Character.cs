@@ -7,7 +7,6 @@ namespace Bot.Characters
         private readonly ulong _guild;
         private ulong _characterThread;
         private ulong _transactionThread;
-        private ulong _embedMessageId;
 
         private string? _name;
         private string? _desc;

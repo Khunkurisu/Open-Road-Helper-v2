@@ -208,16 +208,6 @@ namespace Bot.Characters
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
-
-        public ulong EmbedMessageId
-        {
-            get => _embedMessageId;
-            set
-            {
-                _embedMessageId = value;
-                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            }
-        }
         public int Downtime
         {
             get => _downtime;
