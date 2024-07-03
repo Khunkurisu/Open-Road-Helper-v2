@@ -113,6 +113,7 @@ namespace Bot
             }
 
             character.Status = Status.Approved;
+            guild.QueueSave("characters");
 
             var msg = await transactions.SendMessageAsync($"{charName} has been approved.");
             string msgLink = $"https://discord.com/channels/{guildId}/{msg.Channel.Id}/{msg.Id}";
@@ -246,6 +247,7 @@ namespace Bot
                 }
 
                 character.Status = Status.Rejected;
+                guild.QueueSave("characters");
 
                 ulong[] tags = { guild.CharacterBoard.Tags.First(x => x.Name == "Rejected").Id };
 
