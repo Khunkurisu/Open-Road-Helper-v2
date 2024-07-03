@@ -623,6 +623,23 @@ namespace Bot.Guilds
             }
         }
 
+        public async Task AddGMRole(IRole role)
+        {
+            if (_gmRoles.Contains(role.Name))
+            {
+                await Task.CompletedTask;
+                return;
+            }
+            _gmRoles.Add(role.Name);
+            await Task.CompletedTask;
+        }
+
+        public async Task RemoveGMRole(IRole role)
+        {
+            _gmRoles.Remove(role.Name);
+            await Task.CompletedTask;
+        }
+
         public ulong Id
         {
             get { return _id; }
@@ -639,6 +656,11 @@ namespace Bot.Guilds
         public ReadOnlyCollection<Party> Parties
         {
             get => _parties.AsReadOnly();
+        }
+
+        public ReadOnlyCollection<string> GMRoles
+        {
+            get => _gmRoles.AsReadOnly();
         }
 
         public ReadOnlyDictionary<string, Availability> Availability
