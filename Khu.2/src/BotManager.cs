@@ -188,6 +188,29 @@ namespace Bot
             }
         }
 
+        public static async Task AwakenThread(Character character)
+        {
+            IThreadChannel? threadChannel = GetThreadChannel(
+                character.Guild,
+                character.CharacterThread
+            );
+            if (threadChannel == null)
+            {
+                return;
+            }
+            IUser? user = GetGuildUser(character.Guild, character.User);
+            if (user == null)
+            {
+                return;
+            }
+            await threadChannel.ModifyAsync(x => x.Archived = false);
+        }
+
+        public static async Task AwakenThread(Quest quest)
+        {
+            await Task.CompletedTask;
+        }
+
         private async Task OnModalSubmit(SocketModal modal)
         {
             List<SocketMessageComponentData> components = modal.Data.Components.ToList();
