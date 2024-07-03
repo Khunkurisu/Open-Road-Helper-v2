@@ -7,6 +7,12 @@ namespace Bot.Characters
     {
         public FoundryImport(Dictionary<string, dynamic> jsonData)
         {
+            _name = jsonData["name"];
+            Task.Run(() => CollateData(jsonData));
+        }
+
+        private async Task CollateData(Dictionary<string, dynamic> jsonData)
+        {
             jsonData.Remove("prototypeToken");
             jsonData.Remove("type");
             jsonData.Remove("effects");
@@ -14,8 +20,7 @@ namespace Bot.Characters
             jsonData.Remove("folder");
             jsonData.Remove("flags");
             jsonData.Remove("_stats");
-
-            _name = jsonData["name"];
+            await Task.Yield();
 
             Dictionary<string, dynamic> systemData = jsonData["system"].ToObject<
                 Dictionary<string, dynamic>
@@ -28,6 +33,7 @@ namespace Bot.Characters
             systemData.Remove("abilities");
             systemData.Remove("pfs");
             systemData.Remove("exploration");
+            await Task.Yield();
 
             _buildData = systemData["build"].ToObject<Dictionary<string, dynamic>>();
             _itemData = jsonData["items"].ToObject<List<Dictionary<string, dynamic>>>();
@@ -43,22 +49,34 @@ namespace Bot.Characters
                         toRemove.Add(dict);
                     }
                 }
+                await Task.Yield();
             }
             foreach (Dictionary<string, dynamic> dict in toRemove)
             {
                 _itemData.Remove(dict);
+                await Task.Yield();
             }
 
             CollateAttributeData();
-            CollateItemData(_itemData);
+            await Task.Yield();
+            CollateItemData();
+            await Task.Yield();
             CollateSystemData(systemData);
+            await Task.Yield();
             foreach (string k in _skills.Keys)
             {
                 _skills[k] = SkillBonus(k);
+                await Task.Yield();
+            }
+            foreach (string k in _lore.Keys)
+            {
+                _lore[k] = LoreBonus(k);
+                await Task.Yield();
             }
             foreach (string k in _saves.Keys)
             {
                 _saves[k] = SaveBonus(k);
+                await Task.Yield();
             }
         }
 
@@ -206,9 +224,9 @@ namespace Bot.Characters
             }
         }
 
-        private void CollateItemData(List<Dictionary<string, dynamic>> itemData)
+        private void CollateItemData()
         {
-            Dictionary<string, dynamic> classData = itemData.First(x => x["type"] == "class");
+            Dictionary<string, dynamic> classData = _itemData.First(x => x["type"] == "class");
             _class = classData["name"];
             Dictionary<string, dynamic> classSystem = classData["system"].ToObject<
                 Dictionary<string, dynamic>
@@ -245,9 +263,11 @@ namespace Bot.Characters
             }
 
             _ancestry = _ancestryData["name"];
-            Dictionary<string, dynamic> heritageData = itemData.First(x => x["type"] == "heritage");
+            Dictionary<string, dynamic> heritageData = _itemData.First(
+                x => x["type"] == "heritage"
+            );
             _heritage = heritageData["name"];
-            Dictionary<string, dynamic> backgroundData = itemData.First(
+            Dictionary<string, dynamic> backgroundData = _itemData.First(
                 x => x["type"] == "background"
             );
             Dictionary<string, dynamic> backgroundSystem = backgroundData["system"].ToObject<
@@ -279,31 +299,16 @@ namespace Bot.Characters
                 }
             }
 
-            foreach (var item in itemData)
+            foreach (var item in _itemData)
             {
                 if (item["type"] == "lore")
                 {
                     int loreRank = item["system"]["proficient"]["value"];
-                    Console.WriteLine(
-                        $"{item["name"]} rank is {((Helper.Proficiency)loreRank).ToString()}"
-                    );
-                    int loreModifier = (int)
-                        Enum.Parse<Helper.ProficiencyBonus>(
-                            ((Helper.Proficiency)loreRank).ToString()
-                        );
-                    Console.WriteLine(
-                        $"{item["name"]} modifier is {Helper.ModifierToString(loreModifier)}"
-                    );
-                    int attributeBonus = Helper.AttributeToModifier(_attributes["int"]);
-                    Console.WriteLine($"{item["name"]} attribute bonus is {attributeBonus}");
-                    int loreValue =
-                        loreModifier + (loreModifier > 0 ? (int)_level : 0) + attributeBonus;
-                    Console.WriteLine($"{item["name"]} final value is {loreValue}");
-                    _lore.Add(item["name"], loreValue);
+                    _lore.Add(item["name"], loreRank);
                 }
             }
 
-            foreach (var item in itemData)
+            foreach (var item in _itemData)
             {
                 if (item["type"] == "treasure")
                 {
@@ -324,46 +329,112 @@ namespace Bot.Characters
                 }
             }
 
-            foreach (var item in itemData)
+            foreach (var item in _itemData)
             {
                 if (item["type"] == "spell")
                 {
                     _spells.Add(item["name"]);
                 }
             }
+            _perception = perceptionRank;
 
-            foreach (var item in itemData)
+            foreach (var item in _itemData)
             {
                 if (item["type"] == "feat")
                 {
                     _feats.Add(item["name"]);
-                    if (item["name"].Contains("Canny Acumen"))
-                    {
-                        if (item["name"].Contains("Perception") && perceptionRank < 2)
-                        {
-                            perceptionRank = 2;
-                        }
-                        else if (item["name"].Contains("will") && _saves["will"] < 2)
-                        {
-                            _saves["will"] = 2;
-                        }
-                        else if (item["name"].Contains("fortitude") && _saves["fortitude"] < 2)
-                        {
-                            _saves["fortitude"] = 2;
-                        }
-                        else if (item["name"].Contains("reflex") && _saves["reflex"] < 2)
-                        {
-                            _saves["reflex"] = 2;
-                        }
-                    }
+                    CheckFeatEffects(item["name"]);
                 }
             }
 
             int perceptionModifier = (int)
-                Enum.Parse<Helper.ProficiencyBonus>(
-                    ((Helper.Proficiency)perceptionRank).ToString()
-                );
+                Enum.Parse<Helper.ProficiencyBonus>(((Helper.Proficiency)_perception).ToString());
             _perception = perceptionModifier + (int)_level + GetAttributeBonus("perception");
+        }
+
+        private void CheckFeatEffects(string featName)
+        {
+            CheckCannyAcumen(featName);
+            CheckTrainingRanks(featName);
+        }
+
+        private void CheckWillRanks(string featName)
+        {
+            int save = _saves["will"];
+            if (featName.Contains("Bravery") && _saves["will"] < 2)
+            {
+                save = 2;
+            }
+            _saves["will"] = save;
+        }
+
+        private void CheckFortitudeRanks(string featName)
+        {
+            int save = _saves["fortitude"];
+            if (featName.Contains("Juggernaut") && _saves["fortitude"] < 3)
+            {
+                save = 3;
+            }
+            _saves["fortitude"] = save;
+        }
+
+        private void CheckReflexRanks(string featName)
+        {
+            int save = _saves["reflex"];
+            if (
+                (
+                    featName.Contains("Lightning Reflexes")
+                    || featName.Contains("Shared Reflexes")
+                    || featName.Contains("Reflex Expertise")
+                )
+                && save < 2
+            )
+            {
+                save = 2;
+            }
+            _saves["reflex"] = save;
+        }
+
+        private void CheckPerceptionRanks(string featName)
+        {
+            if (
+                (featName.Contains("Battlefield Surveyor") || featName.Contains("Shared Vigilance"))
+                && _perception < 2
+            )
+            {
+                _perception++;
+            }
+        }
+
+        private void CheckTrainingRanks(string featName)
+        {
+            CheckFortitudeRanks(featName);
+            CheckWillRanks(featName);
+            CheckReflexRanks(featName);
+            CheckPerceptionRanks(featName);
+        }
+
+        private void CheckCannyAcumen(string featName)
+        {
+            if (featName.Contains("Canny Acumen"))
+            {
+                if (featName.Contains("Perception") && _perception < 2)
+                {
+                    _perception = 2;
+                }
+                else if (featName.Contains("will") && _saves["will"] < 2)
+                {
+                    _saves["will"] = 2;
+                }
+                else if (featName.Contains("fortitude") && _saves["fortitude"] < 2)
+                {
+                    _saves["fortitude"] = 2;
+                }
+                else if (featName.Contains("reflex") && _saves["reflex"] < 2)
+                {
+                    _saves["reflex"] = 2;
+                }
+            }
         }
 
         private int GetAttributeBonus(string skillName)
@@ -420,26 +491,48 @@ namespace Bot.Characters
             {
                 return Helper.AttributeToModifier(_attributes["wis"]);
             }
-
-            return 0;
+            else
+            {
+                return Helper.AttributeToModifier(_attributes["int"]);
+            }
         }
 
         private int SkillBonus(string skillName)
         {
             int skillRank = _skills[skillName];
-            int skillModifier = (int)
-                Enum.Parse<Helper.ProficiencyBonus>(((Helper.Proficiency)skillRank).ToString());
+            int skillModifier = Helper.RankToBonus(skillRank);
             int attributeBonus = GetAttributeBonus(skillName);
-            return skillModifier + (skillRank > 0 ? (int)_level : 0) + attributeBonus;
+            return skillModifier + LevelBonus(skillRank) + attributeBonus;
+        }
+
+        private int LoreBonus(string loreName)
+        {
+            int loreRank = _lore[loreName];
+            int loreModifier = Helper.RankToBonus(loreRank);
+            int attributeBonus = GetAttributeBonus(loreName);
+            return loreModifier + LevelBonus(loreRank) + attributeBonus;
         }
 
         private int SaveBonus(string saveName)
         {
             int saveRank = _saves[saveName];
-            int saveModifier = (int)
-                Enum.Parse<Helper.ProficiencyBonus>(((Helper.Proficiency)saveRank).ToString());
+            int saveModifier = Helper.RankToBonus(saveRank);
             int attributeBonus = GetAttributeBonus(saveName);
             return saveModifier + (int)_level + attributeBonus;
+        }
+
+        private int LevelBonus(int rank)
+        {
+            if (rank > 0)
+            {
+                return (int)_level;
+            }
+            if (_feats.Contains("Untrained Improvisation"))
+            {
+                return (int)
+                    Math.Max((_level < 7) ? (_level < 5 ? _level - 2 : _level - 1) : _level, 0);
+            }
+            return 0;
         }
 
         private Dictionary<string, dynamic> _buildData = new();
