@@ -629,12 +629,15 @@ namespace Bot.Guilds
                 return false;
             }
             _gmRoles.Add(role.Name);
+            SaveRoles();
             return true;
         }
 
         public bool RemoveGMRole(IRole role)
         {
-            return _gmRoles.Remove(role.Name);
+            bool success = _gmRoles.Remove(role.Name);
+            SaveRoles();
+            return success;
         }
 
         public ulong Id
