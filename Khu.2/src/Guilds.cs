@@ -114,10 +114,8 @@ namespace Bot.Guilds
                 return false;
             }
 
-            var gmRole = (user as IGuildUser).Guild.Roles.FirstOrDefault(
-                x => _gmRoles.Contains(x.Name)
-            );
-            return user.Roles.Contains(gmRole);
+            var userRoles = user.Roles.Where(x => _gmRoles.Contains(x.Name));
+            return userRoles.Any();
         }
 
         public void LoadAll()
