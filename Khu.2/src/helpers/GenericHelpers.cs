@@ -178,11 +178,6 @@ namespace Bot.Helpers
         {
             return 0.45359237f * lbs;
         }
-
-        public static string ModifierToString(int mod)
-        {
-            return mod < 0 ? "-" + mod : "+" + mod;
-        }
     }
 
     public static class StringExtensions

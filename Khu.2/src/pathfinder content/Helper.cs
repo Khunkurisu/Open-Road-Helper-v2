@@ -82,6 +82,15 @@ namespace Bot.PF2
             Legendary
         }
 
+        public enum ProficiencyBonus
+        {
+            Untrained = 0,
+            Trained = 2,
+            Expert = 4,
+            Master = 6,
+            Legendary = 8
+        }
+
         public static int[,] CharacterWealth { get; } =
             new int[,]
             {
@@ -160,21 +169,56 @@ namespace Bot.PF2
 
         public static string AttributeNames(string attribute)
         {
-			return attribute switch
-			{
-				"str" => "Strength",
-				"dex" => "Dexterity",
-				"con" => "Constitution",
-				"int" => "Intelligence",
-				"wis" => "Wisdom",
-				"cha" => "Charisma",
-				_ => "",
-			};
-		}
+            return attribute switch
+            {
+                "str" => "Strength",
+                "dex" => "Dexterity",
+                "con" => "Constitution",
+                "int" => "Intelligence",
+                "wis" => "Wisdom",
+                "cha" => "Charisma",
+                _ => "",
+            };
+        }
+
+        public enum Attributes
+        {
+            Strength,
+            Dexterity,
+            Constitution,
+            Intelligence,
+            Wisdom,
+            Charisma
+        }
+
+        public enum SkillAttributes
+        {
+            Acrobatics = Attributes.Dexterity,
+            Arcana = Attributes.Intelligence,
+            Athletics = Attributes.Strength,
+            Crafting = Arcana,
+            Deception = Attributes.Charisma,
+            Diplomacy = Deception,
+            Intimidation = Deception,
+            Medicine = Attributes.Wisdom,
+            Nature = Medicine,
+            Occultism = Arcana,
+            Performance = Deception,
+            Religion = Medicine,
+            Society = Arcana,
+            Stealth = Acrobatics,
+            Survival = Medicine,
+            Thievery = Acrobatics,
+        }
 
         public static int AttributeToModifier(uint attribute)
         {
             return (int)MathF.Floor((attribute - 10) / 2);
+        }
+
+        public static string ModifierToString(int mod)
+        {
+            return mod < 0 ? "-" + mod : "+" + mod;
         }
     }
 }

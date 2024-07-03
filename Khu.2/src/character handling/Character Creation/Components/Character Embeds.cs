@@ -1,5 +1,6 @@
 using Bot.Guilds;
 using Bot.Helpers;
+using Bot.PF2;
 using Discord;
 
 namespace Bot.Characters
@@ -50,7 +51,7 @@ namespace Bot.Characters
                     "**"
                         + StringExtensions.FirstCharToUpper(k)
                         + "** "
-                        + GenericHelpers.ModifierToString(Modifiers[k])
+                        + Helper.ModifierToString(Modifiers[k])
                 );
             }
             attributesEmbed.AddField("Attributes", string.Join(", ", attributes));
@@ -62,22 +63,21 @@ namespace Bot.Characters
                     "**"
                         + StringExtensions.FirstCharToUpper(k)
                         + "** "
-                        + GenericHelpers.ModifierToString((int)Saves[k])
+                        + Helper.ModifierToString(Saves[k])
                 );
             }
             attributesEmbed.AddField("Saves", string.Join(", ", saves));
-            attributesEmbed.AddField(
-                "Perception",
-                GenericHelpers.ModifierToString((int)Perception)
-            );
+            attributesEmbed.AddField("Perception", Helper.ModifierToString((int)Perception));
 
             List<string> skills = new();
             foreach (string k in Skills.Keys)
             {
+                if (k == null || k == string.Empty)
+                {
+                    continue;
+                }
                 skills.Add(
-                    StringExtensions.FirstCharToUpper(k)
-                        + " "
-                        + GenericHelpers.ModifierToString((int)Skills[k])
+                    StringExtensions.FirstCharToUpper(k) + " " + Helper.ModifierToString(Skills[k])
                 );
             }
             string skillField = "**Skills** " + string.Join(", ", skills);
@@ -86,13 +86,17 @@ namespace Bot.Characters
                 List<string> lore = new();
                 foreach (string k in Lore.Keys)
                 {
+                    if (k == null || k == string.Empty)
+                    {
+                        continue;
+                    }
                     lore.Add(
                         StringExtensions.FirstCharToUpper(k)
                             + " "
-                            + GenericHelpers.ModifierToString((int)Lore[k])
+                            + Helper.ModifierToString(Lore[k])
                     );
                 }
-                skillField += "; **Lore** " + string.Join(" ,", lore);
+                skillField += "; **Lore** " + string.Join(", ", lore);
             }
             attributesEmbed.AddField("Training", skillField);
 
