@@ -141,5 +141,68 @@ namespace Bot.Characters
                 _ => new(),
             };
         }
+
+        public EmbedBuilder GenerateEmbed()
+        {
+            return DisplayMode switch
+            {
+                Display.Details => GenerateDetailsEmbed(),
+                Display.Attributes => GenerateAttributesEmbed(),
+                Display.Equipment => GenerateEquipmentEmbed(),
+                Display.Spells => GenerateSpellsEmbed(),
+                Display.Feats => GenerateFeatsEmbed(),
+                _ => new(),
+            };
+        }
+
+        public EmbedBuilder GenerateDetailsEmbed()
+        {
+            IUser? player = Manager.GetGuildUser(_guild, _user);
+            if (player == null)
+            {
+                return new EmbedBuilder();
+            }
+            return GenerateDetailsEmbed(player);
+        }
+
+        public EmbedBuilder GenerateAttributesEmbed()
+        {
+            IUser? player = Manager.GetGuildUser(_guild, _user);
+            if (player == null)
+            {
+                return new EmbedBuilder();
+            }
+            return GenerateAttributesEmbed(player);
+        }
+
+        public EmbedBuilder GenerateEquipmentEmbed()
+        {
+            IUser? player = Manager.GetGuildUser(_guild, _user);
+            if (player == null)
+            {
+                return new EmbedBuilder();
+            }
+            return GenerateEquipmentEmbed(player);
+        }
+
+        public EmbedBuilder GenerateSpellsEmbed()
+        {
+            IUser? player = Manager.GetGuildUser(_guild, _user);
+            if (player == null)
+            {
+                return new EmbedBuilder();
+            }
+            return GenerateSpellsEmbed(player);
+        }
+
+        public EmbedBuilder GenerateFeatsEmbed()
+        {
+            IUser? player = Manager.GetGuildUser(_guild, _user);
+            if (player == null)
+            {
+                return new EmbedBuilder();
+            }
+            return GenerateFeatsEmbed(player);
+        }
     }
 }
