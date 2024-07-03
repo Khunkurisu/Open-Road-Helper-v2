@@ -39,16 +39,34 @@ namespace Bot.GameMaster
             public async Task AddGMRole(IRole role)
             {
                 Guild guild = Manager.GetGuild(Context.Guild.Id);
-                await guild.AddGMRole(role);
-                await Context.Interaction.RespondAsync($"{role.Name} added as GM Role!");
+                if (guild.AddGMRole(role))
+                {
+                    await Context.Interaction.RespondAsync($"{role.Name} was added to GM Roles!");
+                }
+                else
+                {
+                    await Context.Interaction.RespondAsync(
+                        $"{role.Name} **could not** be added to GM Roles!"
+                    );
+                }
             }
 
             [SlashCommand("remove", "Remove a role to include as GM.")]
             public async Task RemoveGMRole(IRole role)
             {
                 Guild guild = Manager.GetGuild(Context.Guild.Id);
-                await guild.RemoveGMRole(role);
-                await Context.Interaction.RespondAsync($"{role.Name} removed from GM Roles!");
+                if (guild.RemoveGMRole(role))
+                {
+                    await Context.Interaction.RespondAsync(
+                        $"{role.Name} was removed from GM Roles!"
+                    );
+                }
+                else
+                {
+                    await Context.Interaction.RespondAsync(
+                        $"{role.Name} **could not** be removed from GM Roles!"
+                    );
+                }
             }
 
             [SlashCommand("list", "List current roles associated with GMs.")]

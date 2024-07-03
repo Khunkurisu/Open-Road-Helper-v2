@@ -623,21 +623,19 @@ namespace Bot.Guilds
             }
         }
 
-        public async Task AddGMRole(IRole role)
+        public bool AddGMRole(IRole role)
         {
             if (_gmRoles.Contains(role.Name))
             {
-                await Task.CompletedTask;
-                return;
+                return false;
             }
             _gmRoles.Add(role.Name);
-            await Task.CompletedTask;
+            return true;
         }
 
-        public async Task RemoveGMRole(IRole role)
+        public bool RemoveGMRole(IRole role)
         {
-            _gmRoles.Remove(role.Name);
-            await Task.CompletedTask;
+            return _gmRoles.Remove(role.Name);
         }
 
         public ulong Id
