@@ -199,6 +199,10 @@ namespace Bot
             {
                 await CharacterCreate(modal, components);
             }
+            else if (modal.Data.CustomId.Contains("rejectCharacter"))
+            {
+                await RejectCharacter(modal, components);
+            }
         }
     }
 }
