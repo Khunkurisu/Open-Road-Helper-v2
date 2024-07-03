@@ -115,19 +115,21 @@ namespace Bot
             character.Status = Status.Approved;
             guild.QueueSave("characters");
 
-            var msg = await transactions.SendMessageAsync($"{charName} has been approved.");
-            string msgLink = $"https://discord.com/channels/{guildId}/{msg.Channel.Id}/{msg.Id}";
-            await messageComponent.RespondAsync(
-                $"{charName} has been approved. ({msgLink})",
-                ephemeral: true
+            var msg = await transactions.SendMessageAsync(
+                $"{threadChannel.Mention} has been approved."
             );
+            string msgLink = $"https://discord.com/channels/{guildId}/{msg.Channel.Id}/{msg.Id}";
+            await messageComponent.UpdateAsync(x =>
+            {
+                x.Content = $"{charName} has been approved. ({msgLink})";
+                x.Components = null;
+            });
 
             ulong[] tags = { guild.CharacterBoard.Tags.First(x => x.Name == "Approved").Id };
             await threadChannel.ModifyAsync(x =>
             {
                 x.AppliedTags = tags;
             });
-            await messageComponent.DeleteOriginalResponseAsync();
             await DrawCharacterPost(character, messageComponent);
         }
 
@@ -176,8 +178,8 @@ namespace Bot
                     "Detail the reasoning for this rejection."
                 );
 
-            await messageComponent.RespondWithModalAsync(modal.Build());
             await messageComponent.DeleteOriginalResponseAsync();
+            await messageComponent.RespondWithModalAsync(modal.Build());
         }
 
         private static async Task RejectCharacter(
@@ -259,7 +261,7 @@ namespace Bot
                 string reason = components.First(x => x.CustomId == "rejection_reason").Value;
 
                 var msg = await transactions.SendMessageAsync(
-                    $"{charName} has been rejected.",
+                    $"{threadChannel.Mention} has been rejected.",
                     embed: new EmbedBuilder()
                         .WithTitle("Rejection Reason")
                         .WithDescription(reason)
