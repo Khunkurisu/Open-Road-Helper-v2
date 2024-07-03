@@ -66,6 +66,14 @@ namespace Bot.Characters
                         ButtonStyle.Danger
                     );
             }
+            else if (Status == Status.Rejected)
+            {
+                buttons.WithButton(
+                    "Refund",
+                    "refundCharacter+" + guildId + "+" + playerId + "+" + Name,
+                    ButtonStyle.Danger
+                );
+            }
             else if (Status == Status.Approved)
             {
                 buttons.WithButton(
