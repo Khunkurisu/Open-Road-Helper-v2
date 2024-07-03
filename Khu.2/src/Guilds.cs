@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using Bot.Characters;
-using Bot.Helpers;
 using Bot.Quests;
 using Discord;
 using Discord.WebSocket;
