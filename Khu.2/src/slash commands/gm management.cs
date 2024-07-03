@@ -33,13 +33,13 @@ namespace Bot.GameMaster
         [Group("gm-roles", "Manage roles assigned as Game Master.")]
         public class GameMasterRoles : InteractionModuleBase<SocketInteractionContext>
         {
-            [SlashCommand("Add", "Add a role to include as GM.")]
+            [SlashCommand("add", "Add a role to include as GM.")]
             public async Task AddGMRole(IRole role)
             {
                 Guild guild = Manager.GetGuild(Context.Guild.Id);
                 await guild.AddGMRole(role);
             }
-            [SlashCommand("Remove", "Remove a role to include as GM.")]
+            [SlashCommand("remove", "Remove a role to include as GM.")]
             public async Task RemoveGMRole(IRole role)
             {
                 Guild guild = Manager.GetGuild(Context.Guild.Id);
