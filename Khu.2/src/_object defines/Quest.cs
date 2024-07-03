@@ -4,6 +4,7 @@ namespace Bot.Quests
     {
         private readonly Guid _id;
         private readonly string _name = "temp";
+		private readonly ulong _guild;
         private readonly ulong _gameMaster;
         private string _description = "temp";
         private Threats _threat;

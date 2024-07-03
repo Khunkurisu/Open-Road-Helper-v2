@@ -7,6 +7,7 @@ namespace Bot.Quests
             _id = template._id;
             _name = template._name;
             _gameMaster = template._gameMaster;
+            _guild = template._guild;
             _description = template._description;
             _threat = template._threat;
             _tags = template._tags;

@@ -14,6 +14,10 @@ namespace Bot.Quests
         {
             get => _gameMaster;
         }
+        public ulong GuildId
+        {
+            get => _guild;
+        }
         public string Description
         {
             get => _description;

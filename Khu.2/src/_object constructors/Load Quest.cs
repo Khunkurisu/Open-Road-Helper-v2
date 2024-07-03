@@ -9,6 +9,7 @@ namespace Bot.Quests
             Guid id,
             string name,
             ulong gameMaster,
+            ulong guildId,
             string description,
             Threats threat,
             List<string> tags,
@@ -26,6 +27,7 @@ namespace Bot.Quests
             _id = id;
             _name = name;
             _gameMaster = gameMaster;
+            _guild = guildId;
             _description = description;
             _threat = threat;
             _tags = tags;
