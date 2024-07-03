@@ -19,6 +19,10 @@ namespace Bot.GameMaster
             public async Task RefreshCharacterPosts()
             {
                 Guild guild = Manager.GetGuild(Context.Guild.Id);
+				if(!guild.IsGamemaster(Context.User)) {
+					await Context.Interaction.RespondAsync("Only GMs may run this command!");
+					return;
+				}
                 await guild.RefreshCharacterPosts(Context);
                 await Context.Interaction.RespondAsync("Character posts refreshed!");
             }
@@ -27,6 +31,10 @@ namespace Bot.GameMaster
             public async Task RefreshQuestPosts()
             {
                 Guild guild = Manager.GetGuild(Context.Guild.Id);
+				if(!guild.IsGamemaster(Context.User)) {
+					await Context.Interaction.RespondAsync("Only GMs may run this command!");
+					return;
+				}
                 await guild.RefreshQuestPosts();
                 await Context.Interaction.RespondAsync("Character posts refreshed!");
             }
@@ -39,6 +47,10 @@ namespace Bot.GameMaster
             public async Task AddGMRole(IRole role)
             {
                 Guild guild = Manager.GetGuild(Context.Guild.Id);
+				if(!guild.IsGamemaster(Context.User)) {
+					await Context.Interaction.RespondAsync("Only GMs may run this command!");
+					return;
+				}
                 if (guild.AddGMRole(role))
                 {
                     await Context.Interaction.RespondAsync($"{role.Name} was added to GM Roles!");
@@ -55,6 +67,10 @@ namespace Bot.GameMaster
             public async Task RemoveGMRole(IRole role)
             {
                 Guild guild = Manager.GetGuild(Context.Guild.Id);
+				if(!guild.IsGamemaster(Context.User)) {
+					await Context.Interaction.RespondAsync("Only GMs may run this command!");
+					return;
+				}
                 if (guild.RemoveGMRole(role))
                 {
                     await Context.Interaction.RespondAsync(
@@ -73,6 +89,10 @@ namespace Bot.GameMaster
             public async Task ListGMRoles()
             {
                 Guild guild = Manager.GetGuild(Context.Guild.Id);
+				if(!guild.IsGamemaster(Context.User)) {
+					await Context.Interaction.RespondAsync("Only GMs may run this command!");
+					return;
+				}
                 string roles = string.Join("\n", guild.GMRoles);
                 if (roles == null || roles == string.Empty)
                 {
@@ -91,6 +111,10 @@ namespace Bot.GameMaster
             public async Task AssignQuestBoard(IForumChannel forumChannel)
             {
                 Guild guild = Manager.GetGuild(Context.Guild.Id);
+				if(!guild.IsGamemaster(Context.User)) {
+					await Context.Interaction.RespondAsync("Only GMs may run this command!");
+					return;
+				}
                 guild.QuestBoard = forumChannel;
                 guild.QueueSave("boards");
 
@@ -103,6 +127,10 @@ namespace Bot.GameMaster
             public async Task AssignCharacterBoard(IForumChannel forumChannel)
             {
                 Guild guild = Manager.GetGuild(Context.Guild.Id);
+				if(!guild.IsGamemaster(Context.User)) {
+					await Context.Interaction.RespondAsync("Only GMs may run this command!");
+					return;
+				}
                 guild.CharacterBoard = forumChannel;
                 guild.QueueSave("boards");
 
@@ -118,6 +146,10 @@ namespace Bot.GameMaster
             public async Task AssignTransactionBoard(IForumChannel forumChannel)
             {
                 Guild guild = Manager.GetGuild(Context.Guild.Id);
+				if(!guild.IsGamemaster(Context.User)) {
+					await Context.Interaction.RespondAsync("Only GMs may run this command!");
+					return;
+				}
                 guild.TransactionBoard = forumChannel;
                 guild.SaveAll();
 
