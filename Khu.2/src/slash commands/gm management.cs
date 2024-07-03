@@ -2,12 +2,106 @@ using Bot.Characters;
 using Bot.Guilds;
 using Discord;
 using Discord.Interactions;
+using Newtonsoft.Json;
 
 namespace Bot.GameMaster
 {
     [Group("gm", "Perform gm related tasks with these commands.")]
     public class GameMasterManagement : InteractionModuleBase<SocketInteractionContext>
     {
+        [Group("characters", "Manage various aspects of characters.")]
+        public class ManageCharacters : InteractionModuleBase<SocketInteractionContext>
+        {
+            [SlashCommand("force-create", "Forcibly create a character from a foundry import.")]
+            public async Task CreateCharacter(IUser player, IAttachment sheet)
+            {
+                ulong guildId = Context.Guild.Id;
+                Guild guild = Manager.GetGuild(guildId);
+                if (!guild.IsGamemaster(Context.User))
+                {
+                    await Context.Interaction.RespondAsync("Only GMs may run this command!");
+                    return;
+                }
+
+                string json = "";
+                int sheetType = 1;
+                HttpClient client = new() { Timeout = TimeSpan.FromSeconds(2) };
+
+                if (sheet != null && sheet.Filename.Contains(".json"))
+                {
+                    json = await client.GetStringAsync(sheet.Url);
+                }
+                if (json != "")
+                {
+                    Dictionary<string, dynamic>? importData = JsonConvert.DeserializeObject<
+                        Dictionary<string, dynamic>
+                    >(json);
+
+                    if (importData != null)
+                    {
+                        if (sheetType == 1)
+                        {
+                            FoundryImport characterImport = new(importData);
+                            Manager.StoreTempCharacter(characterImport, guildId, player);
+                        }
+                        else
+                        {
+                            await RespondAsync("Please upload a valid json file.");
+                            return;
+                        }
+
+                        Dictionary<string, dynamic>? charData = guild
+                            .GetCharacterJson(player.Id)
+                            ?.GetCharacterData();
+                        string charName = string.Empty;
+                        if (charData != null && charData.ContainsKey("name"))
+                        {
+                            charName = charData["name"];
+                        }
+
+                        string charDesc = string.Empty;
+                        if (charData != null && charData.ContainsKey("description"))
+                        {
+                            charDesc = charData["description"];
+                        }
+
+                        var textBox = new ModalBuilder()
+                            .WithTitle("Create Character")
+                            .WithCustomId("forceCreateCharacter+" + guildId + "+" + player.Id)
+                            .AddTextInput(
+                                "Name",
+                                "character_name",
+                                placeholder: "Character Name",
+                                value: charName == string.Empty ? null : charName
+                            )
+                            .AddTextInput(
+                                "Description",
+                                "character_description",
+                                TextInputStyle.Paragraph,
+                                "The character's outward appearance and general description.",
+                                value: charDesc == string.Empty ? null : charDesc
+                            )
+                            .AddTextInput(
+                                "Reputation",
+                                "character_reputation",
+                                TextInputStyle.Paragraph,
+                                "The character's public reputation and info."
+                            );
+
+                        await RespondWithModalAsync(textBox.Build());
+                    }
+                    else
+                    {
+                        await RespondAsync("Please upload a valid json file.");
+                    }
+                }
+                else
+                {
+                    await RespondAsync("Please upload a valid json file.");
+                }
+            }
+        }
+
         [Group("refresh", "Refresh posts for the given list.")]
         public class RefreshListing : InteractionModuleBase<SocketInteractionContext>
         {
