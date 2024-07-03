@@ -6,6 +6,50 @@ using Newtonsoft.Json;
 
 namespace Bot.Characters
 {
+    public class CharacterNameAutocompleteHandler : AutocompleteHandler
+    {
+        public override async Task<AutocompletionResult> GenerateSuggestionsAsync(
+            IInteractionContext context,
+            IAutocompleteInteraction autocompleteInteraction,
+            IParameterInfo parameter,
+            IServiceProvider services
+        )
+        {
+            Guild guild = Manager.GetGuild(context.Guild.Id);
+            IUser? user;
+            if (autocompleteInteraction.Data.CommandName.Contains("update"))
+            {
+                user = context.User;
+            }
+            else
+            {
+                user = Manager.GetGuildUser(
+                    guild.Id,
+                    ulong.Parse(
+                        autocompleteInteraction.Data.Options
+                            .First(x => x.Name == "user")
+                            .Value.ToString() ?? "0"
+                    )
+                );
+            }
+            if (user == null)
+            {
+                return AutocompletionResult.FromError(
+                    InteractionCommandError.BadArgs,
+                    "could not find user"
+                );
+            }
+
+            List<AutocompleteResult> results = new();
+            foreach (Character character in guild.GetCharacters(user))
+            {
+                results.Add(new(character.Name, character.Name));
+                await Task.Yield();
+            }
+            return AutocompletionResult.FromSuccess(results.Take(25));
+        }
+    }
+
     [Group("character", "Manage your characters with these commands.")]
     public class CharacterManagement : InteractionModuleBase<SocketInteractionContext>
     {

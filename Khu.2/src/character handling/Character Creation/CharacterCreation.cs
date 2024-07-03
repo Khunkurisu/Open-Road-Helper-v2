@@ -119,7 +119,7 @@ namespace Bot
                 Guild guild = GetGuild(ulong.Parse(guildId));
 
                 string charName = button.Data.CustomId.Split("+")[3];
-                int tokenCost = guild.GetNewCharacterCost(user.Id);
+                uint tokenCost = (uint)guild.GetNewCharacterCost(user.Id);
                 uint tokenCount = guild.GetPlayerTokenCount(user.Id);
 
                 Character? character = guild.GetCharacter(user.Id, charName);
@@ -186,6 +186,7 @@ namespace Bot
                 {
                     guild.CharacterBoard.Tags.First(x => x.Name == "Pending Approval")
                 };
+                character.Status = Status.Pending;
 
                 IThreadChannel charThread = await guild.CharacterBoard.CreatePostAsync(
                     character.Name,
@@ -207,7 +208,6 @@ namespace Bot
 
                 character.CharacterThread = charThread.Id;
                 character.TransactionThread = transThread.Id;
-                character.Status = Status.Pending;
                 guild.QueueSave("characters");
 
                 await charThread.AddUserAsync((IGuildUser)user);

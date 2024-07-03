@@ -12,7 +12,7 @@ namespace Bot.Guilds
     {
         private readonly ulong _id;
         private long _lastSave;
-        private bool _saveQueued;
+        private bool _saveProcessing;
         private readonly Dictionary<string, bool> _shouldSave =
             new()
             {
@@ -97,18 +97,18 @@ namespace Bot.Guilds
             SetPlayerTokenCount(playerId, GetPlayerTokenCount(playerId) + tokenCount);
         }
 
-        public bool DecreasePlayerTokenCount(ulong playerId, int amount)
+        public bool DecreasePlayerTokenCount(ulong playerId, uint amount)
         {
-            int currentTokens = (int)GetPlayerTokenCount(playerId);
+            uint currentTokens = GetPlayerTokenCount(playerId);
 
-            int newTokens = currentTokens - amount;
-
-            if (newTokens < 0)
+            if (currentTokens < amount)
             {
                 return false;
             }
 
-            SetPlayerTokenCount(playerId, (uint)newTokens);
+            uint newTokens = currentTokens - amount;
+
+            SetPlayerTokenCount(playerId, newTokens);
 
             return true;
         }
@@ -342,6 +342,14 @@ namespace Bot.Guilds
         {
             foreach (ulong playerId in _characters.Keys)
             {
+                await RefreshCharacterPosts(playerId);
+            }
+        }
+
+        public async Task RefreshCharacterPosts(ulong playerId)
+        {
+            if (_characters.ContainsKey(playerId))
+            {
                 foreach (Character character in _characters[playerId])
                 {
                     await Manager.DrawCharacterPost(character);
@@ -386,26 +394,31 @@ namespace Bot.Guilds
             return _shouldSave.ContainsKey(save) && _shouldSave[save];
         }
 
-        public void QueueSave(string save)
+        public void QueueSave(string save, bool noWait = false)
         {
             save = save.ToLower();
             if (_shouldSave.ContainsKey(save) && !_shouldSave[save])
             {
                 _shouldSave[save] = true;
             }
-            Task.Run(() => SaveWithDelay(DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _lastSave));
+            Task.Run(
+                () => SaveWithDelay(DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _lastSave, noWait)
+            );
         }
 
-        private async Task SaveWithDelay(long delay)
+        private async Task SaveWithDelay(long delay, bool noWait = false)
         {
-            if (_saveQueued)
+            if (_saveProcessing)
             {
                 return;
             }
-            _saveQueued = true;
-            await Task.Delay(TimeSpan.FromSeconds(delay));
+            _saveProcessing = true;
+            if (!noWait)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(delay));
+            }
             SaveAll();
-            _saveQueued = false;
+            _saveProcessing = false;
         }
 
         private void SaveRoles()
@@ -586,20 +599,20 @@ namespace Bot.Guilds
             if (_characters.ContainsKey(playerId) && _characters[playerId].Contains(character))
             {
                 _characters[playerId].Remove(character);
-                QueueSave("characters");
+                QueueSave("characters", true);
             }
         }
 
         public void RemoveQuest(int index)
         {
             _quests.RemoveAt(index);
-            QueueSave("quests");
+            QueueSave("quests", true);
         }
 
         public void RemoveQuest(Quest quest)
         {
             _quests.Remove(quest);
-            QueueSave("quests");
+            QueueSave("quests", true);
         }
 
         public Quest? GetQuest(string name, IUser gm)
@@ -700,6 +713,15 @@ namespace Bot.Guilds
             bool success = _gmRoles.Remove(role.Name);
             QueueSave("roles");
             return success;
+        }
+
+        public List<Character> GetCharacters(IUser user)
+        {
+            if (_characters.ContainsKey(user.Id))
+            {
+                return _characters[user.Id];
+            }
+            return new();
         }
 
         public ulong Id
