@@ -180,7 +180,14 @@ namespace Bot.Guilds
             {
                 foreach (ulong playerId in playerTokens.Keys)
                 {
-                    _playerTokens.Add(playerId, playerTokens[playerId]);
+                    if (_playerTokens.ContainsKey(playerId))
+                    {
+                        _playerTokens[playerId] = playerTokens[playerId];
+                    }
+                    else
+                    {
+                        _playerTokens.Add(playerId, playerTokens[playerId]);
+                    }
                 }
             }
         }
