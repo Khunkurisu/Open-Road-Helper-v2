@@ -360,50 +360,182 @@ namespace Bot.Characters
 
         private void CheckWillRanks(string featName)
         {
+            List<string> willExpertFeats =
+                new() { "Bravery", "Iron Will", "Will Expertise", "Stubborn" };
+            List<string> willMasterFeats =
+                new()
+                {
+                    "Path to Perfection (Will)",
+                    "Second Path to Perfection (Will)",
+                    "Indomitable Will",
+                    "Resolve",
+                    "Walls of Will",
+                    "Will of the Pupil",
+                    "Performer's Heart",
+                    "Divine Will",
+                    "Agile Mind",
+                    "Prodigious Will",
+                    "Resolute Faith",
+                    "Wild Willpower",
+                    "Shared Resolve"
+                };
+            List<string> willLegendaryFeats =
+                new()
+                {
+                    "Third Path to Perfection (Will)",
+                    "Greater Resolve",
+                    "Fortress of Will",
+                    "Greater Performer's Heart"
+                };
+
             int save = _saves["will"];
-            if (featName.Contains("Bravery") && _saves["will"] < 2)
+            if (willExpertFeats.Contains(featName))
             {
-                save = 2;
+                save = Math.Max(save, (int)Helper.Proficiency.Expert);
             }
+            else if (willMasterFeats.Contains(featName))
+            {
+                save = Math.Max(save, (int)Helper.Proficiency.Master);
+            }
+            else if (willLegendaryFeats.Contains(featName))
+            {
+                save = Math.Max(save, (int)Helper.Proficiency.Legendary);
+            }
+
             _saves["will"] = save;
         }
 
         private void CheckFortitudeRanks(string featName)
         {
+            List<string> fortitudeExpertFeats =
+                new()
+                {
+                    "Great Fortitude",
+                    "Magical Fortitude",
+                    "Fortitude Expertise",
+                    "Rogue Resilience",
+                    "First Doctrine (Warpriest)"
+                };
+            List<string> fortitudeMasterFeats =
+                new()
+                {
+                    "Path to Perfection (Fortitude)",
+                    "Second Path to Perfection (Fortitude)",
+                    "Juggernaut",
+                    "Battle Hardened",
+                    "Warden's Endurance",
+                    "Kinetic Durability",
+                    "Fifth Doctrine (Warpriest)",
+                    "Twin Juggernauts"
+                };
+            List<string> fortitudeLegendaryFeats =
+                new()
+                {
+                    "Third Path to Perfection (Fortitude)",
+                    "Greater Juggernaut",
+                    "Greater Kinetic Durability"
+                };
+
             int save = _saves["fortitude"];
-            if (featName.Contains("Juggernaut") && _saves["fortitude"] < 3)
+            if (fortitudeExpertFeats.Contains(featName))
             {
-                save = 3;
+                save = Math.Max(save, (int)Helper.Proficiency.Expert);
             }
+            else if (fortitudeMasterFeats.Contains(featName))
+            {
+                save = Math.Max(save, (int)Helper.Proficiency.Master);
+            }
+            else if (fortitudeLegendaryFeats.Contains(featName))
+            {
+                save = Math.Max(save, (int)Helper.Proficiency.Legendary);
+            }
+
             _saves["fortitude"] = save;
         }
 
         private void CheckReflexRanks(string featName)
         {
+            List<string> reflexExpertFeats =
+                new()
+                {
+                    "Lightning Reflexes",
+                    "Precognitive Reflexes",
+                    "Reflex Expertise",
+                    "Shared Reflexes"
+                };
+            List<string> reflexMasterFeats =
+                new()
+                {
+                    "Path to Perfection (Reflex)",
+                    "Second Path to Perfection (Reflex)",
+                    "Evasion",
+                    "Tempered Reflexes",
+                    "Natural Reflexes",
+                    "Kinetic Quickness",
+                    "Evasive Reflexes"
+                };
+            List<string> reflexLegendaryFeats =
+                new()
+                {
+                    "Third Path to Perfection (Reflex)",
+                    "Greater Natural Reflexes",
+                    "Improved Evasion",
+                    "Greater Rogue Reflexes"
+                };
+
             int save = _saves["reflex"];
-            if (
-                (
-                    featName.Contains("Lightning Reflexes")
-                    || featName.Contains("Shared Reflexes")
-                    || featName.Contains("Reflex Expertise")
-                )
-                && save < 2
-            )
+            if (reflexExpertFeats.Contains(featName))
             {
-                save = 2;
+                save = Math.Max(save, (int)Helper.Proficiency.Expert);
             }
+            else if (reflexMasterFeats.Contains(featName))
+            {
+                save = Math.Max(save, (int)Helper.Proficiency.Master);
+            }
+            else if (reflexLegendaryFeats.Contains(featName))
+            {
+                save = Math.Max(save, (int)Helper.Proficiency.Legendary);
+            }
+
             _saves["reflex"] = save;
         }
 
         private void CheckPerceptionRanks(string featName)
         {
-            if (
-                (featName.Contains("Battlefield Surveyor") || featName.Contains("Shared Vigilance"))
-                && _perception < 2
-            )
+            List<string> perceptionExpertFeats =
+                new()
+                {
+                    "Alertness",
+                    "Extrasensory Perception",
+                    "Perception Expertise",
+                    "Shared Vigilance"
+                };
+            List<string> perceptionMasterFeats =
+                new()
+                {
+                    "Heightened Senses",
+                    "Battlefield Surveyor",
+                    "Vigilant Senses",
+                    "Perception Mastery"
+                };
+            List<string> perceptionLegendaryFeats =
+                new() { "Incredible Senses", "Perception Legend" };
+
+            int proficiency = _perception;
+            if (perceptionExpertFeats.Contains(featName))
             {
-                _perception++;
+                proficiency = Math.Max(proficiency, (int)Helper.Proficiency.Expert);
             }
+            else if (perceptionMasterFeats.Contains(featName))
+            {
+                proficiency = Math.Max(proficiency, (int)Helper.Proficiency.Master);
+            }
+            else if (perceptionLegendaryFeats.Contains(featName))
+            {
+                proficiency = Math.Max(proficiency, (int)Helper.Proficiency.Legendary);
+            }
+
+            _perception = proficiency;
         }
 
         private void CheckTrainingRanks(string featName)
