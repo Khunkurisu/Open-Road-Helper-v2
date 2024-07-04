@@ -13,6 +13,9 @@ namespace Bot.Characters
             _description = _description.Replace("<p>", "");
             _description = _description.Replace("</p>", "\n");
 
+            _image = jsonData["img"];
+            _image = _image.Replace("_Character%20Images/_Players/the%20open%20road/", "");
+
             Task.Run(() => CollateData(jsonData));
         }
 
@@ -694,6 +697,7 @@ namespace Bot.Characters
         private string _background = "";
         private double _coin = 0;
         private int _perception = 0;
+        private readonly string _image = string.Empty;
         private readonly List<string> _languages = new();
         private readonly List<string> _edicts = new();
         private readonly List<string> _anathema = new();
@@ -757,7 +761,8 @@ namespace Bot.Characters
                 { "saves", _saves },
                 { "feats", _feats },
                 { "spells", _spells },
-                { "attributes", _attributes }
+                { "attributes", _attributes },
+                { "image", _image }
             };
         }
 
