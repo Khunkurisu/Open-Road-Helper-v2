@@ -8,33 +8,6 @@ namespace Bot.Characters
 {
     public partial class Character
     {
-        public Character(Character template, Dictionary<string, dynamic> data)
-        {
-            _id = template.Id;
-            _user = template._user;
-            _guild = template._guild;
-            _characterThread = template._characterThread;
-            _transactionThread = template._transactionThread;
-            _display = template._display;
-            _currentAvatar = template._currentAvatar;
-
-            ParseImport(data);
-
-            _name = template._name;
-            _updated = template._updated;
-            _status = template._status;
-            _avatars = template._avatars;
-            _colorPref = template._colorPref;
-            _notes = template._notes;
-            _lastTokenTrade = template._lastTokenTrade;
-            _downtime = template._downtime;
-            _birthDay = template._birthDay;
-            _birthMonth = template._birthMonth;
-            _birthYear = template._birthYear;
-
-            _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        }
-
         public static async Task ReplaceAsync(
             SocketInteractionContext context,
             IAttachment sheet,
@@ -139,32 +112,33 @@ namespace Bot.Characters
                 await modal.RespondAsync($"Unable to load submitted data.", ephemeral: true);
                 return;
             }
-            string charReputation = components
-                .First(x => x.CustomId == "character_reputation")
-                .Value;
-
-            Character newCharacter = new(character, charData) { Reputation = charReputation };
 
             IThreadChannel? transThread = Manager.GetThreadChannel(
                 guild.Id,
-                newCharacter.TransactionThread
+                character.TransactionThread
             );
             if (transThread == null)
             {
                 await modal.RespondAsync(
-                    $"Transaction thread for {newCharacter.Name} could not be found.",
+                    $"Transaction thread for {character.Name} could not be found.",
                     ephemeral: true
                 );
                 return;
             }
-            guild.RemoveCharacter(character);
-            guild.AddCharacter(player.Id, newCharacter);
+
+            Character charHolder = new(character);
+            character.ParseImport(charData);
+            character.Reputation = components
+                .First(x => x.CustomId == "character_reputation")
+                .Value;
+            ;
+            character.Name = charHolder.Name;
             guild.QueueSave("characters");
 
-            var msg = await transThread.SendMessageAsync($"{newCharacter.Name} has been updated.");
+            var msg = await transThread.SendMessageAsync($"{character.Name} has been updated.");
             string msgLink = $"https://discord.com/channels/{guildId}/{msg.Channel.Id}/{msg.Id}";
             await modal.RespondAsync(
-                $"{newCharacter.Name} has been updated. ({msgLink})",
+                $"{character.Name} has been updated. ({msgLink})",
                 ephemeral: true
             );
         }
