@@ -58,7 +58,7 @@ namespace Bot.Characters
             if (Heritage.Contains(_ancestry))
             {
                 _heritage = _heritage.Replace(_ancestry, "");
-                _heritage = _heritage.TrimEnd();
+                _heritage = _heritage.Trim();
             }
         }
     }
