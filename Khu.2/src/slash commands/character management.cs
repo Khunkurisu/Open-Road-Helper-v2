@@ -57,7 +57,6 @@ namespace Bot.Characters
         public async Task CreateCharacter(
             float height,
             float weight,
-            IAttachment? sheet = null,
             int pathbuilderId = -1
         )
         {
@@ -67,12 +66,7 @@ namespace Bot.Characters
             int sheetType = 0;
             HttpClient client = new() { Timeout = TimeSpan.FromSeconds(2) };
 
-            if (sheet != null && sheet.Filename.Contains(".json"))
-            {
-                json = await client.GetStringAsync(sheet.Url);
-                sheetType = 1;
-            }
-            else if (pathbuilderId > 0)
+            if (pathbuilderId > 0)
             {
                 json = await client.GetStringAsync(
                     "https://pathbuilder2e.com/json.php?id=" + pathbuilderId
