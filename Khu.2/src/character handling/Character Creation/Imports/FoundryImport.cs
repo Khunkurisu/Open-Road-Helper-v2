@@ -8,6 +8,11 @@ namespace Bot.Characters
         public FoundryImport(Dictionary<string, dynamic> jsonData)
         {
             _name = jsonData["name"];
+
+            _description = jsonData["system"]["details"]["biography"]["appearance"];
+            _description = _description.Replace("<p>", "");
+            _description = _description.Replace("</p>", "\n");
+
             Task.Run(() => CollateData(jsonData));
         }
 
@@ -63,6 +68,10 @@ namespace Bot.Characters
             await Task.Yield();
             CollateSystemData(systemData);
             await Task.Yield();
+            foreach (string feat in _feats)
+            {
+                CheckFeatEffects(feat);
+            }
             foreach (string k in _skills.Keys)
             {
                 _skills[k] = SkillBonus(k);
@@ -78,6 +87,10 @@ namespace Bot.Characters
                 _saves[k] = SaveBonus(k);
                 await Task.Yield();
             }
+
+            int perceptionModifier = (int)
+                Enum.Parse<Helper.ProficiencyBonus>(((Helper.Proficiency)_perception).ToString());
+            _perception = perceptionModifier + (int)_level + GetAttributeBonus("perception");
         }
 
         private void CollateAttributeData()
@@ -161,9 +174,7 @@ namespace Bot.Characters
             Dictionary<string, dynamic> biography = details["biography"].ToObject<
                 Dictionary<string, dynamic>
             >();
-            _description = biography["appearance"];
-            _description = _description.Replace("<p>", "");
-            _description = _description.Replace("</p>", "\n");
+
             _birthplace = biography["birthPlace"];
             _backstory = biography["backstory"];
             foreach (string edict in biography["edicts"])
@@ -231,7 +242,7 @@ namespace Bot.Characters
             Dictionary<string, dynamic> classSystem = classData["system"].ToObject<
                 Dictionary<string, dynamic>
             >();
-            int perceptionRank = (int)classSystem["perception"];
+            _perception = (int)classSystem["perception"];
 
             if (classSystem.ContainsKey("boosts"))
             {
@@ -336,20 +347,14 @@ namespace Bot.Characters
                     _spells.Add(item["name"]);
                 }
             }
-            _perception = perceptionRank;
 
             foreach (var item in _itemData)
             {
                 if (item["type"] == "feat")
                 {
                     _feats.Add(item["name"]);
-                    CheckFeatEffects(item["name"]);
                 }
             }
-
-            int perceptionModifier = (int)
-                Enum.Parse<Helper.ProficiencyBonus>(((Helper.Proficiency)_perception).ToString());
-            _perception = perceptionModifier + (int)_level + GetAttributeBonus("perception");
         }
 
         private void CheckFeatEffects(string featName)
@@ -550,21 +555,21 @@ namespace Bot.Characters
         {
             if (featName.Contains("Canny Acumen"))
             {
-                if (featName.Contains("Perception") && _perception < 2)
+                if (featName.Contains("Perception"))
                 {
-                    _perception = 2;
+                    _perception = Math.Max(_perception, 2);
                 }
-                else if (featName.Contains("will") && _saves["will"] < 2)
+                else if (featName.Contains("will"))
                 {
-                    _saves["will"] = 2;
+                    _saves["will"] = Math.Max(_saves["will"], 2);
                 }
-                else if (featName.Contains("fortitude") && _saves["fortitude"] < 2)
+                else if (featName.Contains("fortitude"))
                 {
-                    _saves["fortitude"] = 2;
+                    _saves["fortitude"] = Math.Max(_saves["fortitude"], 2);
                 }
-                else if (featName.Contains("reflex") && _saves["reflex"] < 2)
+                else if (featName.Contains("reflex"))
                 {
-                    _saves["reflex"] = 2;
+                    _saves["reflex"] = Math.Max(_saves["reflex"], 2);
                 }
             }
         }
