@@ -24,81 +24,71 @@ namespace Bot.GameMaster
                 }
 
                 string json = "";
-                int sheetType = 1;
                 HttpClient client = new() { Timeout = TimeSpan.FromSeconds(2) };
 
                 if (sheet != null && sheet.Filename.Contains(".json"))
                 {
                     json = await client.GetStringAsync(sheet.Url);
                 }
-                if (json != "")
+                if (json == null || json == string.Empty)
                 {
-                    Dictionary<string, dynamic>? importData = JsonConvert.DeserializeObject<
-                        Dictionary<string, dynamic>
-                    >(json);
+                    await RespondAsync("Please upload a valid json file.", ephemeral: true);
+                    return;
+                }
 
-                    if (importData != null)
+                Dictionary<string, dynamic>? importData = JsonConvert.DeserializeObject<
+                    Dictionary<string, dynamic>
+                >(json);
+                if (importData == null)
+                {
+                    await RespondAsync("Please upload a valid json file.", ephemeral: true);
+                    return;
+                }
+
+                FoundryImport characterImport = new(importData);
+                Manager.StoreTempCharacter(characterImport, guildId, player);
+
+                Dictionary<string, dynamic>? charData = guild
+                    .GetCharacterJson(player.Id)
+                    ?.GetCharacterData();
+                string charName = string.Empty;
+                string charDesc = string.Empty;
+                if (charData != null)
+                {
+                    if (charData.ContainsKey("name"))
                     {
-                        if (sheetType == 1)
-                        {
-                            FoundryImport characterImport = new(importData);
-                            Manager.StoreTempCharacter(characterImport, guildId, player);
-                        }
-                        else
-                        {
-                            await RespondAsync("Please upload a valid json file.");
-                            return;
-                        }
-
-                        Dictionary<string, dynamic>? charData = guild
-                            .GetCharacterJson(player.Id)
-                            ?.GetCharacterData();
-                        string charName = string.Empty;
-                        if (charData != null && charData.ContainsKey("name"))
-                        {
-                            charName = charData["name"];
-                        }
-
-                        string charDesc = string.Empty;
-                        if (charData != null && charData.ContainsKey("description"))
-                        {
-                            charDesc = charData["description"];
-                        }
-
-                        var textBox = new ModalBuilder()
-                            .WithTitle("Create Character")
-                            .WithCustomId("forceCreateCharacter+" + guildId + "+" + player.Id)
-                            .AddTextInput(
-                                "Name",
-                                "character_name",
-                                placeholder: "Character Name",
-                                value: charName == string.Empty ? null : charName
-                            )
-                            .AddTextInput(
-                                "Description",
-                                "character_description",
-                                TextInputStyle.Paragraph,
-                                "The character's outward appearance and general description.",
-                                value: charDesc == string.Empty ? null : charDesc
-                            )
-                            .AddTextInput(
-                                "Reputation",
-                                "character_reputation",
-                                TextInputStyle.Paragraph,
-                                "The character's public reputation and info."
-                            );
-
-                        await RespondWithModalAsync(textBox.Build());
+                        charName = charData["name"];
                     }
-                    else
+                    if (charData.ContainsKey("description"))
                     {
-                        await RespondAsync("Please upload a valid json file.");
+                        charDesc = charData["description"];
                     }
                 }
-                else
-                {
-                    await RespondAsync("Please upload a valid json file.");
-                }
+
+                var textBox = new ModalBuilder()
+                    .WithTitle("Create Character")
+                    .WithCustomId("forceCreateCharacter+" + guildId + "+" + player.Id)
+                    .AddTextInput(
+                        "Name",
+                        "character_name",
+                        placeholder: "Character Name",
+                        value: charName == string.Empty ? null : charName
+                    )
+                    .AddTextInput(
+                        "Description",
+                        "character_description",
+                        TextInputStyle.Paragraph,
+                        "The character's outward appearance and general description.",
+                        value: charDesc == string.Empty ? null : charDesc
+                    )
+                    .AddTextInput(
+                        "Reputation",
+                        "character_reputation",
+                        TextInputStyle.Paragraph,
+                        "The character's public reputation and info."
+                    );
+
+                await RespondWithModalAsync(textBox.Build());
             }
         }
 
