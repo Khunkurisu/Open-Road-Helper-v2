@@ -23,7 +23,7 @@ namespace Bot.GameMaster
                     return;
                 }
 
-                string json = "";
+                string json = string.Empty;
                 HttpClient client = new() { Timeout = TimeSpan.FromSeconds(2) };
 
                 if (sheet != null && sheet.Filename.Contains(".json"))
