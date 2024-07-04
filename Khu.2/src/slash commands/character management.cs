@@ -1,7 +1,6 @@
 using Bot.Guilds;
 using Discord;
 using Discord.Interactions;
-using Discord.WebSocket;
 using Newtonsoft.Json;
 
 namespace Bot.Characters
@@ -58,7 +57,7 @@ namespace Bot.Characters
         {
             ulong guildId = Context.Guild.Id;
             IUser player = Context.User;
-            string json = "";
+            string json = string.Empty;
             HttpClient client = new() { Timeout = TimeSpan.FromSeconds(2) };
 
             if (pathbuilderId == 0)
@@ -132,12 +131,27 @@ namespace Bot.Characters
         }
 
         [SlashCommand("update", "Update a character.")]
-        public async Task UpdateCharacter(string name, IAttachment sheet)
+        public async Task UpdateCharacter(
+            [Autocomplete(typeof(CharacterNameAutocompleteHandler))] string charName,
+            IAttachment? sheet
+        )
         {
-            await RespondAsync(name);
-            //ulong messageId = SetToNewMessageID();
-            SocketUser user = Context.Client.CurrentUser;
-            await ReplyAsync($"{user.Username}#{user.Discriminator}");
+            ulong guildId = Context.Guild.Id;
+            Guild guild = Manager.GetGuild(guildId);
+
+            Character? character = guild.GetCharacter(guildId, charName);
+            if (character == null)
+            {
+                await RespondAsync(
+                    $"Unable to locate {charName} for user <@{Context.User.Id}>.",
+                    ephemeral: true
+                );
+                return;
+            }
+            if (sheet != null)
+            {
+                await Character.ReplaceAsync(Context, sheet, character);
+            }
         }
 
         [SlashCommand("roleplay", "Roleplay as a character.")]

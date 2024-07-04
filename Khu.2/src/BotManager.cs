@@ -264,6 +264,10 @@ namespace Bot
             {
                 await CharacterCreate(modal, components);
             }
+            else if (modal.Data.CustomId.Contains("replaceCharacter"))
+            {
+                await Character.ReplaceCharacter(modal, components);
+            }
             else if (modal.Data.CustomId.Contains("forceCreateCharacter"))
             {
                 await CharacterCreate(modal, components, true);
