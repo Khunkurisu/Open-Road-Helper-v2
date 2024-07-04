@@ -31,7 +31,7 @@ namespace Bot.Characters
                 .AddField("PT", guild.GetPlayerTokenCount(User).ToString())
                 .AddField("DT", Downtime.ToString(), true)
                 .AddField("Coin", Gold + " gp", true)
-                .WithImageUrl(Avatars.Count > 0 ? Avatars[0] : string.Empty);
+                .WithImageUrl(GetAvatar(0));
 
             return detailsEmbed;
         }

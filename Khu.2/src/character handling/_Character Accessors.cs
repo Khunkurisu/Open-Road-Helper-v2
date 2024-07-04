@@ -385,6 +385,22 @@ namespace Bot.Characters
                 return mods;
             }
         }
+
+        public string GetAvatar(int index)
+        {
+            if (Avatars.Any())
+            {
+                if (Avatars.Count >= index + 1)
+                {
+                    return $"{_avatarPrefix}{Avatars[index]}";
+                }
+                else
+                {
+                    return $"{_avatarPrefix}{Avatars[0]}";
+                }
+            }
+            return string.Empty;
+        }
     }
 
     public enum Status

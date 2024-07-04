@@ -58,5 +58,8 @@ namespace Bot.Characters
         private long _updated = 0;
         private Status _status = 0;
         private Display _display = 0;
+
+        private const string _avatarPrefix =
+            "http://pf2.khunkurisu.com/open-road/character-images/";
     }
 }
