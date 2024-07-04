@@ -386,6 +386,35 @@ namespace Bot.Characters
             }
         }
 
+        public int Avatar
+        {
+            get => _currentAvatar;
+            set
+            {
+                _currentAvatar = Math.Clamp(value, 0, Avatars.Count);
+                _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            }
+        }
+
+        public void NextAvatar()
+        {
+            Avatar++;
+        }
+
+        public void PreviousAvatar()
+        {
+            Avatar--;
+        }
+
+        public bool CheckMoreAvatars(bool forward = true)
+        {
+            if (forward)
+            {
+                return Avatar < Avatars.Count;
+            }
+            return Avatar > 0;
+        }
+
         public string GetAvatar(int index)
         {
             if (Avatars.Any())
