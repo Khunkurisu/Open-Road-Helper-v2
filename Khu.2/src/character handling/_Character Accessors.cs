@@ -421,11 +421,11 @@ namespace Bot.Characters
             {
                 if (Avatars.Count - 1 >= index)
                 {
-                    return $"{_avatarPrefix}{Avatars.ElementAt(index)}";
+                    return $"{_avatarPrefix}{Avatars[Avatars.Keys.ElementAt(index)]}";
                 }
                 else
                 {
-                    return $"{_avatarPrefix}{Avatars.ElementAt(0)}";
+                    return $"{_avatarPrefix}{Avatars[Avatars.Keys.ElementAt(0)]}";
                 }
             }
             return string.Empty;
