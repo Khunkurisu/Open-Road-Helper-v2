@@ -35,7 +35,14 @@ namespace Bot.Characters
             _attributes = data["attributes"];
             if (data.ContainsKey("foundry image"))
             {
-                _avatars.Add("FoundryVTT", data["foundry image"]);
+                if (_avatars.ContainsKey("FoundryVTT"))
+                {
+                    _avatars["FoundryVTT"] = data["foundry image"];
+                }
+                else
+                {
+                    _avatars.Add("FoundryVTT", data["foundry image"]);
+                }
             }
 
             if (data.ContainsKey("edicts"))
