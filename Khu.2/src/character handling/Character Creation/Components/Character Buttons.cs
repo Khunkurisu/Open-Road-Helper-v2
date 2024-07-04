@@ -1,12 +1,34 @@
 using Bot.Guilds;
-using Bot.Helpers;
-using Bot.PF2;
 using Discord;
 
 namespace Bot.Characters
 {
     public partial class Character
     {
+        public ComponentBuilder AvatarButtons(ulong guildId)
+        {
+            return AvatarButtons(guildId, new ComponentBuilder());
+        }
+
+        public ComponentBuilder AvatarButtons(ulong guildId, ComponentBuilder button)
+        {
+            return button
+                .WithButton(
+                    "Previous Avatar",
+                    $"shiftAvatar+{guildId}+{User}+{Name}+back",
+                    ButtonStyle.Primary,
+                    row: 1,
+                    disabled: CheckMoreAvatars(false)
+                )
+                .WithButton(
+                    "Next Avatar",
+                    $"shiftAvatar+{guildId}+{User}+{Name}+forward",
+                    ButtonStyle.Primary,
+                    row: 1,
+                    disabled: CheckMoreAvatars()
+                );
+        }
+
         public static ComponentBuilder ConfirmationButtons(
             string guildId,
             ulong playerId,
@@ -116,6 +138,7 @@ namespace Bot.Characters
                         "retireCharacter+" + guildId + "+" + playerId + "+" + Name,
                         ButtonStyle.Danger
                     );
+                    buttons = AvatarButtons(guildId, buttons);
                 }
             }
 

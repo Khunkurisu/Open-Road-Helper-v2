@@ -33,7 +33,10 @@ namespace Bot.Characters
             _feats = data["feats"];
             _spells = data["spells"];
             _attributes = data["attributes"];
-            _avatars.Add(data["image"]);
+            if (data.ContainsKey("foundry image"))
+            {
+                _avatars.Add("FoundryVTT", data["foundry image"]);
+            }
 
             if (data.ContainsKey("edicts"))
             {

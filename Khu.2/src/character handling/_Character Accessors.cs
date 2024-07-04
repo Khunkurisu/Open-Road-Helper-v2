@@ -226,7 +226,7 @@ namespace Bot.Characters
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
-        public List<string> Avatars
+        public Dictionary<string, string> Avatars
         {
             get => _avatars;
             set
@@ -410,22 +410,38 @@ namespace Bot.Characters
         {
             if (forward)
             {
-                return Avatar < Avatars.Count;
+                return Avatar >= Avatars.Count - 1;
             }
-            return Avatar > 0;
+            return Avatars.Count < 1 || Avatar == 0;
         }
 
         public string GetAvatar(int index)
         {
             if (Avatars.Any())
             {
-                if (Avatars.Count >= index + 1)
+                if (Avatars.Count - 1 >= index)
                 {
-                    return $"{_avatarPrefix}{Avatars[index]}";
+                    return $"{_avatarPrefix}{Avatars.ElementAt(index)}";
                 }
                 else
                 {
-                    return $"{_avatarPrefix}{Avatars[0]}";
+                    return $"{_avatarPrefix}{Avatars.ElementAt(0)}";
+                }
+            }
+            return string.Empty;
+        }
+
+        public string GetAvatar(string key)
+        {
+            if (Avatars.Any())
+            {
+                if (Avatars.ContainsKey(key))
+                {
+                    return $"{_avatarPrefix}{Avatars[key]}";
+                }
+                else
+                {
+                    return $"{_avatarPrefix}{Avatars.ElementAt(0)}";
                 }
             }
             return string.Empty;

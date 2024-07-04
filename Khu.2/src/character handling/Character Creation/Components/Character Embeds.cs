@@ -42,7 +42,8 @@ namespace Bot.Characters
                 .WithTitle(Heritage + " " + Ancestry + " " + Class + " " + Level)
                 .WithAuthor(Name)
                 .WithColor(GetDiscordColor())
-                .WithFooter(player.Username);
+                .WithFooter(player.Username)
+                .WithImageUrl(GetAvatar(Avatar));
 
             List<string> attributes = new();
             foreach (string k in Attributes.Keys)
@@ -110,7 +111,8 @@ namespace Bot.Characters
                 .WithTitle(Heritage + " " + Ancestry + " " + Class + " " + Level)
                 .WithAuthor(Name)
                 .WithColor(GetDiscordColor())
-                .WithFooter(player.Username);
+                .WithFooter(player.Username)
+                .WithImageUrl(GetAvatar(Avatar));
         }
 
         public EmbedBuilder GenerateSpellsEmbed(IUser player)
@@ -120,7 +122,8 @@ namespace Bot.Characters
                 .WithTitle(Heritage + " " + Ancestry + " " + Class + " " + Level)
                 .WithAuthor(Name)
                 .WithColor(GetDiscordColor())
-                .WithFooter(player.Username);
+                .WithFooter(player.Username)
+                .WithImageUrl(GetAvatar(Avatar));
         }
 
         public EmbedBuilder GenerateFeatsEmbed(IUser player)
@@ -130,7 +133,8 @@ namespace Bot.Characters
                 .WithTitle(Heritage + " " + Ancestry + " " + Class + " " + Level)
                 .WithAuthor(Name)
                 .WithColor(GetDiscordColor())
-                .WithFooter(player.Username);
+                .WithFooter(player.Username)
+                .WithImageUrl(GetAvatar(Avatar));
         }
 
         public EmbedBuilder GenerateEmbed(IUser player)

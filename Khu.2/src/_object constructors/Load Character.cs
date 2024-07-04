@@ -41,7 +41,8 @@ namespace Bot.Characters
             List<string> anathema,
             Dictionary<string, uint> attributes,
             string colorPref,
-            List<string> avatars,
+            Dictionary<string, string> avatars,
+			int avatar,
             List<string> notes,
             int lastTokenTrade,
             long created,
@@ -92,6 +93,7 @@ namespace Bot.Characters
             _updated = updated;
             _status = status;
             _display = display;
+			_currentAvatar = avatar;
         }
     }
 }

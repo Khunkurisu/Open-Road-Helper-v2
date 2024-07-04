@@ -762,7 +762,7 @@ namespace Bot.Characters
                 { "feats", _feats },
                 { "spells", _spells },
                 { "attributes", _attributes },
-                { "image", _image }
+                { "foundry image", _image }
             };
         }
 

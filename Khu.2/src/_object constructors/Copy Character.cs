@@ -46,6 +46,7 @@ namespace Bot.Characters
             _updated = template._updated;
             _status = template._status;
             _display = template._display;
+            _currentAvatar = template._currentAvatar;
         }
     }
 }

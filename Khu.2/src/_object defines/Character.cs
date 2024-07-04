@@ -24,20 +24,23 @@ namespace Bot.Characters
         private string? _heritage;
         private string? _class;
         private string? _background;
+
         private uint _level = 0;
         private int _generation = 1;
         private double _currency = 0;
         private uint _downtime = 0;
 
-        private List<string> _languages = new() { "" };
         private Dictionary<string, int> _skills = new() { };
         private Dictionary<string, int> _lore = new() { };
         private Dictionary<string, int> _saves = new() { };
         private uint _perception = 0;
+
+        private List<string> _languages = new() { "" };
         private List<string> _feats = new() { "" };
         private List<string> _spells = new() { "" };
         private List<string> _edicts = new() { "" };
         private List<string> _anathema = new() { "" };
+
         private Dictionary<string, uint> _attributes =
             new()
             {
@@ -50,8 +53,8 @@ namespace Bot.Characters
             };
 
         private string _colorPref = "#000000";
-        private List<string> _avatars = new() { "" };
-        private List<string> _notes = new() { "" };
+        private Dictionary<string, string> _avatars = new() { };
+        private List<string> _notes = new() { };
 
         private int _lastTokenTrade = 0;
         private readonly long _created;
