@@ -37,10 +37,7 @@ namespace Bot
             }
         }
 
-        public static async Task DrawCharacterPost(
-            Character character,
-            SocketInteraction context
-        )
+        public static async Task DrawCharacterPost(Character character, SocketInteraction context)
         {
             IThreadChannel? threadChannel = GetThreadChannel(
                 character.Guild,
@@ -71,9 +68,7 @@ namespace Bot
             );
         }
 
-        public static async Task DrawCharacterPost(
-            Character character
-        )
+        public static async Task DrawCharacterPost(Character character)
         {
             IThreadChannel? threadChannel = GetThreadChannel(
                 character.Guild,
@@ -94,6 +89,7 @@ namespace Bot
                 {
                     msg.Embed = character.GenerateEmbed(user).Build();
                     msg.Components = character.GenerateComponents().Build();
+                    msg.Content = string.Empty;
                 }
             );
         }
