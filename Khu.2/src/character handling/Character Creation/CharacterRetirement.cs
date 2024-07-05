@@ -111,6 +111,51 @@ namespace Bot
                 );
                 return;
             }
+
+            IThreadChannel? charThread = GetThreadChannel(guild.Id, character.CharacterThread);
+            IThreadChannel? transactionChannel = (IThreadChannel?)GetTextChannel(
+                guild.Id,
+                character.TransactionThread
+            );
+            if (transactionChannel == null || charThread == null)
+            {
+                await component.RespondAsync(
+                    $"{charName} forum threads could not be found.",
+                    ephemeral: true
+                );
+                return;
+            }
+
+            character.Status = character.RetirementType;
+            guild.RemoveCharacter(character);
+            uint refundAmount = (uint)guild.GetNewCharacterCost(user.Id);
+            guild.IncreasePlayerTokenCount(user.Id, refundAmount);
+            guild.AddCharacter(user.Id, character);
+            if (guild.CharacterBoard == null)
+            {
+                await component.RespondAsync(
+                    $"Server forum boards have not been configured.",
+                    ephemeral: true
+                );
+                return;
+            }
+            ulong[] tags =
+            {
+                guild.CharacterBoard.Tags.First(x => x.Name == character.Status.ToString()).Id
+            };
+            await charThread.ModifyAsync(x => x.AppliedTags = tags);
+
+            IUserMessage msg = await transactionChannel.SendMessageAsync(
+                $"{charName} marked as {character.RetirementType}. ({refundAmount} PT gained | {guild.GetPlayerTokenCount(user.Id)} PT remaining)"
+            );
+            string msgLink = $"https://discord.com/channels/{guildId}/{msg.Channel.Id}/{msg.Id}";
+
+            await component.UpdateAsync(x =>
+            {
+                x.Content = $"{charName} marked as {character.RetirementType}. ({msgLink})";
+                x.Embed = null;
+                x.Components = null;
+            });
         }
 
         public static async Task RetireCharacterCancel(SocketMessageComponent component)
@@ -134,15 +179,12 @@ namespace Bot
             }
 
             string charName = formValues[2];
-            Character? character = guild.GetCharacter(user.Id, charName);
-            if (character == null)
+            await component.UpdateAsync(x =>
             {
-                await component.RespondAsync(
-                    $"{charName} could not be found in database for {user.Username}.",
-                    ephemeral: true
-                );
-                return;
-            }
+                x.Content = $"{charName} retirement canceled.";
+                x.Embed = null;
+                x.Components = null;
+            });
         }
     }
 }
