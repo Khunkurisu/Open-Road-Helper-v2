@@ -226,11 +226,11 @@ namespace Bot
             }
             else if (actionContext.Contains("refundCharacter"))
             {
-                await PendingCharacterRefund(button);
+                await PendingCharacterRefund(button, actionContext.Contains("FromForced"));
             }
-            else if (actionContext.Contains("refundCharacterFromForced"))
+            else if (actionContext.Contains("retireCharacter"))
             {
-                await PendingCharacterRefund(button, true);
+                await RetireCharacter(button);
             }
         }
 
