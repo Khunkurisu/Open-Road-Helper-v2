@@ -446,6 +446,8 @@ namespace Bot.Characters
             }
             return string.Empty;
         }
+
+        public Status RetirementType = Status.Retired;
     }
 
     public enum Status
