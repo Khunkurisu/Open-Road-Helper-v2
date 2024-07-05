@@ -158,7 +158,7 @@ namespace Bot
             }
             else if (actionContext.Contains("createCharacter"))
             {
-                actionContext = formValues[4];
+                actionContext = formValues[3];
                 if (actionContext.Contains("cancel"))
                 {
                     await CharacterCreateCancel(button);
@@ -170,7 +170,7 @@ namespace Bot
             }
             else if (actionContext.Contains("replaceCharacter"))
             {
-                actionContext = formValues[4];
+                actionContext = formValues[3];
                 if (actionContext.Contains("cancel"))
                 {
                     await Character.CharacterReplaceCancel(button);
@@ -182,7 +182,7 @@ namespace Bot
             }
             else if (actionContext.Contains("forceCreateCharacter"))
             {
-                actionContext = formValues[4];
+                actionContext = formValues[3];
                 if (actionContext.Contains("cancel"))
                 {
                     await CharacterCreateCancel(button);
@@ -194,7 +194,7 @@ namespace Bot
             }
             else if (actionContext.Contains("editCharacter"))
             {
-                actionContext = formValues[4];
+                actionContext = formValues[3];
                 if (actionContext.Contains("cancel"))
                 {
                     await CharacterEditCancel(button);
@@ -210,7 +210,7 @@ namespace Bot
             }
             else if (actionContext.Contains("judgeCharacter"))
             {
-                actionContext = formValues[4];
+                actionContext = formValues[3];
                 if (actionContext.Contains("approve"))
                 {
                     await ApproveCharacter(button);
@@ -230,7 +230,19 @@ namespace Bot
             }
             else if (actionContext.Contains("retireCharacter"))
             {
-                await RetireCharacter(button);
+                actionContext = formValues[3];
+                if (actionContext.Contains("cancel"))
+                {
+                    await RetireCharacterCancel(button);
+                }
+                else if (actionContext.Contains("confirm"))
+                {
+                    await RetireCharacterConfirm(button);
+                }
+                else
+                {
+                    await RetireCharacter(button);
+                }
             }
         }
 
@@ -254,6 +266,10 @@ namespace Bot
             else if (actionContext.Contains("charDisplay"))
             {
                 await DrawCharacterPost(selectMenu, true);
+            }
+            else if (actionContext.Contains("retirementType"))
+            {
+                await RetireCharacter(selectMenu, true);
             }
         }
 

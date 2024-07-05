@@ -69,7 +69,6 @@ namespace Bot.Characters
 
         public ComponentBuilder? GenerateButtons()
         {
-            Guild guild = Manager.GetGuild(Guild);
             IUser? player = Manager.GetGuildUser(Guild, User);
             if (player == null)
             {
@@ -85,7 +84,7 @@ namespace Bot.Characters
 
             buttons.WithButton(
                 "Edit",
-                "editCharacter+" + Guild + "+" + User + "+" + Name,
+                guild.GenerateFormValues(new() { $"editCharacter", User, Name, "init" }),
                 ButtonStyle.Primary
             );
 
@@ -96,13 +95,15 @@ namespace Bot.Characters
                     buttons
                         .WithButton(
                             "Judge",
-                            guild.GenerateFormValues(new() { $"judgeCharacter", User, Name }),
+                            guild.GenerateFormValues(
+                                new() { $"judgeCharacter", User, Name, "init" }
+                            ),
                             ButtonStyle.Primary
                         )
                         .WithButton(
                             "Refund",
                             guild.GenerateFormValues(
-                                new() { $"refundCharacterFromForced", User, Name }
+                                new() { $"refundCharacterFromForced", User, Name, "init" }
                             ),
                             ButtonStyle.Danger
                         );
@@ -112,7 +113,7 @@ namespace Bot.Characters
                     buttons.WithButton(
                         "Refund",
                         guild.GenerateFormValues(
-                            new() { $"refundCharacterFromForced", User, Name }
+                            new() { $"refundCharacterFromForced", User, Name, "init" }
                         ),
                         ButtonStyle.Danger
                     );
@@ -125,12 +126,16 @@ namespace Bot.Characters
                     buttons
                         .WithButton(
                             "Judge",
-                            guild.GenerateFormValues(new() { $"judgeCharacter", User, Name }),
+                            guild.GenerateFormValues(
+                                new() { $"judgeCharacter", User, Name, "init" }
+                            ),
                             ButtonStyle.Primary
                         )
                         .WithButton(
                             "Refund",
-                            guild.GenerateFormValues(new() { $"refundCharacter", User, Name }),
+                            guild.GenerateFormValues(
+                                new() { $"refundCharacter", User, Name, "init" }
+                            ),
                             ButtonStyle.Danger
                         );
                 }
@@ -138,7 +143,7 @@ namespace Bot.Characters
                 {
                     buttons.WithButton(
                         "Refund",
-                        guild.GenerateFormValues(new() { $"refundCharacter", User, Name }),
+                        guild.GenerateFormValues(new() { $"refundCharacter", User, Name, "init" }),
                         ButtonStyle.Danger
                     );
                 }
@@ -146,7 +151,7 @@ namespace Bot.Characters
                 {
                     buttons.WithButton(
                         "Retire",
-                        guild.GenerateFormValues(new() { $"retireCharacter", User, Name }),
+                        guild.GenerateFormValues(new() { $"retireCharacter", User, Name, "init" }),
                         ButtonStyle.Danger
                     );
                     buttons = AvatarButtons(buttons);

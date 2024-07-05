@@ -44,6 +44,46 @@ namespace Bot.Characters
             return menu;
         }
 
+        public SelectMenuBuilder RetirementTypeSelector()
+        {
+            Guild guild = Manager.GetGuild(Guild);
+
+            var menu = new SelectMenuBuilder()
+                .WithCustomId(guild.GenerateFormValues(new() { $"retirementType", User, Name }))
+                .AddOption(
+                    Status.Retired.ToString(),
+                    Status.Retired.ToString(),
+                    isDefault: RetirementType == Status.Retired
+                )
+                .AddOption(
+                    Status.Deceased.ToString(),
+                    Status.Deceased.ToString(),
+                    isDefault: RetirementType == Status.Deceased
+                );
+
+            return menu;
+        }
+
+        public ComponentBuilder RetirementPost()
+        {
+            Guild guild = Manager.GetGuild(Guild);
+
+            return new ComponentBuilder()
+                .WithSelectMenu(RetirementTypeSelector())
+                .WithButton(
+                    "Confirm",
+                    guild.GenerateFormValues(new() { $"retireCharacter", User, Name, "confirm" }),
+                    ButtonStyle.Success,
+                    row: 1
+                )
+                .WithButton(
+                    "Cancel",
+                    guild.GenerateFormValues(new() { $"retireCharacter", User, Name, "cancel" }),
+                    ButtonStyle.Danger,
+                    row: 1
+                );
+        }
+
         public enum Display
         {
             Details,

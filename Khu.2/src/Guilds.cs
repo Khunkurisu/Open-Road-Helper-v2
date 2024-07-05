@@ -49,8 +49,15 @@ namespace Bot.Guilds
         public string GenerateFormValues(List<dynamic> values)
         {
             string guid = Guid.NewGuid().ToString();
-            formValues.Add(guid, values);
+            Task.Run(() => StoreFormValues(guid, values));
             return guid;
+        }
+
+        public async Task StoreFormValues(string guid, List<dynamic> values)
+        {
+            await Task.Yield();
+            formValues.Add(guid, values);
+            await Task.CompletedTask;
         }
 
         public List<dynamic> GetFormValues(string formId)
