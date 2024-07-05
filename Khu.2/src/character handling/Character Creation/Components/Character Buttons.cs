@@ -79,20 +79,11 @@ namespace Bot.Characters
             return GenerateButtons();
         }
 
-        public ComponentBuilder GenerateButtons(bool isForced = false)
+        public ComponentBuilder GenerateButtons(ComponentBuilder buttons, bool isForced = false)
         {
             Guild guild = Manager.GetGuild(Guild);
 
-            if (!isForced && Status == Status.Temp)
-            {
-                return ConfirmationButtons(Guild, User, Name, "create");
-            }
-            if (isForced && Status == Status.Temp)
-            {
-                return ConfirmationButtons(Guild, User, Name, "forceCreate");
-            }
-
-            var buttons = new ComponentBuilder().WithButton(
+            buttons.WithButton(
                 "Edit",
                 "editCharacter+" + Guild + "+" + User + "+" + Name,
                 ButtonStyle.Primary
@@ -163,6 +154,20 @@ namespace Bot.Characters
             }
 
             return buttons;
+        }
+
+        public ComponentBuilder GenerateButtons(bool isForced = false)
+        {
+            if (!isForced && Status == Status.Temp)
+            {
+                return ConfirmationButtons(Guild, User, Name, "create");
+            }
+            if (isForced && Status == Status.Temp)
+            {
+                return ConfirmationButtons(Guild, User, Name, "forceCreate");
+            }
+
+            return GenerateButtons(new(), isForced);
         }
     }
 }
