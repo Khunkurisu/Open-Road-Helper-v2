@@ -57,8 +57,7 @@ namespace Bot.Characters
         {
             ulong guildId = Context.Guild.Id;
             IUser player = Context.User;
-            string json = string.Empty;
-            HttpClient client = new() { Timeout = TimeSpan.FromSeconds(2) };
+            HttpClient httpClient = new() { Timeout = TimeSpan.FromSeconds(2) };
 
             if (pathbuilderId == 0)
             {
@@ -66,7 +65,7 @@ namespace Bot.Characters
                 return;
             }
 
-            json = await client.GetStringAsync(
+            string json = await httpClient.GetStringAsync(
                 "https://pathbuilder2e.com/json.php?id=" + pathbuilderId
             );
             if (json == null || json == string.Empty)
