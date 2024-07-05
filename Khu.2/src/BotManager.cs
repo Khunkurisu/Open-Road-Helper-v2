@@ -125,7 +125,7 @@ namespace Bot
                     await guild.RefreshQuestPosts();
                 }
             }
-            await Task.Delay(TimeSpan.FromSeconds(0.5));
+            await Task.Delay(10);
         }
 
         private async Task OnButtonExecuted(SocketMessageComponent button)
