@@ -15,7 +15,6 @@ namespace Bot.Characters
 
             _name = data["name"];
             _desc = data["description"];
-            _rep = data["reputation"];
             _class = data["class"];
             _ancestry = data["ancestry"];
             _heritage = data["heritage"];

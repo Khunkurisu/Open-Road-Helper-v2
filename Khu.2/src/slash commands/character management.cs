@@ -16,7 +16,7 @@ namespace Bot.Characters
         {
             Guild guild = Manager.GetGuild(context.Guild.Id);
             IUser? user;
-            if (autocompleteInteraction.Data.CommandName.Contains("update"))
+            if (autocompleteInteraction.Data.CommandName.Contains("character"))
             {
                 user = context.User;
             }
@@ -138,12 +138,13 @@ namespace Bot.Characters
         {
             ulong guildId = Context.Guild.Id;
             Guild guild = Manager.GetGuild(guildId);
+            IUser user = Context.User;
 
-            Character? character = guild.GetCharacter(guildId, charName);
+            Character? character = guild.GetCharacter(user.Id, charName);
             if (character == null)
             {
                 await RespondAsync(
-                    $"Unable to locate {charName} for user <@{Context.User.Id}>.",
+                    $"Unable to locate {charName} for user <@{user.Id}>.",
                     ephemeral: true
                 );
                 return;
@@ -172,25 +173,6 @@ namespace Bot.Characters
                 );
 
             await Context.Interaction.RespondWithModalAsync(textBox.Build());
-        }
-    }
-
-    public class CharacterNameSuggestions : AutocompleteHandler
-    {
-        public override async Task<AutocompletionResult> GenerateSuggestionsAsync(
-            IInteractionContext context,
-            IAutocompleteInteraction autocompleteInteraction,
-            IParameterInfo parameter,
-            IServiceProvider services
-        )
-        {
-            await Task.Yield();
-            IEnumerable<AutocompleteResult> results = new[]
-            {
-                new AutocompleteResult("name1", "value1"),
-                new AutocompleteResult("name2", "value2")
-            };
-            return AutocompletionResult.FromSuccess(results.Take(25));
         }
     }
 }

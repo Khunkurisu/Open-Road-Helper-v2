@@ -44,6 +44,24 @@ namespace Bot.Guilds
         private readonly List<Party> _parties = new();
         private readonly Dictionary<ulong, uint> _playerTokens = new();
 
+        public Dictionary<string, List<dynamic>> formValues = new();
+
+        public string GenerateFormValues(List<dynamic> values)
+        {
+            string guid = Guid.NewGuid().ToString();
+            formValues.Add(guid, values);
+            return guid;
+        }
+
+        public List<dynamic> GetFormValues(string formId)
+        {
+            if (formValues.ContainsKey(formId))
+            {
+                return formValues[formId];
+            }
+            return new();
+        }
+
         public List<uint> Generations { get; } = new() { 5 };
 
         public int GenerationCount

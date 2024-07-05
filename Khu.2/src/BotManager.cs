@@ -130,51 +130,76 @@ namespace Bot
 
         private async Task OnButtonExecuted(SocketMessageComponent button)
         {
-            string customId = button.Data.CustomId;
-            if (customId.Contains("createQuest"))
+            if (button.GuildId == null)
             {
-                if (customId.Contains("back"))
+                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+                return;
+            }
+            ulong guildId = (ulong)button.GuildId;
+            Guild guild = GetGuild(guildId);
+
+            List<dynamic> formValues = guild.GetFormValues(button.Data.CustomId);
+
+            string actionContext = formValues[0];
+            if (actionContext.Contains("createQuest"))
+            {
+                if (actionContext.Contains("back"))
                 {
                     await QuestCreateBack(button);
                 }
-                else if (customId.Contains("cancel"))
+                else if (actionContext.Contains("cancel"))
                 {
                     await QuestCreateCancel(button);
                 }
-                else if (customId.Contains("confirm"))
+                else if (actionContext.Contains("confirm"))
                 {
                     await QuestCreateConfirm(button);
                 }
             }
-            else if (customId.Contains("createCharacter"))
+            else if (actionContext.Contains("createCharacter"))
             {
-                if (customId.Contains("cancel"))
+                actionContext = formValues[4];
+                if (actionContext.Contains("cancel"))
                 {
                     await CharacterCreateCancel(button);
                 }
-                else if (customId.Contains("confirm"))
+                else if (actionContext.Contains("confirm"))
                 {
                     await CharacterCreateConfirm(button);
                 }
             }
-            else if (customId.Contains("forceCreateCharacter"))
+            else if (actionContext.Contains("replaceCharacter"))
             {
-                if (customId.Contains("cancel"))
+                actionContext = formValues[4];
+                if (actionContext.Contains("cancel"))
                 {
-                    await CharacterCreateCancel(button, true);
+                    await Character.CharacterReplaceCancel(button);
                 }
-                else if (customId.Contains("confirm"))
+                else if (actionContext.Contains("confirm"))
+                {
+                    await Character.CharacterReplaceConfirm(button);
+                }
+            }
+            else if (actionContext.Contains("forceCreateCharacter"))
+            {
+                actionContext = formValues[4];
+                if (actionContext.Contains("cancel"))
+                {
+                    await CharacterCreateCancel(button);
+                }
+                else if (actionContext.Contains("confirm"))
                 {
                     await CharacterCreateConfirm(button, true);
                 }
             }
-            else if (customId.Contains("editCharacter"))
+            else if (actionContext.Contains("editCharacter"))
             {
-                if (customId.Contains("cancel"))
+                actionContext = formValues[4];
+                if (actionContext.Contains("cancel"))
                 {
                     await CharacterEditCancel(button);
                 }
-                else if (customId.Contains("confirm"))
+                else if (actionContext.Contains("confirm"))
                 {
                     await CharacterEditConfirm(button);
                 }
@@ -183,13 +208,14 @@ namespace Bot
                     await CharacterEditStart(button);
                 }
             }
-            else if (customId.Contains("judgeCharacter"))
+            else if (actionContext.Contains("judgeCharacter"))
             {
-                if (customId.Contains("approve"))
+                actionContext = formValues[4];
+                if (actionContext.Contains("approve"))
                 {
                     await ApproveCharacter(button);
                 }
-                else if (customId.Contains("reject"))
+                else if (actionContext.Contains("reject"))
                 {
                     await RejectCharacter(button);
                 }
@@ -198,11 +224,11 @@ namespace Bot
                     await JudgeCharacter(button);
                 }
             }
-            else if (customId.Contains("refundCharacter"))
+            else if (actionContext.Contains("refundCharacter"))
             {
                 await PendingCharacterRefund(button);
             }
-            else if (customId.Contains("refundCharacterFromForced"))
+            else if (actionContext.Contains("refundCharacterFromForced"))
             {
                 await PendingCharacterRefund(button, true);
             }
@@ -210,13 +236,24 @@ namespace Bot
 
         private async Task OnSelectMenuExecuted(SocketMessageComponent selectMenu)
         {
-            if (selectMenu.Data.CustomId.Contains("createQuest"))
+            if (selectMenu.GuildId == null)
+            {
+                await selectMenu.RespondAsync("This must be run in a guild.", ephemeral: true);
+                return;
+            }
+            ulong guildId = (ulong)selectMenu.GuildId;
+            Guild guild = GetGuild(guildId);
+
+            List<dynamic> formValues = guild.GetFormValues(selectMenu.Data.CustomId);
+
+            string actionContext = formValues[0];
+            if (actionContext.Contains("createQuest"))
             {
                 await QuestCreate(selectMenu);
             }
-            else if (selectMenu.Data.CustomId.Contains("charDisplay"))
+            else if (actionContext.Contains("charDisplay"))
             {
-                await DrawCharacterPost(selectMenu);
+                await DrawCharacterPost(selectMenu, true);
             }
         }
 
@@ -255,24 +292,35 @@ namespace Bot
 
         private async Task OnModalSubmit(SocketModal modal)
         {
+            if (modal.GuildId == null)
+            {
+                await modal.RespondAsync("This must be run in a guild.", ephemeral: true);
+                return;
+            }
+            ulong guildId = (ulong)modal.GuildId;
+            Guild guild = GetGuild(guildId);
+
+            List<dynamic> formValues = guild.GetFormValues(modal.Data.CustomId);
+
+            string actionContext = formValues[0];
             List<SocketMessageComponentData> components = modal.Data.Components.ToList();
-            if (modal.Data.CustomId.Contains("createQuest"))
+            if (actionContext.Contains("createQuest"))
             {
                 await QuestCreate(modal, components);
             }
-            else if (modal.Data.CustomId.Contains("createCharacter"))
+            else if (actionContext.Contains("createCharacter"))
             {
                 await CharacterCreate(modal, components);
             }
-            else if (modal.Data.CustomId.Contains("replaceCharacter"))
+            else if (actionContext.Contains("replaceCharacter"))
             {
                 await Character.ReplaceCharacter(modal, components);
             }
-            else if (modal.Data.CustomId.Contains("forceCreateCharacter"))
+            else if (actionContext.Contains("forceCreateCharacter"))
             {
                 await CharacterCreate(modal, components, true);
             }
-            else if (modal.Data.CustomId.Contains("rejectCharacter"))
+            else if (actionContext.Contains("rejectCharacter"))
             {
                 await RejectCharacter(modal, components);
             }

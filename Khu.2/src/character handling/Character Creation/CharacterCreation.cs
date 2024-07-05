@@ -43,69 +43,79 @@ namespace Bot
             bool isForced = false
         )
         {
-            string guildId = modal.Data.CustomId.Split("+")[1];
-            Guild guild = GetGuild(ulong.Parse(guildId));
-            string playerIdString = modal.Data.CustomId.Split("+")[2];
+            ulong? guildIdOrNull = modal.GuildId;
+            if (guildIdOrNull == null)
+            {
+                await modal.RespondAsync("This command can only be used in a guild.");
+                return;
+            }
+            ulong guildId = (ulong)guildIdOrNull;
+            Guild guild = GetGuild(guildId);
+            List<dynamic> formData = guild.GetFormValues(modal.Data.CustomId);
+            string playerIdString = formData[2];
             ulong playerId = ulong.Parse(playerIdString);
             IUser user = modal.User;
             IUser? player = _client?.GetUser(playerId);
-            if (player != null)
+            if (player == null)
             {
-                string charName = components.First(x => x.CustomId == "character_name").Value;
-                string charDescription = components
-                    .First(x => x.CustomId == "character_description")
-                    .Value;
-                string charReputation = components
-                    .First(x => x.CustomId == "character_reputation")
-                    .Value;
+                await modal.RespondAsync("Unable to locate player.", ephemeral: true);
+                return;
+            }
 
-                Dictionary<string, dynamic>? charData;
-                IImportable? importedCharacter = guild.GetCharacterJson(playerId);
-                if (importedCharacter != null)
+            if (user.Id != playerId && !guild.IsGamemaster(user))
+            {
+                await modal.RespondAsync(
+                    "You lack permissions to perform this action.",
+                    ephemeral: true
+                );
+                return;
+            }
+            string charName = components.First(x => x.CustomId == "character_name").Value;
+            string charDescription = components
+                .First(x => x.CustomId == "character_description")
+                .Value;
+            string charReputation = components
+                .First(x => x.CustomId == "character_reputation")
+                .Value;
+
+            Dictionary<string, dynamic>? charData;
+            IImportable? importedCharacter = guild.GetCharacterJson(playerId);
+            if (importedCharacter != null)
+            {
+                charData = importedCharacter.GetCharacterData();
+                if (charData != null)
                 {
-                    charData = importedCharacter.GetCharacterData();
-                    if (charData != null)
+                    int tokenCost = guild.GetNewCharacterCost(playerId);
+                    uint tokenCount = guild.GetPlayerTokenCount(playerId);
+                    if (!isForced && tokenCount < tokenCost)
                     {
-                        int tokenCost = guild.GetNewCharacterCost(playerId);
-                        uint tokenCount = guild.GetPlayerTokenCount(playerId);
-                        if (!isForced && tokenCount < tokenCost)
-                        {
-                            await modal.RespondAsync(
-                                "You lack sufficient tokens to create a new character. "
-                                    + $"({tokenCost} PT required - {tokenCount} PT remaining.)"
-                            );
-                            return;
-                        }
-                        charData["name"] = charName;
-                        charData["description"] = charDescription;
-                        charData["reputation"] = charReputation;
-                        Character character = new(player, guild, charData);
-                        guild.AddCharacter(user.Id, character);
-
                         await modal.RespondAsync(
-                            "Ensure everything looks correct before continuing!",
-                            embed: character.GenerateEmbed(user).Build(),
-                            components: character.GenerateComponents().Build(),
-                            ephemeral: true
+                            "You lack sufficient tokens to create a new character. "
+                                + $"({tokenCost} PT required - {tokenCount} PT remaining.)"
                         );
+                        return;
                     }
-                    else
-                    {
-                        await modal.RespondAsync("charData was null");
-                    }
+                    charData["name"] = charName;
+                    charData["description"] = charDescription;
+                    charData["reputation"] = charReputation;
+                    Character character = new(player, guild, charData);
+                    guild.AddCharacter(user.Id, character);
+
+                    await modal.RespondAsync(
+                        "Ensure everything looks correct before continuing!",
+                        embed: character.GenerateEmbed(user).Build(),
+                        components: character.GenerateComponents().Build(),
+                        ephemeral: true
+                    );
                 }
                 else
                 {
-                    await modal.RespondAsync("importedCharacter was null");
+                    await modal.RespondAsync("charData was null");
                 }
-            }
-            else if (user.Id != playerId)
-            {
-                await modal.RespondAsync();
             }
             else
             {
-                await modal.RespondAsync("something went terribly wrong");
+                await modal.RespondAsync("importedCharacter was null");
             }
         }
 
@@ -114,68 +124,121 @@ namespace Bot
             bool isForced = false
         )
         {
-            string guildId = button.Data.CustomId.Split("+")[1];
-            Guild guild = GetGuild(ulong.Parse(guildId));
-            IUser user = button.User;
-            string player = button.Data.CustomId.Split("+")[2];
-            if (user.Id.ToString() == player || guild.IsGamemaster(user))
+            if (button.GuildId == null)
             {
-                string charName = button.Data.CustomId.Split("+")[3];
-                uint tokenCost = (uint)guild.GetNewCharacterCost(user.Id);
-                uint tokenCount = guild.GetPlayerTokenCount(user.Id);
+                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+                return;
+            }
+            ulong guildId = (ulong)button.GuildId;
+            Guild guild = GetGuild(guildId);
 
-                Character? character = guild.GetCharacter(user.Id, charName);
-                if (character != null && character.Status == Status.Temp)
+            List<dynamic> formValues = guild.GetFormValues(button.Data.CustomId);
+
+            ulong playerId = formValues[1];
+            IUser user = button.User;
+            if (user.Id != playerId && !guild.IsGamemaster(user))
+            {
+                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                return;
+            }
+
+            string charName = formValues[2];
+            Character? character = guild.GetCharacter(user.Id, charName);
+            if (character == null)
+            {
+                await button.UpdateAsync(x =>
                 {
-                    if (!isForced)
-                    {
-                        guild.DecreasePlayerTokenCount(user.Id, tokenCost);
-                    }
-                    await PostCharacter(button, guild, character, user);
-                }
-                else
+                    x.Content = $"Unable to locate {charName}.";
+                    x.Embed = null;
+                    x.Components = null;
+                });
+                return;
+            }
+            if (character.Status != Status.Temp)
+            {
+                await button.UpdateAsync(x =>
                 {
-                    await button.UpdateAsync(x =>
-                    {
-                        x.Content = "Somehow character was null.";
-                    });
-                }
+                    x.Content = $"{charName} has an invalid status for that action.";
+                    x.Embed = null;
+                    x.Components = null;
+                });
+                return;
+            }
+
+            bool paid = true;
+            if (!isForced)
+            {
+                paid = guild.DecreasePlayerTokenCount(
+                    user.Id,
+                    (uint)guild.GetNewCharacterCost(user.Id)
+                );
+            }
+            if (paid)
+            {
+                await PostCharacter(button, guild, character, user);
             }
             else
             {
-                await button.UpdateAsync(x => { });
+                await button.UpdateAsync(x =>
+                {
+                    x.Content = $"You lack sufficient PT to create {charName}.";
+                    x.Embed = null;
+                    x.Components = null;
+                });
             }
         }
 
-        private static async Task CharacterCreateCancel(
-            SocketMessageComponent button,
-            bool isForced = false
-        )
+        private static async Task CharacterCreateCancel(SocketMessageComponent button)
         {
-            string guildId = button.Data.CustomId.Split("+")[1];
-            Guild guild = GetGuild(ulong.Parse(guildId));
+            if (button.GuildId == null)
+            {
+                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+                return;
+            }
+            ulong guildId = (ulong)button.GuildId;
+            Guild guild = GetGuild(guildId);
+
+            List<dynamic> formValues = guild.GetFormValues(button.Data.CustomId);
+
+            ulong playerId = formValues[1];
             IUser user = button.User;
-            string player = button.Data.CustomId.Split("+")[2];
-            if (user.Id.ToString() == player || guild.IsGamemaster(user))
+            if (user.Id != playerId && !guild.IsGamemaster(user))
             {
-                guild.ClearTempCharacter(user.Id);
-                string charName = button.Data.CustomId.Split("+")[3];
-                Character? character = guild.GetCharacter(user.Id, charName);
-                if (character != null && character.Status == Status.Temp)
+                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                return;
+            }
+
+            string charName = formValues[2];
+            Character? character = guild.GetCharacter(user.Id, charName);
+            if (character == null)
+            {
+                await button.UpdateAsync(x =>
                 {
-                    guild.RemoveCharacter(character);
-                    await button.UpdateAsync(x =>
-                    {
-                        x.Content = "Character creation canceled.";
-                        x.Embed = null;
-                        x.Components = null;
-                    });
-                }
+                    x.Content = $"Unable to locate {charName}.";
+                    x.Embed = null;
+                    x.Components = null;
+                });
+                return;
             }
-            else
+            if (character.Status != Status.Temp)
             {
-                await button.UpdateAsync(x => { });
+                await button.UpdateAsync(x =>
+                {
+                    x.Content = $"{charName} has an invalid status for that action.";
+                    x.Embed = null;
+                    x.Components = null;
+                });
+                return;
             }
+
+            guild.ClearTempCharacter(user.Id);
+            guild.RemoveCharacter(character);
+            await button.UpdateAsync(x =>
+            {
+                x.Content = "Character creation canceled.";
+                x.Embed = null;
+                x.Components = null;
+            });
         }
 
         private static async Task PostCharacter(
@@ -185,55 +248,56 @@ namespace Bot
             IUser user
         )
         {
-            if (guild.CharacterBoard != null && guild.TransactionBoard != null)
+            if (guild.CharacterBoard == null || guild.TransactionBoard == null)
             {
-                guild.ClearTempCharacter(user.Id);
-                ForumTag[] tags =
-                {
-                    guild.CharacterBoard.Tags.First(x => x.Name == "Pending Approval")
-                };
-                character.Status = Status.Pending;
-
-                IThreadChannel charThread = await guild.CharacterBoard.CreatePostAsync(
-                    character.Name,
-                    ThreadArchiveDuration.OneWeek,
-                    embed: character.GenerateEmbed(user).Build(),
-                    tags: tags,
-                    components: character.GenerateComponents().Build()
-                );
-
-                IThreadChannel transThread = await guild.TransactionBoard.CreatePostAsync(
-                    character.Name,
-                    ThreadArchiveDuration.OneWeek,
-                    text: $"{character.Name} Transactions"
-                );
-
-                await transThread.SendMessageAsync(
-                    $"{charThread.Mention} has been created and is pending approval."
-                );
-
-                character.CharacterThread = charThread.Id;
-                character.TransactionThread = transThread.Id;
-                guild.QueueSave("characters");
-
-                await charThread.AddUserAsync((IGuildUser)user);
-                await transThread.AddUserAsync((IGuildUser)user);
-
                 await context.UpdateAsync(x =>
                 {
-                    x.Content =
-                        $"{character.Name} has been created and is pending approval. (Character: {charThread.Mention} | Transactions: {transThread.Mention})";
+                    x.Content = $"Server forum boards have not been configured.";
                     x.Embed = null;
                     x.Components = null;
                 });
+                return;
             }
-            else
+
+            guild.ClearTempCharacter(user.Id);
+            ForumTag[] tags =
             {
-                await context.UpdateAsync(x =>
-                {
-                    x.Content = "Server forum boards have not been assigned.";
-                });
-            }
+                guild.CharacterBoard.Tags.First(x => x.Name == "Pending Approval")
+            };
+            character.Status = Status.Pending;
+
+            IThreadChannel charThread = await guild.CharacterBoard.CreatePostAsync(
+                character.Name,
+                ThreadArchiveDuration.OneWeek,
+                embed: character.GenerateEmbed(user).Build(),
+                tags: tags,
+                components: character.GenerateComponents().Build()
+            );
+
+            IThreadChannel transThread = await guild.TransactionBoard.CreatePostAsync(
+                character.Name,
+                ThreadArchiveDuration.OneWeek,
+                text: $"{character.Name} Transactions"
+            );
+
+            await transThread.SendMessageAsync(
+                $"{charThread.Mention} has been created and is pending approval."
+            );
+
+            character.CharacterThread = charThread.Id;
+            character.TransactionThread = transThread.Id;
+            guild.QueueSave("characters");
+
+            await charThread.AddUserAsync((IGuildUser)user);
+            await transThread.AddUserAsync((IGuildUser)user);
+
+            await context.UpdateAsync(x =>
+            {
+                x.Content =
+                    $"{character.Name} has been created and is pending approval. (Character: {charThread.Mention} | Transactions: {transThread.Mention})";
+                x.Embed = null;
+                x.Components = null;
+            });
         }
 
         public static async Task PendingCharacterRefund(
@@ -241,20 +305,25 @@ namespace Bot
             bool isForced = false
         )
         {
-            IUser user = button.User;
-            string player = button.Data.CustomId.Split("+")[2];
-            string guildId = button.Data.CustomId.Split("+")[1];
-            Guild guild = GetGuild(ulong.Parse(guildId));
-            if (user.Id.ToString() != player && !guild.IsGamemaster(user))
+            if (button.GuildId == null)
             {
-                await button.RespondAsync(
-                    $"You ({user.Username}) lack permission to do this.",
-                    ephemeral: true
-                );
+                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+                return;
+            }
+            ulong guildId = (ulong)button.GuildId;
+            Guild guild = GetGuild(guildId);
+
+            List<dynamic> formValues = guild.GetFormValues(button.Data.CustomId);
+
+            ulong playerId = formValues[1];
+            IUser user = button.User;
+            if (user.Id != playerId && !guild.IsGamemaster(user))
+            {
+                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
                 return;
             }
 
-            string charName = button.Data.CustomId.Split("+")[3];
+            string charName = formValues[2];
             Character? character = guild.GetCharacter(user.Id, charName);
             if (character == null)
             {

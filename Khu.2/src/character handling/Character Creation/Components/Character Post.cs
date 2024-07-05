@@ -8,18 +8,19 @@ namespace Bot.Characters
     {
         public ComponentBuilder GenerateComponents(bool isForced = false)
         {
-            return GenerateButtons(_guild, _user, isForced)
-                .WithSelectMenu(CharacterDisplaySelector(_guild, _user));
+            return GenerateButtons(isForced).WithSelectMenu(CharacterDisplaySelector());
         }
 
         public static SelectMenuBuilder CharacterDisplaySelector(
             ulong guildId,
             ulong userId,
-            string name
+            string charName
         )
         {
+            Guild guild = Manager.GetGuild(guildId);
+
             return new SelectMenuBuilder()
-                .WithCustomId("charDisplay+" + guildId + "+" + userId + "+" + name)
+                .WithCustomId(guild.GenerateFormValues(new() { $"charDisplay", userId, charName }))
                 .AddOption("Details", "Details", isDefault: true)
                 .AddOption("Attributes", "Attributes")
                 .AddOption("Equipment", "Equipment")
@@ -27,10 +28,12 @@ namespace Bot.Characters
                 .AddOption("Feats", "Feats");
         }
 
-        public SelectMenuBuilder CharacterDisplaySelector(ulong guildId, ulong userId)
+        public SelectMenuBuilder CharacterDisplaySelector()
         {
+            Guild guild = Manager.GetGuild(Guild);
+
             var menu = new SelectMenuBuilder().WithCustomId(
-                "charDisplay+" + guildId + "+" + userId + "+" + Name
+                guild.GenerateFormValues(new() { $"charDisplay", _user, Name })
             );
 
             foreach (string k in Enum.GetNames(typeof(Display)))

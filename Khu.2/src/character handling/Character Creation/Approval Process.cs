@@ -285,15 +285,21 @@ namespace Bot
             string context
         )
         {
+            Guild guild = GetGuild(ulong.Parse(guildId));
+
             return new ComponentBuilder()
                 .WithButton(
                     "Approve",
-                    context + "Character+" + guildId + "+" + playerId + "+" + charName + "+approve",
+                    guild.GenerateFormValues(
+                        new() { $"{context}Character", playerId, charName, "approve" }
+                    ),
                     ButtonStyle.Success
                 )
                 .WithButton(
                     "Reject",
-                    context + "Character+" + guildId + "+" + playerId + "+" + charName + "+reject",
+                    guild.GenerateFormValues(
+                        new() { $"{context}Character", playerId, charName, "reject" }
+                    ),
                     ButtonStyle.Danger
                 );
         }

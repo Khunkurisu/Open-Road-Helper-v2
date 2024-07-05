@@ -197,13 +197,34 @@ namespace Bot.Characters
                 _languages.Add(language);
             }
 
-            _age = details["age"]["value"];
-            _height = details["height"]["value"];
-            _weight = details["weight"]["value"];
-            _gender = details["gender"]["value"];
-            _ethnicity = details["ethnicity"]["value"];
-            _nationality = details["nationality"]["value"];
-            _deity = details["deity"]["value"];
+            if (details.ContainsKey("age"))
+            {
+                _age = details["age"]["value"];
+            }
+            if (details.ContainsKey("height"))
+            {
+                _height = details["height"]["value"];
+            }
+            if (details.ContainsKey("weight"))
+            {
+                _weight = details["weight"]["value"];
+            }
+            if (details.ContainsKey("gender"))
+            {
+                _gender = details["gender"]["value"];
+            }
+            if (details.ContainsKey("ethnicity"))
+            {
+                _ethnicity = details["ethnicity"]["value"];
+            }
+            if (details.ContainsKey("nationality"))
+            {
+                _nationality = details["nationality"]["value"];
+            }
+            if (details.ContainsKey("deity"))
+            {
+                _deity = details["deity"]["value"];
+            }
 
             Dictionary<string, Dictionary<string, uint>> skills = systemData["skills"].ToObject<
                 Dictionary<string, Dictionary<string, uint>>
@@ -249,9 +270,15 @@ namespace Bot.Characters
 
             if (classSystem.ContainsKey("boosts"))
             {
-                Dictionary<string, dynamic> boostsData = classSystem["keyability"].ToObject<
-                    Dictionary<string, dynamic>
-                >();
+                Dictionary<string, dynamic> boostsData = new();
+                if (classSystem.ContainsKey("keyability"))
+                {
+                    boostsData = classSystem["keyability"].ToObject<Dictionary<string, dynamic>>();
+                }
+                else if (classSystem.ContainsKey("keyAbility"))
+                {
+                    boostsData = classSystem["keyAbility"].ToObject<Dictionary<string, dynamic>>();
+                }
 
                 if (boostsData.ContainsKey("selected"))
                 {

@@ -8,6 +8,33 @@ namespace Bot.Characters
 {
     public partial class Character
     {
+        public Character(Character template, Dictionary<string, dynamic> data)
+        {
+            _id = template.Id;
+            _user = template._user;
+            _guild = template._guild;
+            _characterThread = template._characterThread;
+            _transactionThread = template._transactionThread;
+            _display = template._display;
+            _currentAvatar = template._currentAvatar;
+
+            ParseImport(data);
+
+            _name = template._name;
+            _updated = template._updated;
+            _status = template._status;
+            _avatars = template._avatars;
+            _colorPref = template._colorPref;
+            _notes = template._notes;
+            _lastTokenTrade = template._lastTokenTrade;
+            _downtime = template._downtime;
+            _birthDay = template._birthDay;
+            _birthMonth = template._birthMonth;
+            _birthYear = template._birthYear;
+
+            _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        }
+
         public static async Task ReplaceAsync(
             SocketInteractionContext context,
             IAttachment sheet,
@@ -20,7 +47,6 @@ namespace Bot.Characters
         public async Task ReplaceAsync(SocketInteractionContext context, IAttachment sheet)
         {
             ulong guildId = context.Guild.Id;
-            Guild guild = Manager.GetGuild(guildId);
             IUser player = context.User;
             string json = string.Empty;
             HttpClient client = new() { Timeout = TimeSpan.FromSeconds(2) };
@@ -75,6 +101,7 @@ namespace Bot.Characters
             string guildId = modalData[1];
             Guild guild = Manager.GetGuild(ulong.Parse(guildId));
             string playerIdString = modalData[2];
+            string charName = modalData[3];
             ulong playerId = ulong.Parse(playerIdString);
             IUser user = modal.User;
             IUser? player = Manager.GetGuildUser(guild.Id, playerId);
@@ -94,11 +121,11 @@ namespace Bot.Characters
                 return;
             }
 
-            Character? character = guild.GetCharacter(guild.Id, modalData[3]);
+            Character? character = guild.GetCharacter(player.Id, charName);
             if (character == null)
             {
                 await modal.RespondAsync(
-                    $"Unable to locate {modalData[3]} for user <@{player.Id}>.",
+                    $"Unable to locate {charName} for user <@{player.Id}>.",
                     ephemeral: true
                 );
                 return;
@@ -113,34 +140,162 @@ namespace Bot.Characters
                 return;
             }
 
+            string charReputation = components
+                .First(x => x.CustomId == "character_reputation")
+                .Value;
+            Character newCharacter =
+                new(character, charData)
+                {
+                    Reputation = charReputation,
+                    Name = $"{charData["name"]}-NEW"
+                };
+            guild.AddCharacter(playerId, newCharacter);
+
+            await modal.RespondAsync(
+                $"Make sure everything looks correct before continuing.",
+                embed: newCharacter.GenerateEmbed().Build(),
+                components: ConfirmationButtons(
+                        guildId,
+                        playerId,
+                        $"{newCharacter.Name}+{character.Name}",
+                        "replace"
+                    )
+                    .Build()
+            );
+        }
+
+        public static async Task CharacterReplaceConfirm(SocketMessageComponent button)
+        {
+            if (button.GuildId == null)
+            {
+                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+                return;
+            }
+            ulong guildId = (ulong)button.GuildId;
+            Guild guild = Manager.GetGuild(guildId);
+
+            List<dynamic> formValues = guild.GetFormValues(button.Data.CustomId);
+
+            ulong playerId = formValues[1];
+            IUser user = button.User;
+            if (user.Id != playerId && !guild.IsGamemaster(user))
+            {
+                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                return;
+            }
+
+            IUser? player = Manager.GetGuildUser(guildId, playerId);
+            if (player == null)
+            {
+                await button.RespondAsync(
+                    $"Unable to find user <@{playerId}> in database.",
+                    ephemeral: true
+                );
+                return;
+            }
+
+            string[] charNames = formValues[2].Split("+");
+            string charName = charNames[0];
+            string oldCharName = charNames[1];
+
+            Character? character = guild.GetCharacter(player.Id, oldCharName);
+            if (character == null)
+            {
+                await button.UpdateAsync(x =>
+                {
+                    x.Content = $"Unable to locate {oldCharName} for user <@{playerId}>.";
+                    x.Components = null;
+                    x.Embed = null;
+                });
+                return;
+            }
+
             IThreadChannel? transThread = Manager.GetThreadChannel(
                 guild.Id,
                 character.TransactionThread
             );
             if (transThread == null)
             {
-                await modal.RespondAsync(
-                    $"Transaction thread for {character.Name} could not be found.",
-                    ephemeral: true
-                );
+                await button.UpdateAsync(x =>
+                {
+                    x.Content = $"Transaction thread for {character.Name} could not be found.";
+                    x.Components = null;
+                    x.Embed = null;
+                });
                 return;
             }
 
-            Character charHolder = new(character);
-            character.ParseImport(charData);
-            character.Reputation = components
-                .First(x => x.CustomId == "character_reputation")
-                .Value;
-            ;
-            character.Name = charHolder.Name;
-            guild.QueueSave("characters");
-
-            var msg = await transThread.SendMessageAsync($"{character.Name} has been updated.");
-            string msgLink = $"https://discord.com/channels/{guildId}/{msg.Channel.Id}/{msg.Id}";
-            await modal.RespondAsync(
-                $"{character.Name} has been updated. ({msgLink})",
-                ephemeral: true
+            IThreadChannel? charThread = Manager.GetThreadChannel(
+                guild.Id,
+                character.CharacterThread
             );
+            if (charThread == null)
+            {
+                await button.UpdateAsync(x =>
+                {
+                    x.Content = $"Character thread for {character.Name} could not be found.";
+                    x.Components = null;
+                    x.Embed = null;
+                });
+                return;
+            }
+
+            Character? newCharacter = guild.GetCharacter(playerId, $"{character.Name}-New");
+            if (newCharacter == null)
+            {
+                await button.UpdateAsync(x =>
+                {
+                    x.Content = $"Unable to load new character data.";
+                    x.Components = null;
+                    x.Embed = null;
+                });
+                return;
+            }
+
+            newCharacter.Name = newCharacter.Name.Replace("-New", string.Empty);
+            guild.RemoveCharacter(character);
+
+            var msg = await transThread.SendMessageAsync($"{newCharacter.Name} has been updated.");
+            await transThread.ModifyAsync(x => x.Name = newCharacter.Name);
+            await charThread.ModifyAsync(x => x.Name = newCharacter.Name);
+            string msgLink = $"https://discord.com/channels/{guildId}/{msg.Channel.Id}/{msg.Id}";
+            await button.UpdateAsync(x =>
+            {
+                x.Content = $"{newCharacter.Name} has been updated. ({msgLink})";
+                x.Components = null;
+                x.Embed = null;
+            });
+        }
+
+        public static async Task CharacterReplaceCancel(SocketMessageComponent button)
+        {
+            if (button.GuildId == null)
+            {
+                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+                return;
+            }
+            ulong guildId = (ulong)button.GuildId;
+            Guild guild = Manager.GetGuild(guildId);
+
+            List<dynamic> formValues = guild.GetFormValues(button.Data.CustomId);
+
+            ulong playerId = formValues[1];
+            IUser user = button.User;
+            if (user.Id != playerId && !guild.IsGamemaster(user))
+            {
+                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                return;
+            }
+
+            string charName = formValues[2];
+            guild.ClearTempCharacter(user.Id);
+
+            await button.UpdateAsync(x =>
+            {
+                x.Content = $"Update for {charName.Replace("-New", string.Empty)} canceled.";
+                x.Components = null;
+                x.Embed = null;
+            });
         }
     }
 }

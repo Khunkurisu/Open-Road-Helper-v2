@@ -5,27 +5,29 @@ namespace Bot.Characters
 {
     public partial class Character
     {
-        public ComponentBuilder AvatarButtons(ulong guildId)
+        public static ComponentBuilder ConfirmationButtons(
+            ulong guildId,
+            ulong playerId,
+            string charName,
+            string context
+        )
         {
-            return AvatarButtons(guildId, new ComponentBuilder());
-        }
+            Guild guild = Manager.GetGuild(guildId);
 
-        public ComponentBuilder AvatarButtons(ulong guildId, ComponentBuilder button)
-        {
-            return button
+            return new ComponentBuilder()
                 .WithButton(
-                    "Previous Avatar",
-                    $"shiftAvatar+{guildId}+{User}+{Name}+back",
-                    ButtonStyle.Primary,
-                    row: 1,
-                    disabled: CheckMoreAvatars(false)
+                    "Confirm",
+                    guild.GenerateFormValues(
+                        new() { $"{context}Character", playerId, charName, "confirm" }
+                    ),
+                    ButtonStyle.Success
                 )
                 .WithButton(
-                    "Next Avatar",
-                    $"shiftAvatar+{guildId}+{User}+{Name}+forward",
-                    ButtonStyle.Primary,
-                    row: 1,
-                    disabled: CheckMoreAvatars()
+                    "Cancel",
+                    guild.GenerateFormValues(
+                        new() { $"{context}Character", playerId, charName, "cancel" }
+                    ),
+                    ButtonStyle.Danger
                 );
         }
 
@@ -36,49 +38,63 @@ namespace Bot.Characters
             string context
         )
         {
-            return new ComponentBuilder()
+            return ConfirmationButtons(ulong.Parse(guildId), playerId, charName, context);
+        }
+
+        public ComponentBuilder AvatarButtons()
+        {
+            return AvatarButtons(new ComponentBuilder());
+        }
+
+        public ComponentBuilder AvatarButtons(ComponentBuilder button)
+        {
+            Guild guild = Manager.GetGuild(Guild);
+
+            return button
                 .WithButton(
-                    "Confirm",
-                    context + "Character+" + guildId + "+" + playerId + "+" + charName + "+confirm",
-                    ButtonStyle.Success
+                    "Previous Avatar",
+                    guild.GenerateFormValues(new() { $"shiftAvatar", User, Name, "back" }),
+                    ButtonStyle.Primary,
+                    row: 1,
+                    disabled: CheckMoreAvatars(false)
                 )
                 .WithButton(
-                    "Cancel",
-                    context + "Character+" + guildId + "+" + playerId + "+" + charName + "+cancel",
-                    ButtonStyle.Danger
+                    "Next Avatar",
+                    guild.GenerateFormValues(new() { $"shiftAvatar", User, Name, "forward" }),
+                    ButtonStyle.Primary,
+                    row: 1,
+                    disabled: CheckMoreAvatars()
                 );
         }
 
         public ComponentBuilder? GenerateButtons()
         {
-            Guild guild = Manager.GetGuild(_guild);
-            IUser? player = Manager.GetGuildUser(_guild, _user);
+            Guild guild = Manager.GetGuild(Guild);
+            IUser? player = Manager.GetGuildUser(Guild, User);
             if (player == null)
             {
                 return null;
             }
 
-            return GenerateButtons(guild.Id, player.Id);
+            return GenerateButtons();
         }
 
-        public ComponentBuilder GenerateButtons(
-            ulong guildId,
-            ulong playerId,
-            bool isForced = false
-        )
+        public ComponentBuilder GenerateButtons(bool isForced = false)
         {
+            Guild guild = Manager.GetGuild(Guild);
+
             if (!isForced && Status == Status.Temp)
             {
-                return ConfirmationButtons("" + guildId, playerId, Name, "create");
+                return ConfirmationButtons(Guild, User, Name, "create");
             }
             if (isForced && Status == Status.Temp)
             {
-                return ConfirmationButtons("" + guildId, playerId, Name, "forceCreate");
+                return ConfirmationButtons(Guild, User, Name, "forceCreate");
             }
 
             var buttons = new ComponentBuilder().WithButton(
                 "Edit",
-                "editCharacter+" + guildId + "+" + playerId + "+" + Name,
+                "editCharacter+" + Guild + "+" + User + "+" + Name,
                 ButtonStyle.Primary
             );
 
@@ -89,12 +105,14 @@ namespace Bot.Characters
                     buttons
                         .WithButton(
                             "Judge",
-                            "judgeCharacter+" + guildId + "+" + playerId + "+" + Name,
+                            guild.GenerateFormValues(new() { $"judgeCharacter", User, Name }),
                             ButtonStyle.Primary
                         )
                         .WithButton(
                             "Refund",
-                            "refundCharacterFromForced+" + guildId + "+" + playerId + "+" + Name,
+                            guild.GenerateFormValues(
+                                new() { $"refundCharacterFromForced", User, Name }
+                            ),
                             ButtonStyle.Danger
                         );
                 }
@@ -102,7 +120,9 @@ namespace Bot.Characters
                 {
                     buttons.WithButton(
                         "Refund",
-                        "refundCharacterFromForced+" + guildId + "+" + playerId + "+" + Name,
+                        guild.GenerateFormValues(
+                            new() { $"refundCharacterFromForced", User, Name }
+                        ),
                         ButtonStyle.Danger
                     );
                 }
@@ -114,12 +134,12 @@ namespace Bot.Characters
                     buttons
                         .WithButton(
                             "Judge",
-                            "judgeCharacter+" + guildId + "+" + playerId + "+" + Name,
+                            guild.GenerateFormValues(new() { $"judgeCharacter", User, Name }),
                             ButtonStyle.Primary
                         )
                         .WithButton(
                             "Refund",
-                            "refundCharacter+" + guildId + "+" + playerId + "+" + Name,
+                            guild.GenerateFormValues(new() { $"refundCharacter", User, Name }),
                             ButtonStyle.Danger
                         );
                 }
@@ -127,7 +147,7 @@ namespace Bot.Characters
                 {
                     buttons.WithButton(
                         "Refund",
-                        "refundCharacter+" + guildId + "+" + playerId + "+" + Name,
+                        guild.GenerateFormValues(new() { $"refundCharacter", User, Name }),
                         ButtonStyle.Danger
                     );
                 }
@@ -135,10 +155,10 @@ namespace Bot.Characters
                 {
                     buttons.WithButton(
                         "Retire",
-                        "retireCharacter+" + guildId + "+" + playerId + "+" + Name,
+                        guild.GenerateFormValues(new() { $"retireCharacter", User, Name }),
                         ButtonStyle.Danger
                     );
-                    buttons = AvatarButtons(guildId, buttons);
+                    buttons = AvatarButtons(buttons);
                 }
             }
 
