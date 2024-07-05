@@ -262,7 +262,7 @@ namespace Bot
             guild.ClearTempCharacter(user.Id);
             ForumTag[] tags =
             {
-                guild.CharacterBoard.Tags.First(x => x.Name == "Pending Approval")
+                guild.CharacterBoard.Tags.First(x => x.Name == "Pending")
             };
             character.Status = Status.Pending;
 
