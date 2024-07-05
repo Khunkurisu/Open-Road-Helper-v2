@@ -112,7 +112,7 @@ namespace Bot
             await Task.CompletedTask;
         }
 
-        private long _lastRefresh;
+        private long _lastRefresh = 0;
 
         private async Task RefreshLoop()
         {
