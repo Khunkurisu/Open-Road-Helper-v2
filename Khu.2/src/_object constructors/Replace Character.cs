@@ -22,7 +22,7 @@ namespace Bot.Characters
 
             _name = template._name;
             _updated = template._updated;
-            _status = template._status;
+            _status = Status.Temp;
             _avatars = template._avatars;
             _colorPref = template._colorPref;
             _notes = template._notes;
@@ -49,11 +49,11 @@ namespace Bot.Characters
             ulong guildId = context.Guild.Id;
             IUser player = context.User;
             string json = string.Empty;
-            HttpClient client = new() { Timeout = TimeSpan.FromSeconds(2) };
+            HttpClient httpClient = new() { Timeout = TimeSpan.FromSeconds(2) };
 
             if (sheet != null && sheet.Filename.Contains(".json"))
             {
-                json = await client.GetStringAsync(sheet.Url);
+                json = await httpClient.GetStringAsync(sheet.Url);
             }
             if (json == null || json == string.Empty)
             {
@@ -253,6 +253,7 @@ namespace Bot.Characters
             }
 
             newCharacter.Name = newCharacter.Name.Replace("-New", string.Empty);
+            newCharacter.Status = character.Status;
             guild.RemoveCharacter(character);
 
             var msg = await transThread.SendMessageAsync($"{newCharacter.Name} has been updated.");
