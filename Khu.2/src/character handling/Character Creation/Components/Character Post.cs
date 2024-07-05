@@ -33,7 +33,7 @@ namespace Bot.Characters
             Guild guild = Manager.GetGuild(Guild);
 
             var menu = new SelectMenuBuilder().WithCustomId(
-                guild.GenerateFormValues(new() { $"charDisplay", _user, Name })
+                guild.GenerateFormValues(new() { $"charDisplay", User, Name })
             );
 
             foreach (string k in Enum.GetNames(typeof(Display)))
