@@ -23,9 +23,9 @@ namespace Bot
             ulong guildId = (ulong)messageComponent.GuildId;
             Guild guild = GetGuild(guildId);
 
-            List<dynamic> formValues = guild.GetFormValues(messageComponent.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(messageComponent.Data.CustomId);
 
-            ulong playerId = formValues[1];
+            ulong playerId = formValues.User;
             IUser user = messageComponent.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
@@ -36,7 +36,7 @@ namespace Bot
                 return;
             }
 
-            string charName = formValues[2];
+            string charName = formValues.Target;
             IUser? player = GetGuildUser(guild.Id, playerId);
 
             if (player == null)
@@ -70,6 +70,7 @@ namespace Bot
                 if (Enum.TryParse(displayName, out Character.Display displayValue))
                 {
                     character.DisplayMode = displayValue;
+                    guild.QueueSave("characters");
                 }
             }
 

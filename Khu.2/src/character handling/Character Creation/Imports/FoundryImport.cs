@@ -46,6 +46,8 @@ namespace Bot.Characters
             _buildData = systemData["build"].ToObject<Dictionary<string, dynamic>>();
             _itemData = jsonData["items"].ToObject<List<Dictionary<string, dynamic>>>();
 
+            _level = systemData["details"]["level"]["value"];
+
             List<Dictionary<string, dynamic>> toRemove = new();
             foreach (Dictionary<string, dynamic> dict in _itemData)
             {
@@ -98,26 +100,6 @@ namespace Bot.Characters
 
         private void CollateAttributeData()
         {
-            Dictionary<string, dynamic> attributeData = _buildData["attributes"].ToObject<
-                Dictionary<string, dynamic>
-            >();
-            Dictionary<string, List<string>> boostData = attributeData["boosts"].ToObject<
-                Dictionary<string, List<string>>
-            >();
-
-            foreach (string level in boostData.Keys)
-            {
-                foreach (string attribute in boostData[level])
-                {
-                    uint mod = 2;
-                    if (_attributes[attribute] >= 18)
-                    {
-                        mod = 1;
-                    }
-                    _attributes[attribute] += mod;
-                }
-            }
-
             _ancestryData = _itemData.First(x => x["type"] == "ancestry");
             Dictionary<string, dynamic> systemData = _ancestryData["system"].ToObject<
                 Dictionary<string, dynamic>
@@ -125,6 +107,8 @@ namespace Bot.Characters
             Dictionary<string, dynamic> boostsData = systemData["boosts"].ToObject<
                 Dictionary<string, dynamic>
             >();
+            Console.WriteLine($"Boosts from Ancestry");
+            Console.WriteLine($"---");
             foreach (string level in boostsData.Keys)
             {
                 Dictionary<string, dynamic> levelData = boostsData[level].ToObject<
@@ -140,12 +124,26 @@ namespace Bot.Characters
                         mod = 1;
                     }
                     _attributes[attribute] += mod;
+                    Console.WriteLine($"{attribute} modified by +{mod}: {_attributes[attribute]}");
+                }
+                else if (levelData.ContainsKey("value"))
+                {
+                    string attribute = levelData["value"][0];
+                    uint mod = 2;
+                    if (_attributes[attribute] >= 18)
+                    {
+                        mod = 1;
+                    }
+                    _attributes[attribute] += mod;
+                    Console.WriteLine($"{attribute} modified by +{mod}: {_attributes[attribute]}");
                 }
             }
 
             Dictionary<string, dynamic> flawsData = systemData["flaws"].ToObject<
                 Dictionary<string, dynamic>
             >();
+            Console.WriteLine($"Flaws from Ancestry");
+            Console.WriteLine($"---");
             foreach (string level in flawsData.Keys)
             {
                 Dictionary<string, dynamic> levelData = flawsData[level].ToObject<
@@ -161,6 +159,41 @@ namespace Bot.Characters
                         mod = 1;
                     }
                     _attributes[attribute] -= mod;
+                    Console.WriteLine($"{attribute} modified by -{mod}: {_attributes[attribute]}");
+                }
+                else if (levelData.ContainsKey("value"))
+                {
+                    string attribute = levelData["value"][0];
+                    uint mod = 2;
+                    if (_attributes[attribute] > 18)
+                    {
+                        mod = 1;
+                    }
+                    _attributes[attribute] -= mod;
+                    Console.WriteLine($"{attribute} modified by -{mod}: {_attributes[attribute]}");
+                }
+            }
+
+            Dictionary<string, dynamic> attributeData = _buildData["attributes"].ToObject<
+                Dictionary<string, dynamic>
+            >();
+            Dictionary<string, List<string>> boostData = attributeData["boosts"].ToObject<
+                Dictionary<string, List<string>>
+            >();
+            Console.WriteLine($"Boosts from Levels");
+            Console.WriteLine($"---");
+
+            foreach (string level in boostData.Keys)
+            {
+                foreach (string attribute in boostData[level])
+                {
+                    uint mod = 2;
+                    if (_attributes[attribute] >= 18)
+                    {
+                        mod = 1;
+                    }
+                    _attributes[attribute] += mod;
+                    Console.WriteLine($"{attribute} modified by +{mod}: {_attributes[attribute]}");
                 }
             }
         }
@@ -170,9 +203,6 @@ namespace Bot.Characters
             Dictionary<string, dynamic> details = systemData["details"].ToObject<
                 Dictionary<string, dynamic>
             >();
-
-            Dictionary<string, uint> level = details["level"].ToObject<Dictionary<string, uint>>();
-            _level = level["value"];
 
             Dictionary<string, dynamic> biography = details["biography"].ToObject<
                 Dictionary<string, dynamic>
@@ -267,32 +297,34 @@ namespace Bot.Characters
                 Dictionary<string, dynamic>
             >();
             _perception = (int)classSystem["perception"];
-
-            if (classSystem.ContainsKey("boosts"))
+            Console.WriteLine($"Boosts from Class");
+            Console.WriteLine($"---");
+            Dictionary<string, dynamic> boostsData = new();
+            if (classSystem.ContainsKey("keyability"))
             {
-                Dictionary<string, dynamic> boostsData = new();
-                if (classSystem.ContainsKey("keyability"))
-                {
-                    boostsData = classSystem["keyability"].ToObject<Dictionary<string, dynamic>>();
-                }
-                else if (classSystem.ContainsKey("keyAbility"))
-                {
-                    boostsData = classSystem["keyAbility"].ToObject<Dictionary<string, dynamic>>();
-                }
+                boostsData = classSystem["keyability"].ToObject<Dictionary<string, dynamic>>();
+            }
+            else if (classSystem.ContainsKey("keyAbility"))
+            {
+                boostsData = classSystem["keyAbility"].ToObject<Dictionary<string, dynamic>>();
+            }
 
-                if (boostsData.ContainsKey("selected"))
+            if (boostsData.ContainsKey("selected"))
+            {
+                string attribute = boostsData["selected"];
+                uint mod = 2;
+                if (_attributes[attribute] >= 18)
                 {
-                    string attribute = boostsData["selected"];
-                    uint mod = 2;
-                    if (_attributes[attribute] >= 18)
-                    {
-                        mod = 1;
-                    }
-                    _attributes[attribute] += mod;
+                    mod = 1;
                 }
-                else if (boostsData.ContainsKey("value") && boostsData["value"].Any())
+                _attributes[attribute] += mod;
+                Console.WriteLine($"{attribute} modified by +{mod}: {_attributes[attribute]}");
+            }
+            else if (boostsData.ContainsKey("value"))
+            {
+                string[] attributes = boostsData["value"].ToObject<string[]>();
+                if (attributes.Any())
                 {
-                    string[] attributes = boostsData["value"];
                     string attribute = attributes[0];
                     uint mod = 2;
                     if (_attributes[attribute] >= 18)
@@ -300,6 +332,7 @@ namespace Bot.Characters
                         mod = 1;
                     }
                     _attributes[attribute] += mod;
+                    Console.WriteLine($"{attribute} modified by +{mod}: {_attributes[attribute]}");
                 }
             }
 
@@ -315,12 +348,12 @@ namespace Bot.Characters
                 Dictionary<string, dynamic>
             >();
             _background = backgroundData["name"];
+            Console.WriteLine($"Boosts from Background");
+            Console.WriteLine($"---");
 
             if (backgroundSystem.ContainsKey("boosts"))
             {
-                Dictionary<string, dynamic> boostsData = backgroundSystem["boosts"].ToObject<
-                    Dictionary<string, dynamic>
-                >();
+                boostsData = backgroundSystem["boosts"].ToObject<Dictionary<string, dynamic>>();
                 foreach (string level in boostsData.Keys)
                 {
                     Dictionary<string, dynamic> levelData = boostsData[level].ToObject<
@@ -336,6 +369,9 @@ namespace Bot.Characters
                             mod = 1;
                         }
                         _attributes[attribute] += mod;
+                        Console.WriteLine(
+                            $"{attribute} modified by +{mod}: {_attributes[attribute]}"
+                        );
                     }
                 }
             }
@@ -669,7 +705,8 @@ namespace Bot.Characters
             int skillRank = _skills[skillName];
             int skillModifier = Helper.RankToBonus(skillRank);
             int attributeBonus = GetAttributeBonus(skillName);
-            return skillModifier + LevelBonus(skillRank) + attributeBonus;
+			int levelBonus = LevelBonus(skillRank);
+            return skillModifier + levelBonus + attributeBonus;
         }
 
         private int LoreBonus(string loreName)
@@ -677,7 +714,8 @@ namespace Bot.Characters
             int loreRank = _lore[loreName];
             int loreModifier = Helper.RankToBonus(loreRank);
             int attributeBonus = GetAttributeBonus(loreName);
-            return loreModifier + LevelBonus(loreRank) + attributeBonus;
+			int levelBonus = LevelBonus(loreRank);
+            return loreModifier + levelBonus + attributeBonus;
         }
 
         private int SaveBonus(string saveName)

@@ -9,11 +9,21 @@ namespace Bot
     {
         private static async Task JudgeCharacter(SocketMessageComponent messageComponent)
         {
-            string guildId = messageComponent.Data.CustomId.Split("+")[1];
-            Guild guild = GetGuild(ulong.Parse(guildId));
+            if (messageComponent.GuildId == null)
+            {
+                await messageComponent.RespondAsync(
+                    $"This can only be performed in a guild.",
+                    ephemeral: true
+                );
+                return;
+            }
+            ulong guildId = (ulong)messageComponent.GuildId;
+            Guild guild = GetGuild(guildId);
 
-            string userId = messageComponent.Data.CustomId.Split("+")[2];
-            IUser? user = GetGuildUser(guild.Id, ulong.Parse(userId));
+            FormValue formValue = guild.GetFormValues(messageComponent.Data.CustomId);
+
+            ulong userId = formValue.User;
+            IUser? user = GetGuildUser(guild.Id, userId);
             if (user == null)
             {
                 await messageComponent.RespondAsync(
@@ -30,7 +40,7 @@ namespace Bot
                 );
                 return;
             }
-            string charName = messageComponent.Data.CustomId.Split("+")[3];
+            string charName = formValue.Target;
             Character? character = GetCharacter(guild.Id, user.Id, charName);
             if (character == null)
             {
@@ -50,8 +60,16 @@ namespace Bot
 
         private static async Task ApproveCharacter(SocketMessageComponent messageComponent)
         {
-            string guildId = messageComponent.Data.CustomId.Split("+")[1];
-            Guild guild = GetGuild(ulong.Parse(guildId));
+            if (messageComponent.GuildId == null)
+            {
+                await messageComponent.RespondAsync(
+                    $"This can only be performed in a guild.",
+                    ephemeral: true
+                );
+                return;
+            }
+            ulong guildId = (ulong)messageComponent.GuildId;
+            Guild guild = GetGuild(guildId);
             if (guild.CharacterBoard == null || guild.TransactionBoard == null)
             {
                 await messageComponent.RespondAsync(
@@ -61,8 +79,10 @@ namespace Bot
                 return;
             }
 
-            string userId = messageComponent.Data.CustomId.Split("+")[2];
-            IUser? user = GetGuildUser(guild.Id, ulong.Parse(userId));
+            FormValue formValue = guild.GetFormValues(messageComponent.Data.CustomId);
+
+            ulong userId = formValue.User;
+            IUser? user = GetGuildUser(guild.Id, userId);
             if (user == null)
             {
                 await messageComponent.RespondAsync(
@@ -81,7 +101,7 @@ namespace Bot
                 return;
             }
 
-            string charName = messageComponent.Data.CustomId.Split("+")[3];
+            string charName = formValue.Target;
             Character? character = GetCharacter(guild.Id, user.Id, charName);
             if (character == null)
             {
@@ -135,19 +155,29 @@ namespace Bot
 
         private static async Task RejectCharacter(SocketMessageComponent messageComponent)
         {
-            string guildId = messageComponent.Data.CustomId.Split("+")[1];
-            Guild guild = GetGuild(ulong.Parse(guildId));
-
-            if (guild.CharacterBoard == null && guild.TransactionBoard == null)
+            if (messageComponent.GuildId == null)
+            {
+                await messageComponent.RespondAsync(
+                    $"This can only be performed in a guild.",
+                    ephemeral: true
+                );
+                return;
+            }
+            ulong guildId = (ulong)messageComponent.GuildId;
+            Guild guild = GetGuild(guildId);
+            if (guild.CharacterBoard == null || guild.TransactionBoard == null)
             {
                 await messageComponent.RespondAsync(
                     "Server forum boards have not been assigned.",
                     ephemeral: true
                 );
+                return;
             }
 
-            string userId = messageComponent.Data.CustomId.Split("+")[2];
-            IUser? user = GetGuildUser(guild.Id, ulong.Parse(userId));
+            FormValue formValue = guild.GetFormValues(messageComponent.Data.CustomId);
+
+            ulong userId = formValue.User;
+            IUser? user = GetGuildUser(guild.Id, userId);
             if (user == null)
             {
                 await messageComponent.RespondAsync(
@@ -166,11 +196,13 @@ namespace Bot
                 return;
             }
 
-            string charName = messageComponent.Data.CustomId.Split("+")[3];
+            string charName = formValue.Target;
 
             var modal = new ModalBuilder()
                 .WithTitle("Reject Character")
-                .WithCustomId($"rejectCharacter+{guildId}+{userId}+{charName}")
+                .WithCustomId(
+                    guild.GenerateFormValues(new() { $"rejectCharacter", userId, charName })
+                )
                 .AddTextInput(
                     "Reason",
                     "rejection_reason",
@@ -187,105 +219,111 @@ namespace Bot
             List<SocketMessageComponentData> components
         )
         {
-            string guildId = modal.Data.CustomId.Split("+")[1];
-            Guild guild = GetGuild(ulong.Parse(guildId));
-            if (guild.CharacterBoard != null && guild.TransactionBoard != null)
+            if (modal.GuildId == null)
             {
-                string userId = modal.Data.CustomId.Split("+")[2];
-                IUser? user = GetGuildUser(guild.Id, ulong.Parse(userId));
-                if (user == null)
-                {
-                    await modal.RespondAsync(
-                        $"<@{userId}> could not be found in database.",
-                        ephemeral: true
-                    );
-                    return;
-                }
-
-                if (!IsGamemaster(user, guild.Id))
-                {
-                    await modal.RespondAsync(
-                        "Only Game Masters may access this feature.",
-                        ephemeral: true
-                    );
-                    return;
-                }
-
-                string charName = modal.Data.CustomId.Split("+")[3];
-                Character? character = GetCharacter(guild.Id, user.Id, charName);
-                if (character == null)
-                {
-                    await modal.RespondAsync(
-                        $"{charName} could not be found in database.",
-                        ephemeral: true
-                    );
-                    return;
-                }
-
-                IThreadChannel? threadChannel = GetThreadChannel(
-                    guild.Id,
-                    character.CharacterThread
-                );
-                if (threadChannel == null)
-                {
-                    await modal.RespondAsync(
-                        $"Character thread for {charName} could not be found.",
-                        ephemeral: true
-                    );
-                    return;
-                }
-
-                IThreadChannel? transactions = GetThreadChannel(
-                    guild.Id,
-                    character.TransactionThread
-                );
-                if (transactions == null)
-                {
-                    await modal.RespondAsync(
-                        $"Thread for transactions could not be found.",
-                        ephemeral: true
-                    );
-                    return;
-                }
-
-                character.Status = Status.Rejected;
-                guild.QueueSave("characters");
-
-                ulong[] tags = { guild.CharacterBoard.Tags.First(x => x.Name == "Rejected").Id };
-
-                await threadChannel.ModifyAsync(x =>
-                {
-                    x.AppliedTags = tags;
-                });
-
-                string reason = components.First(x => x.CustomId == "rejection_reason").Value;
-
-                var msg = await transactions.SendMessageAsync(
-                    $"{threadChannel.Mention} has been rejected.",
-                    embed: new EmbedBuilder()
-                        .WithTitle("Rejection Reason")
-                        .WithDescription(reason)
-                        .WithAuthor(user.Username)
-                        .Build()
-                );
-                string msgLink =
-                    $"https://discord.com/channels/{guildId}/{msg.Channel.Id}/{msg.Id}";
                 await modal.RespondAsync(
-                    $"{charName} has been rejected. ({msgLink})",
+                    $"This can only be performed in a guild.",
                     ephemeral: true
                 );
-                await DrawCharacterPost(character, modal);
+                return;
             }
+            ulong guildId = (ulong)modal.GuildId;
+            Guild guild = GetGuild(guildId);
+            if (guild.CharacterBoard == null || guild.TransactionBoard == null)
+            {
+                await modal.RespondAsync(
+                    "Server forum boards have not been assigned.",
+                    ephemeral: true
+                );
+                return;
+            }
+
+            FormValue formValue = guild.GetFormValues(modal.Data.CustomId);
+
+            ulong userId = formValue.User;
+            IUser? user = GetGuildUser(guild.Id, userId);
+            if (user == null)
+            {
+                await modal.RespondAsync(
+                    $"<@{userId}> could not be found in database.",
+                    ephemeral: true
+                );
+                return;
+            }
+
+            if (!IsGamemaster(user, guild.Id))
+            {
+                await modal.RespondAsync(
+                    "Only Game Masters may access this feature.",
+                    ephemeral: true
+                );
+                return;
+            }
+
+            string charName = formValue.Target;
+            Character? character = GetCharacter(guild.Id, user.Id, charName);
+            if (character == null)
+            {
+                await modal.RespondAsync(
+                    $"{charName} could not be found in database.",
+                    ephemeral: true
+                );
+                return;
+            }
+
+            IThreadChannel? threadChannel = GetThreadChannel(guild.Id, character.CharacterThread);
+            if (threadChannel == null)
+            {
+                await modal.RespondAsync(
+                    $"Character thread for {charName} could not be found.",
+                    ephemeral: true
+                );
+                return;
+            }
+
+            IThreadChannel? transactions = GetThreadChannel(guild.Id, character.TransactionThread);
+            if (transactions == null)
+            {
+                await modal.RespondAsync(
+                    $"Thread for transactions could not be found.",
+                    ephemeral: true
+                );
+                return;
+            }
+
+            character.Status = Status.Rejected;
+            guild.QueueSave("characters");
+
+            ulong[] tags = { guild.CharacterBoard.Tags.First(x => x.Name == "Rejected").Id };
+
+            await threadChannel.ModifyAsync(x =>
+            {
+                x.AppliedTags = tags;
+            });
+
+            string reason = components.First(x => x.CustomId == "rejection_reason").Value;
+
+            var msg = await transactions.SendMessageAsync(
+                $"{threadChannel.Mention} has been rejected.",
+                embed: new EmbedBuilder()
+                    .WithTitle("Rejection Reason")
+                    .WithDescription(reason)
+                    .WithAuthor(user.Username)
+                    .Build()
+            );
+            string msgLink = $"https://discord.com/channels/{guildId}/{msg.Channel.Id}/{msg.Id}";
+            await modal.RespondAsync($"{charName} has been rejected. ({msgLink})", ephemeral: true);
+            await DrawCharacterPost(character, modal);
         }
 
         public static ComponentBuilder ApproveRejectButtons(
-            string guildId,
+            ulong guildId,
             ulong playerId,
             string charName,
             string context
         )
         {
-            Guild guild = GetGuild(ulong.Parse(guildId));
+            Guild guild = GetGuild(guildId);
 
             return new ComponentBuilder()
                 .WithButton(

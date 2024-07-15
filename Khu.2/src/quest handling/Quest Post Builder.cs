@@ -20,9 +20,12 @@ namespace Bot.Quests
 
         public static SelectMenuBuilder ThreatSelector(string guildId, string gm, string name)
         {
+            Guild guild = Manager.GetGuild(ulong.Parse(guildId));
             return new SelectMenuBuilder()
                 .WithPlaceholder("Quest Threat")
-                .WithCustomId("createQuest+" + guildId + "+" + gm + "+" + name + "+questThreat")
+                .WithCustomId(
+                    guild.GenerateFormValues(new() { $"createQuest", gm, name, "questThreat" })
+                )
                 .WithMinValues(1)
                 .AddOption("Trivial", "Trivial", "Highest threat encounter is trivial.")
                 .AddOption("Low", "Low", "Highest threat encounter is low.")
@@ -33,9 +36,12 @@ namespace Bot.Quests
 
         public static SelectMenuBuilder PlayerMaxSelector(string guildId, string gm, string name)
         {
+            Guild guild = Manager.GetGuild(ulong.Parse(guildId));
             return new SelectMenuBuilder()
                 .WithPlaceholder("Max Players")
-                .WithCustomId("createQuest+" + guildId + "+" + gm + "+" + name + "+questPlayerMax")
+                .WithCustomId(
+                    guild.GenerateFormValues(new() { $"createQuest", gm, name, "questPlayerMax" })
+                )
                 .WithMinValues(1)
                 .AddOption("Four", "4", "No more than four players in the party.")
                 .AddOption("Five", "5", "No more than five players in the party.")
@@ -44,9 +50,12 @@ namespace Bot.Quests
 
         public static SelectMenuBuilder PlayerMinSelector(string guildId, string gm, string name)
         {
+            Guild guild = Manager.GetGuild(ulong.Parse(guildId));
             return new SelectMenuBuilder()
                 .WithPlaceholder("Min Players")
-                .WithCustomId("createQuest+" + guildId + "+" + gm + "+" + name + "+questPlayerMin")
+                .WithCustomId(
+                    guild.GenerateFormValues(new() { $"createQuest", gm, name, "questPlayerMin" })
+                )
                 .WithMinValues(1)
                 .AddOption("Two", "2", "No fewer than two players in the party.")
                 .AddOption("Three", "3", "No fewer than three players in the party.")
@@ -55,25 +64,28 @@ namespace Bot.Quests
 
         public static SelectMenuBuilder PartySelector(string guildId, string gm, string name)
         {
+            Guild guild = Manager.GetGuild(ulong.Parse(guildId));
             SelectMenuBuilder partySelector = new SelectMenuBuilder()
                 .WithPlaceholder("Select Party")
-                .WithCustomId("editQuest+" + guildId + "+" + gm + "+" + name + "+questPartySelect")
+                .WithCustomId(
+                    guild.GenerateFormValues(new() { $"editQuest", gm, name, "questPartySelect" })
+                )
                 .WithMinValues(1);
-            Guild guild = Manager.GetGuild(ulong.Parse(guildId));
             return partySelector;
         }
 
         public static ComponentBuilder ConfirmationButtons(string guildId, string gm, string name)
         {
+            Guild guild = Manager.GetGuild(ulong.Parse(guildId));
             return new ComponentBuilder()
                 .WithButton(
                     "Confirm",
-                    "createQuest+" + guildId + "+" + gm + "+" + name + "+confirm",
+                    guild.GenerateFormValues(new() { $"createQuest", gm, name, "confirm" }),
                     ButtonStyle.Success
                 )
                 .WithButton(
                     "Cancel",
-                    "createQuest+" + guildId + "+" + gm + "+" + name + "+cancel",
+                    guild.GenerateFormValues(new() { $"createQuest", gm, name, "cancel" }),
                     ButtonStyle.Danger
                 );
         }

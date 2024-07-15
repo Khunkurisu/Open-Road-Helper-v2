@@ -59,6 +59,7 @@ namespace Bot.Characters
                 _heritage = _heritage.Replace(_ancestry, "");
                 _heritage = _heritage.Trim();
             }
+
         }
     }
 }

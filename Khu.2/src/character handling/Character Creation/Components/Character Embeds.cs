@@ -24,13 +24,13 @@ namespace Bot.Characters
                 .WithColor(GetDiscordColor())
                 .WithFooter(player.Username)
                 .AddField("Reputation", Reputation, false)
-                .AddField("Age", Age, true)
-                .AddField("Height", Height + " cm", true)
-                .AddField("Weight", Weight + " kg", true)
+                .AddField("Age", Age.ToString(), true)
+                .AddField("Height", $"{Height} cm", true)
+                .AddField("Weight", $"{Weight} kg", true)
                 .AddField("Gender", Gender, true)
                 .AddField("PT", guild.GetPlayerTokenCount(User).ToString())
                 .AddField("DT", Downtime.ToString(), true)
-                .AddField("Coin", Gold + " gp", true)
+                .AddField("Coin", $"{Gold} gp", true)
                 .WithImageUrl(GetAvatar(Avatar));
 
             return detailsEmbed;

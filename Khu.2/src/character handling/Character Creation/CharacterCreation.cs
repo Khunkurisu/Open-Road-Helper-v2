@@ -51,9 +51,8 @@ namespace Bot
             }
             ulong guildId = (ulong)guildIdOrNull;
             Guild guild = GetGuild(guildId);
-            List<dynamic> formData = guild.GetFormValues(modal.Data.CustomId);
-            string playerIdString = formData[2];
-            ulong playerId = ulong.Parse(playerIdString);
+            FormValue formValues = guild.GetFormValues(modal.Data.CustomId);
+            ulong playerId = formValues.User;
             IUser user = modal.User;
             IUser? player = _client?.GetUser(playerId);
             if (player == null)
@@ -97,8 +96,8 @@ namespace Bot
                     }
                     charData["name"] = charName;
                     charData["description"] = charDescription;
-                    charData["reputation"] = charReputation;
-                    Character character = new(player, guild, charData);
+                    Character character =
+                        new(player, guild, charData) { Reputation = charReputation };
                     guild.AddCharacter(user.Id, character);
 
                     await modal.RespondAsync(
@@ -132,9 +131,9 @@ namespace Bot
             ulong guildId = (ulong)button.GuildId;
             Guild guild = GetGuild(guildId);
 
-            List<dynamic> formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
 
-            ulong playerId = formValues[1];
+            ulong playerId = formValues.User;
             IUser user = button.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
@@ -142,7 +141,7 @@ namespace Bot
                 return;
             }
 
-            string charName = formValues[2];
+            string charName = formValues.Target;
             Character? character = guild.GetCharacter(user.Id, charName);
             if (character == null)
             {
@@ -198,9 +197,9 @@ namespace Bot
             ulong guildId = (ulong)button.GuildId;
             Guild guild = GetGuild(guildId);
 
-            List<dynamic> formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
 
-            ulong playerId = formValues[1];
+            ulong playerId = formValues.User;
             IUser user = button.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
@@ -208,7 +207,7 @@ namespace Bot
                 return;
             }
 
-            string charName = formValues[2];
+            string charName = formValues.Target;
             Character? character = guild.GetCharacter(user.Id, charName);
             if (character == null)
             {
@@ -260,10 +259,7 @@ namespace Bot
             }
 
             guild.ClearTempCharacter(user.Id);
-            ForumTag[] tags =
-            {
-                guild.CharacterBoard.Tags.First(x => x.Name == "Pending")
-            };
+            ForumTag[] tags = { guild.CharacterBoard.Tags.First(x => x.Name == "Pending") };
             character.Status = Status.Pending;
 
             IThreadChannel charThread = await guild.CharacterBoard.CreatePostAsync(
@@ -313,9 +309,9 @@ namespace Bot
             ulong guildId = (ulong)button.GuildId;
             Guild guild = GetGuild(guildId);
 
-            List<dynamic> formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
 
-            ulong playerId = formValues[1];
+            ulong playerId = formValues.User;
             IUser user = button.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
@@ -323,7 +319,7 @@ namespace Bot
                 return;
             }
 
-            string charName = formValues[2];
+            string charName = formValues.Target;
             Character? character = guild.GetCharacter(user.Id, charName);
             if (character == null)
             {

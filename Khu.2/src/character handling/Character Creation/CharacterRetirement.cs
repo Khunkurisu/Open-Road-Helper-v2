@@ -20,9 +20,9 @@ namespace Bot
             ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
 
-            List<dynamic> formValues = guild.GetFormValues(component.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
-            ulong playerId = formValues[1];
+            ulong playerId = formValues.User;
             IUser user = component.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
@@ -30,7 +30,7 @@ namespace Bot
                 return;
             }
 
-            string charName = formValues[2];
+            string charName = formValues.Target;
             Character? character = guild.GetCharacter(user.Id, charName);
             if (character == null)
             {
@@ -83,9 +83,9 @@ namespace Bot
             ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
 
-            List<dynamic> formValues = guild.GetFormValues(component.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
-            ulong playerId = formValues[1];
+            ulong playerId = formValues.User;
             IUser user = component.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
@@ -93,7 +93,7 @@ namespace Bot
                 return;
             }
 
-            string charName = formValues[2];
+            string charName = formValues.Target;
             Character? character = guild.GetCharacter(user.Id, charName);
             if (character == null)
             {
@@ -168,9 +168,9 @@ namespace Bot
             ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
 
-            List<dynamic> formValues = guild.GetFormValues(component.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
-            ulong playerId = formValues[1];
+            ulong playerId = formValues.User;
             IUser user = component.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
@@ -178,7 +178,7 @@ namespace Bot
                 return;
             }
 
-            string charName = formValues[2];
+            string charName = formValues.Target;
             await component.UpdateAsync(x =>
             {
                 x.Content = $"{charName} retirement canceled.";

@@ -67,7 +67,9 @@ namespace Bot.GameMaster
 
                 var textBox = new ModalBuilder()
                     .WithTitle("Create Character")
-                    .WithCustomId("forceCreateCharacter+" + guildId + "+" + player.Id)
+                    .WithCustomId(
+                        guild.GenerateFormValues(new() { $"forceCreateCharacter", player.Id })
+                    )
                     .AddTextInput(
                         "Name",
                         "character_name",

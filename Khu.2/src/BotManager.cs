@@ -138,9 +138,9 @@ namespace Bot
             ulong guildId = (ulong)button.GuildId;
             Guild guild = GetGuild(guildId);
 
-            List<dynamic> formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
 
-            string actionContext = formValues[0];
+            string actionContext = formValues.Context;
             if (actionContext.Contains("createQuest"))
             {
                 if (actionContext.Contains("back"))
@@ -158,7 +158,7 @@ namespace Bot
             }
             else if (actionContext.Contains("createCharacter"))
             {
-                actionContext = formValues[3];
+                actionContext = formValues.Modifier;
                 if (actionContext.Contains("cancel"))
                 {
                     await CharacterCreateCancel(button);
@@ -170,7 +170,7 @@ namespace Bot
             }
             else if (actionContext.Contains("replaceCharacter"))
             {
-                actionContext = formValues[3];
+                actionContext = formValues.Modifier;
                 if (actionContext.Contains("cancel"))
                 {
                     await Character.CharacterReplaceCancel(button);
@@ -182,7 +182,7 @@ namespace Bot
             }
             else if (actionContext.Contains("forceCreateCharacter"))
             {
-                actionContext = formValues[3];
+                actionContext = formValues.Modifier;
                 if (actionContext.Contains("cancel"))
                 {
                     await CharacterCreateCancel(button);
@@ -194,7 +194,7 @@ namespace Bot
             }
             else if (actionContext.Contains("editCharacter"))
             {
-                actionContext = formValues[3];
+                actionContext = formValues.Modifier;
                 if (actionContext.Contains("cancel"))
                 {
                     await CharacterEditCancel(button);
@@ -210,7 +210,7 @@ namespace Bot
             }
             else if (actionContext.Contains("judgeCharacter"))
             {
-                actionContext = formValues[3];
+                actionContext = formValues.Modifier;
                 if (actionContext.Contains("approve"))
                 {
                     await ApproveCharacter(button);
@@ -230,7 +230,7 @@ namespace Bot
             }
             else if (actionContext.Contains("retireCharacter"))
             {
-                actionContext = formValues[3];
+                actionContext = formValues.Modifier;
                 if (actionContext.Contains("cancel"))
                 {
                     await RetireCharacterCancel(button);
@@ -256,9 +256,9 @@ namespace Bot
             ulong guildId = (ulong)selectMenu.GuildId;
             Guild guild = GetGuild(guildId);
 
-            List<dynamic> formValues = guild.GetFormValues(selectMenu.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(selectMenu.Data.CustomId);
 
-            string actionContext = formValues[0];
+            string actionContext = formValues.Context;
             if (actionContext.Contains("createQuest"))
             {
                 await QuestCreate(selectMenu);
@@ -316,9 +316,9 @@ namespace Bot
             ulong guildId = (ulong)modal.GuildId;
             Guild guild = GetGuild(guildId);
 
-            List<dynamic> formValues = guild.GetFormValues(modal.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(modal.Data.CustomId);
 
-            string actionContext = formValues[0];
+            string actionContext = formValues.Context;
             List<SocketMessageComponentData> components = modal.Data.Components.ToList();
             if (actionContext.Contains("createQuest"))
             {

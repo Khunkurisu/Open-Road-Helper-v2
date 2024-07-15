@@ -46,8 +46,25 @@ namespace Bot.Characters
 
         public async Task ReplaceAsync(SocketInteractionContext context, IAttachment sheet)
         {
-            ulong guildId = context.Guild.Id;
-            IUser player = context.User;
+            Guild guild = Manager.GetGuild(Guild);
+            IUser? player = Manager.GetGuildUser(Guild, User);
+            IUser user = context.User;
+            if (player == null)
+            {
+                await context.Interaction.RespondAsync(
+                    "User <@{User}> could not be found in the database.",
+                    ephemeral: true
+                );
+                return;
+            }
+            if (user.Id != User && !guild.IsGamemaster(user))
+            {
+                await context.Interaction.RespondAsync(
+                    "You lack permission to do that.",
+                    ephemeral: true
+                );
+                return;
+            }
             string json = string.Empty;
             HttpClient httpClient = new() { Timeout = TimeSpan.FromSeconds(2) };
 
@@ -76,11 +93,11 @@ namespace Bot.Characters
                 return;
             }
 
-            Manager.StoreTempCharacter(new FoundryImport(importData), guildId, player);
+            Manager.StoreTempCharacter(new FoundryImport(importData), Guild, player);
 
             var textBox = new ModalBuilder()
                 .WithTitle($"Update {Name}")
-                .WithCustomId("replaceCharacter+" + guildId + "+" + player.Id + "+" + Name)
+                .WithCustomId(guild.GenerateFormValues(new() { $"replaceCharacter", User, Name }))
                 .AddTextInput(
                     "Reputation",
                     "character_reputation",
@@ -174,9 +191,9 @@ namespace Bot.Characters
             ulong guildId = (ulong)button.GuildId;
             Guild guild = Manager.GetGuild(guildId);
 
-            List<dynamic> formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
 
-            ulong playerId = formValues[1];
+            ulong playerId = formValues.User;
             IUser user = button.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
@@ -194,7 +211,7 @@ namespace Bot.Characters
                 return;
             }
 
-            string[] charNames = formValues[2].Split("+");
+            string[] charNames = formValues.Target.Split("+");
             string charName = charNames[0];
             string oldCharName = charNames[1];
 
@@ -278,9 +295,9 @@ namespace Bot.Characters
             ulong guildId = (ulong)button.GuildId;
             Guild guild = Manager.GetGuild(guildId);
 
-            List<dynamic> formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
 
-            ulong playerId = formValues[1];
+            ulong playerId = formValues.User;
             IUser user = button.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
@@ -288,7 +305,7 @@ namespace Bot.Characters
                 return;
             }
 
-            string charName = formValues[2];
+            string charName = formValues.Target;
             guild.ClearTempCharacter(user.Id);
 
             await button.UpdateAsync(x =>

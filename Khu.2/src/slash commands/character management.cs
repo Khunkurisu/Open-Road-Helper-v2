@@ -105,7 +105,7 @@ namespace Bot.Characters
 
             var textBox = new ModalBuilder()
                 .WithTitle("Create Character")
-                .WithCustomId("createCharacter+" + guildId + "+" + player.Id)
+                .WithCustomId(guild.GenerateFormValues(new() { $"charDisplay", player.Id }))
                 .AddTextInput(
                     "Name",
                     "character_name",
@@ -155,20 +155,29 @@ namespace Bot.Characters
         }
 
         [SlashCommand("roleplay", "Roleplay as a character.")]
-        public async Task Roleplay(string name)
+        public async Task Roleplay(
+            [Autocomplete(typeof(CharacterNameAutocompleteHandler))] string charName
+        )
         {
             ulong guildId = Context.Guild.Id;
+            Guild guild = Manager.GetGuild(guildId);
             IUser player = Context.User;
 
             var textBox = new ModalBuilder()
                 .WithTitle("Roleplay Post")
-                .WithCustomId("createRP+" + guildId + "+" + player.Username + "+" + name)
-                .AddTextInput("Display Name", "display_name", placeholder: name, required: false)
+                .WithCustomId(guild.GenerateFormValues(new() { $"createRP", player.Id, charName }))
+                .AddTextInput(
+                    "Display Name",
+                    "display_name",
+                    placeholder: charName,
+                    required: false
+                )
                 .AddTextInput(
                     "Roleplay",
                     "roleplay",
                     TextInputStyle.Paragraph,
-                    "Roleplay text content."
+                    "Roleplay text content.",
+                    required: true
                 );
 
             await Context.Interaction.RespondWithModalAsync(textBox.Build());

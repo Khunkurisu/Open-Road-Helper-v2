@@ -20,9 +20,10 @@ namespace Bot.Quests
 
             if (Manager.IsGamemaster(gm, guildId))
             {
+                Guild guild = Manager.GetGuild(guildId);
                 var textBox = new ModalBuilder()
                     .WithTitle("Create Quest")
-                    .WithCustomId("createQuest+" + guildId + "+" + gm.Username)
+                    .WithCustomId(guild.GenerateFormValues(new() { $"createQuest", gm.Id }))
                     .AddTextInput("Name", "quest_name", placeholder: "Quest Name")
                     .AddTextInput(
                         "Description",

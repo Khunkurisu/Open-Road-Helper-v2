@@ -44,7 +44,8 @@ namespace Bot.Guilds
         private readonly List<Party> _parties = new();
         private readonly Dictionary<ulong, uint> _playerTokens = new();
 
-        public Dictionary<string, List<dynamic>> formValues = new();
+        public Dictionary<string, FormValue> _formValues = new();
+        private bool _formValuesLocked = false;
 
         public string GenerateFormValues(List<dynamic> values)
         {
@@ -55,16 +56,24 @@ namespace Bot.Guilds
 
         public async Task StoreFormValues(string guid, List<dynamic> values)
         {
+            while (_formValuesLocked)
+            {
+                await Task.Delay(5);
+            }
             await Task.Yield();
-            formValues.Add(guid, values);
+            _formValuesLocked = true;
+            await Task.Yield();
+            _formValues.Add(guid, new(values));
+            await Task.Yield();
+            _formValuesLocked = false;
             await Task.CompletedTask;
         }
 
-        public List<dynamic> GetFormValues(string formId)
+        public FormValue GetFormValues(string formId)
         {
-            if (formValues.ContainsKey(formId))
+            if (_formValues.ContainsKey(formId))
             {
-                return formValues[formId];
+                return _formValues[formId];
             }
             return new();
         }
@@ -536,13 +545,13 @@ namespace Bot.Guilds
                 _characters[playerId] = new();
             }
             _characters[playerId].Add(character);
-            QueueSave("characters");
+            QueueSave("characters", true);
         }
 
         public void AddQuest(Quest quest)
         {
             _quests.Add(quest);
-            QueueSave("quests");
+            QueueSave("quests", true);
         }
 
         public bool FormParty(Guid creator)
