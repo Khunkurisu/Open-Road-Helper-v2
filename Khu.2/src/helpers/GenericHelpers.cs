@@ -49,7 +49,7 @@ namespace Bot.Helpers
                 case "thievery":
                     return "thievery";
                 default:
-                    return "";
+                    return skillAbbreviation;
             }
         }
 
