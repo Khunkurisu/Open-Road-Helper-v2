@@ -115,9 +115,9 @@ namespace Bot.Characters
                     Dictionary<string, dynamic>
                 >();
 
-                if (levelData.ContainsKey("selected"))
+                if (levelData.TryGetValue("selected", out dynamic? selected))
                 {
-                    string attribute = levelData["selected"];
+                    string attribute = selected;
                     uint mod = 2;
                     if (_attributes[attribute] >= 18)
                     {
@@ -126,16 +126,22 @@ namespace Bot.Characters
                     _attributes[attribute] += mod;
                     Console.WriteLine($"{attribute} modified by +{mod}: {_attributes[attribute]}");
                 }
-                else if (levelData.ContainsKey("value"))
+                else if (levelData.TryGetValue("value", out dynamic? value))
                 {
-                    string attribute = levelData["value"][0];
-                    uint mod = 2;
-                    if (_attributes[attribute] >= 18)
+                    if (value != null)
                     {
-                        mod = 1;
+                        if (value.HasValues)
+                        {
+                            string attribute = value[0];
+                            uint mod = 2;
+                            if (_attributes[attribute] >= 18)
+                            {
+                                mod = 1;
+                            }
+                            _attributes[attribute] += mod;
+                            Console.WriteLine($"{attribute} modified by +{mod}: {_attributes[attribute]}");
+                        }
                     }
-                    _attributes[attribute] += mod;
-                    Console.WriteLine($"{attribute} modified by +{mod}: {_attributes[attribute]}");
                 }
             }
 
@@ -150,9 +156,9 @@ namespace Bot.Characters
                     Dictionary<string, dynamic>
                 >();
 
-                if (levelData.ContainsKey("selected"))
+                if (levelData.TryGetValue("selected", out dynamic? selected))
                 {
-                    string attribute = levelData["selected"];
+                    string attribute = selected;
                     uint mod = 2;
                     if (_attributes[attribute] > 18)
                     {
@@ -161,16 +167,22 @@ namespace Bot.Characters
                     _attributes[attribute] -= mod;
                     Console.WriteLine($"{attribute} modified by -{mod}: {_attributes[attribute]}");
                 }
-                else if (levelData.ContainsKey("value"))
+                else if (levelData.TryGetValue("value", out dynamic? value))
                 {
-                    string attribute = levelData["value"][0];
-                    uint mod = 2;
-                    if (_attributes[attribute] > 18)
+                    if (value != null)
                     {
-                        mod = 1;
+                        if (value.HasValues)
+                        {
+                            string attribute = value[0];
+                            uint mod = 2;
+                            if (_attributes[attribute] >= 18)
+                            {
+                                mod = 1;
+                            }
+                            _attributes[attribute] += mod;
+                            Console.WriteLine($"{attribute} modified by +{mod}: {_attributes[attribute]}");
+                        }
                     }
-                    _attributes[attribute] -= mod;
-                    Console.WriteLine($"{attribute} modified by -{mod}: {_attributes[attribute]}");
                 }
             }
 
@@ -185,6 +197,7 @@ namespace Bot.Characters
 
             foreach (string level in boostData.Keys)
             {
+                Console.WriteLine($"Level {level}");
                 foreach (string attribute in boostData[level])
                 {
                     uint mod = 2;
@@ -395,11 +408,16 @@ namespace Bot.Characters
                         case "Platinum Pieces":
                             value *= 10;
                             break;
+                        case "Gold Pieces":
+                            break;
                         case "Silver Pieces":
                             value *= 0.1;
                             break;
                         case "Copper Pieces":
                             value *= 0.01;
+                            break;
+                        default:
+                            value = 0;
                             break;
                     }
                     _coin += value;
@@ -705,7 +723,7 @@ namespace Bot.Characters
             int skillRank = _skills[skillName];
             int skillModifier = Helper.RankToBonus(skillRank);
             int attributeBonus = GetAttributeBonus(skillName);
-			int levelBonus = LevelBonus(skillRank);
+            int levelBonus = LevelBonus(skillRank);
             return skillModifier + levelBonus + attributeBonus;
         }
 
@@ -714,7 +732,7 @@ namespace Bot.Characters
             int loreRank = _lore[loreName];
             int loreModifier = Helper.RankToBonus(loreRank);
             int attributeBonus = GetAttributeBonus(loreName);
-			int levelBonus = LevelBonus(loreRank);
+            int levelBonus = LevelBonus(loreRank);
             return loreModifier + levelBonus + attributeBonus;
         }
 
@@ -836,15 +854,15 @@ namespace Bot.Characters
             switch (key)
             {
                 case "height":
-                {
-                    _height = value;
-                    break;
-                }
+                    {
+                        _height = value;
+                        break;
+                    }
                 case "weight":
-                {
-                    _weight = value;
-                    break;
-                }
+                    {
+                        _weight = value;
+                        break;
+                    }
             }
         }
 

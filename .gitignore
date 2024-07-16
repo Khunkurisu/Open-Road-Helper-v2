@@ -3,6 +3,7 @@
 token.txt
 [Oo]bj/
 [Bb]in/
+[Dd]ata/
 .nuget/
 _ReSharper.*
 packages/
@@ -18,4 +19,5 @@ Bin/
 Obj/
 Khu.2/[Oo]bj/
 Khu.2/[Bb]in/
+Khu.2/[Dd]ata/
 .vscode/
