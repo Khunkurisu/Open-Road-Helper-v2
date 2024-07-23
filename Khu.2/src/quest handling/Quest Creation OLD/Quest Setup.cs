@@ -1,3 +1,4 @@
+using System.Windows.Markup;
 using Bot.Guilds;
 using Bot.Quests;
 using Discord;
@@ -9,17 +10,25 @@ namespace Bot
     {
         private static async Task QuestCreate(SocketMessageComponent selectMenu)
         {
-            string gm = selectMenu.Data.CustomId.Split("+")[2];
-            IUser user = selectMenu.User;
-            if (user.Username == gm)
+            ulong? guildIdOrNull = selectMenu.GuildId;
+            if (guildIdOrNull == null)
             {
-                string guildId = selectMenu.Data.CustomId.Split("+")[1];
-                Guild guild = GetGuild(ulong.Parse(guildId));
+                await selectMenu.RespondAsync("This command can only be used in a guild.");
+                return;
+            }
+            ulong guildId = (ulong)guildIdOrNull;
+            Guild guild = GetGuild(guildId);
+            FormValue formValues = guild.GetFormValues(selectMenu.Data.CustomId);
+            ulong gmId = formValues.User;
+            IUser? gamemaster = GetGuildUser(guildId, gmId);
+            IUser user = selectMenu.User;
+            if (gamemaster != null && user.Id == gmId)
+            {
 
-                string name = selectMenu.Data.CustomId.Split("+")[3];
-                string menuType = selectMenu.Data.CustomId.Split("+")[4];
+                string name = formValues.Target;
+                string menuType = formValues.Modifier;
                 string value = string.Join(", ", selectMenu.Data.Values);
-                var maxPlayerMenu = Quest.PlayerMaxSelector(guildId, gm, name);
+                var maxPlayerMenu = Quest.PlayerMaxSelector(guildId, gmId, name);
                 var messageComponents = new ComponentBuilder();
 
                 Quest? quest = guild.GetQuest(name, user);
@@ -30,7 +39,7 @@ namespace Bot
                         case "questPlayerMax":
                         {
                             quest.SetMaxPlayers(value);
-                            messageComponents = Quest.ConfirmationButtons(guildId, gm, name);
+                            messageComponents = Quest.ConfirmationButtons(guildId, gmId, name);
                             break;
                         }
                         case "questThreat":
@@ -40,7 +49,7 @@ namespace Bot
                                 .WithSelectMenu(maxPlayerMenu)
                                 .WithButton(
                                     "Back",
-                                    "createQuest+" + guildId + "+" + gm + "+" + name + "+back",
+                                    "createQuest+" + guildId + "+" + gmId + "+" + name + "+back",
                                     ButtonStyle.Danger
                                 );
                             break;
@@ -80,10 +89,17 @@ namespace Bot
             List<SocketMessageComponentData> components
         )
         {
-            string gm = modal.Data.CustomId.Split("+")[2];
+            ulong? guildIdOrNull = modal.GuildId;
+            if (guildIdOrNull == null)
+            {
+                await modal.RespondAsync("This command can only be used in a guild.");
+                return;
+            }
+            ulong guildId = (ulong)guildIdOrNull;
+            Guild guild = GetGuild(guildId);
+            FormValue formValues = guild.GetFormValues(modal.Data.CustomId);
+            ulong gmId = formValues.User;
             IUser gamemaster = modal.User;
-            string guildId = modal.Data.CustomId.Split("+")[1];
-            Guild guild = GetGuild(ulong.Parse(guildId));
 
             string name = components.First(x => x.CustomId == "quest_name").Value;
             string description = components.First(x => x.CustomId == "quest_description").Value;
@@ -96,13 +112,13 @@ namespace Bot
             guild.AddQuest(quest);
 
             var messageComponents = new ComponentBuilder(); //Quest.ConfirmationButtons(guildId, gm, name);
-            var threatMenu = Quest.ThreatSelector(guildId, gm, name);
-            var maxPlayerMenu = Quest.PlayerMaxSelector(guildId, gm, name);
+            var threatMenu = Quest.ThreatSelector(guildId, gmId, name);
+            var maxPlayerMenu = Quest.PlayerMaxSelector(guildId, gmId, name);
             messageComponents
                 .WithSelectMenu(threatMenu)
                 .WithButton(
                     "Cancel",
-                    "createQuest+" + guildId + "+" + gm + "+" + name + "+cancel",
+                    guild.GenerateFormValues($"createQuest", gmId, name, "cancel"),
                     ButtonStyle.Danger
                 );
 

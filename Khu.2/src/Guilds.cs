@@ -50,11 +50,18 @@ namespace Bot.Guilds
         public string GenerateFormValues(List<dynamic> values)
         {
             string guid = Guid.NewGuid().ToString();
-            Task.Run(() => StoreFormValues(guid, values));
+            Task.Run(() => StoreFormValues(guid, new(values)));
             return guid;
         }
 
-        public async Task StoreFormValues(string guid, List<dynamic> values)
+        public string GenerateFormValues(string context, ulong user, string target, string modifier)
+        {
+            string guid = Guid.NewGuid().ToString();
+            Task.Run(() => StoreFormValues(guid, new(context, user, target, modifier)));
+            return guid;
+        }
+
+        public async Task StoreFormValues(string guid, FormValue formValue)
         {
             while (_formValuesLocked)
             {
@@ -63,7 +70,7 @@ namespace Bot.Guilds
             await Task.Yield();
             _formValuesLocked = true;
             await Task.Yield();
-            _formValues.Add(guid, new(values));
+            _formValues.Add(guid, formValue);
             await Task.Yield();
             _formValuesLocked = false;
             await Task.CompletedTask;

@@ -18,9 +18,9 @@ namespace Bot.Quests
             return embed;
         }
 
-        public static SelectMenuBuilder ThreatSelector(string guildId, string gm, string name)
+        public static SelectMenuBuilder ThreatSelector(ulong guildId, ulong gm, string name)
         {
-            Guild guild = Manager.GetGuild(ulong.Parse(guildId));
+            Guild guild = Manager.GetGuild(guildId);
             return new SelectMenuBuilder()
                 .WithPlaceholder("Quest Threat")
                 .WithCustomId(
@@ -34,9 +34,9 @@ namespace Bot.Quests
                 .AddOption("Extreme", "Extreme", "Highest threat encounter is extreme.");
         }
 
-        public static SelectMenuBuilder PlayerMaxSelector(string guildId, string gm, string name)
+        public static SelectMenuBuilder PlayerMaxSelector(ulong guildId, ulong gm, string name)
         {
-            Guild guild = Manager.GetGuild(ulong.Parse(guildId));
+            Guild guild = Manager.GetGuild(guildId);
             return new SelectMenuBuilder()
                 .WithPlaceholder("Max Players")
                 .WithCustomId(
@@ -48,9 +48,9 @@ namespace Bot.Quests
                 .AddOption("Six", "6", "No more than six players in the party.");
         }
 
-        public static SelectMenuBuilder PlayerMinSelector(string guildId, string gm, string name)
+        public static SelectMenuBuilder PlayerMinSelector(ulong guildId, ulong gm, string name)
         {
-            Guild guild = Manager.GetGuild(ulong.Parse(guildId));
+            Guild guild = Manager.GetGuild(guildId);
             return new SelectMenuBuilder()
                 .WithPlaceholder("Min Players")
                 .WithCustomId(
@@ -62,9 +62,9 @@ namespace Bot.Quests
                 .AddOption("Four", "4", "No fewer than four players in the party.");
         }
 
-        public static SelectMenuBuilder PartySelector(string guildId, string gm, string name)
+        public static SelectMenuBuilder PartySelector(ulong guildId, ulong gm, string name)
         {
-            Guild guild = Manager.GetGuild(ulong.Parse(guildId));
+            Guild guild = Manager.GetGuild(guildId);
             SelectMenuBuilder partySelector = new SelectMenuBuilder()
                 .WithPlaceholder("Select Party")
                 .WithCustomId(
@@ -74,9 +74,9 @@ namespace Bot.Quests
             return partySelector;
         }
 
-        public static ComponentBuilder ConfirmationButtons(string guildId, string gm, string name)
+        public static ComponentBuilder ConfirmationButtons(ulong guildId, ulong gm, string name)
         {
-            Guild guild = Manager.GetGuild(ulong.Parse(guildId));
+            Guild guild = Manager.GetGuild(guildId);
             return new ComponentBuilder()
                 .WithButton(
                     "Confirm",

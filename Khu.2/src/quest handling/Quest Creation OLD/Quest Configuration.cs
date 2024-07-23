@@ -39,24 +39,31 @@ namespace Bot
 
         private static async Task QuestCreateBack(SocketMessageComponent button)
         {
-            IUser user = button.User;
-            string gm = button.Data.CustomId.Split("+")[2];
-            if (user.Username == gm)
+            ulong? guildIdOrNull = button.GuildId;
+            if (guildIdOrNull == null)
             {
-                string guildId = button.Data.CustomId.Split("+")[1];
-                Guild guild = GetGuild(ulong.Parse(guildId));
-
-                string name = button.Data.CustomId.Split("+")[3];
+                await button.RespondAsync("This command can only be used in a guild.");
+                return;
+            }
+            ulong guildId = (ulong)guildIdOrNull;
+            Guild guild = GetGuild(guildId);
+            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
+            ulong gmId = formValues.User;
+            IUser? gamemaster = GetGuildUser(guildId, gmId);
+            IUser user = button.User;
+            if (gamemaster != null && user.Id == gmId)
+            {
+                string name = formValues.Target;
 
                 Quest? quest = guild.GetQuest(name, user);
                 if (quest != null)
                 {
-                    var threatMenu = Quest.ThreatSelector(guildId, gm, name);
+                    var threatMenu = Quest.ThreatSelector(guildId, gmId, name);
                     var messageComponents = new ComponentBuilder()
                         .WithSelectMenu(threatMenu)
                         .WithButton(
                             "Back",
-                            "createQuest+" + guildId + "+" + gm + "+" + name + "+back",
+                            guild.GenerateFormValues($"createQuest", gmId, name, "back"),
                             ButtonStyle.Danger
                         );
                     var questEmbed = quest.GenerateEmbed(user);
