@@ -140,25 +140,7 @@ namespace Bot
 
         private static async Task CharacterEditStart(SocketMessageComponent button)
         {
-            IUser user = button.User;
-            string player = button.Data.CustomId.Split("+")[2];
-            if (user.Id.ToString() == player)
-            {
-                string guildId = button.Data.CustomId.Split("+")[1];
-                Guild guild = GetGuild(ulong.Parse(guildId));
-
-                guild.ClearTempCharacter(user.Id);
-                await button.UpdateAsync(x =>
-                {
-                    x.Content = "Character edit canceled.";
-                    x.Embed = null;
-                    x.Components = null;
-                });
-            }
-            else
-            {
-                await button.UpdateAsync(x => { });
-            }
+            await button.RespondAsync("WIP.", ephemeral: true);
         }
 
         private static async Task CharacterEditCancel(SocketMessageComponent button)

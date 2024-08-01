@@ -17,7 +17,7 @@ namespace Bot
             if (message.Exception is CommandException cmdException)
             {
                 Console.WriteLine(
-                    $"[Command/{message.Severity}] {cmdException.Command.Aliases.First()}"
+                    $"[Command/{message.Severity}] {cmdException.Command.Aliases[0]}"
                         + $" failed to execute in {cmdException.Context.Channel}."
                 );
                 Console.WriteLine(cmdException);

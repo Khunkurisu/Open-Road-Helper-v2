@@ -1,4 +1,4 @@
-using Bot.Guilds;
+/* using Bot.Guilds;
 using Bot.Helpers;
 using Discord;
 using Discord.Interactions;
@@ -110,3 +110,4 @@ namespace Bot.Quests
         }
     }
 }
+ */

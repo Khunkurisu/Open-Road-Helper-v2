@@ -42,7 +42,7 @@ namespace Bot.Characters
             Dictionary<string, uint> attributes,
             string colorPref,
             Dictionary<string, string> avatars,
-			int avatar,
+            int avatar,
             List<string> notes,
             int lastTokenTrade,
             long created,
@@ -93,7 +93,7 @@ namespace Bot.Characters
             _updated = updated;
             _status = status;
             _display = display;
-			_currentAvatar = avatar;
+            _currentAvatar = avatar;
         }
     }
 }

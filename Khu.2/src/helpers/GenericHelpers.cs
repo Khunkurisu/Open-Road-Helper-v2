@@ -8,49 +8,31 @@ namespace Bot.Helpers
         public static async Task<string> GetJson(string url)
         {
             HttpClient client = new();
-            Console.WriteLine(url);
             return await client.GetStringAsync(url);
         }
 
         public static string ExpandSkillAbbreviation(string skillAbbreviation)
         {
-            switch (skillAbbreviation)
+            return skillAbbreviation switch
             {
-                case "acr":
-                    return "acrobatics";
-                case "arc":
-                    return "arcana";
-                case "ath":
-                    return "athletics";
-                case "cra":
-                    return "crafting";
-                case "dec":
-                    return "deception";
-                case "dip":
-                    return "diplomacy";
-                case "itm":
-                    return "intimidation";
-                case "med":
-                    return "medicine";
-                case "nat":
-                    return "nature";
-                case "occ":
-                    return "occultism";
-                case "prf":
-                    return "performance";
-                case "rel":
-                    return "religion";
-                case "soc":
-                    return "society";
-                case "ste":
-                    return "stealth";
-                case "sur":
-                    return "survival";
-                case "thievery":
-                    return "thievery";
-                default:
-                    return skillAbbreviation;
-            }
+                "acr" => "acrobatics",
+                "arc" => "arcana",
+                "ath" => "athletics",
+                "cra" => "crafting",
+                "dec" => "deception",
+                "dip" => "diplomacy",
+                "itm" => "intimidation",
+                "med" => "medicine",
+                "nat" => "nature",
+                "occ" => "occultism",
+                "prf" => "performance",
+                "rel" => "religion",
+                "soc" => "society",
+                "ste" => "stealth",
+                "sur" => "survival",
+                "thievery" => "thievery",
+                _ => skillAbbreviation,
+            };
         }
 
         public static string Ordinal(float num)
@@ -64,21 +46,13 @@ namespace Bot.Helpers
             }
             else
             {
-                switch (ones)
+                suffix = ones switch
                 {
-                    case 1:
-                        suffix = "st";
-                        break;
-                    case 2:
-                        suffix = "nd";
-                        break;
-                    case 3:
-                        suffix = "rd";
-                        break;
-                    default:
-                        suffix = "th";
-                        break;
-                }
+                    1 => "st",
+                    2 => "nd",
+                    3 => "rd",
+                    _ => "th",
+                };
             }
             return $"{num}{suffix}";
         }
@@ -100,11 +74,11 @@ namespace Bot.Helpers
             {
                 if (float.TryParse(heightImperial[0], out float resultFeet))
                 {
-                    height += GenericHelpers.FeetToCentimeters(resultFeet);
+                    height += FeetToCentimeters(resultFeet);
                 }
                 if (float.TryParse(heightImperial[1], out float resultInches))
                 {
-                    height += GenericHelpers.InchesToCentimeters(resultInches);
+                    height += InchesToCentimeters(resultInches);
                 }
                 return height;
             }
@@ -146,7 +120,7 @@ namespace Bot.Helpers
             {
                 if (float.TryParse(weightImperial[0], out float resultFeet))
                 {
-                    weight += GenericHelpers.PoundsToKilograms(resultFeet);
+                    weight += PoundsToKilograms(resultFeet);
                     return weight;
                 }
             }

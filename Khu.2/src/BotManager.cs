@@ -288,7 +288,7 @@ namespace Bot
             {
                 return;
             }
-            await threadChannel.ModifyAsync(x => x.Archived = false);
+            await threadChannel.ModifyAsync(x => { x.Archived = false; });
         }
 
         public static async Task AwakenThread(Quest quest)

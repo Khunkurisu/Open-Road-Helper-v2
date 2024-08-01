@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Bot.Helpers;
 using Bot.PF2;
 
@@ -107,8 +108,6 @@ namespace Bot.Characters
             Dictionary<string, dynamic> boostsData = systemData["boosts"].ToObject<
                 Dictionary<string, dynamic>
             >();
-            Console.WriteLine($"Boosts from Ancestry");
-            Console.WriteLine($"---");
             foreach (string level in boostsData.Keys)
             {
                 Dictionary<string, dynamic> levelData = boostsData[level].ToObject<
@@ -124,7 +123,6 @@ namespace Bot.Characters
                         mod = 1;
                     }
                     _attributes[attribute] += mod;
-                    Console.WriteLine($"{attribute} modified by +{mod}: {_attributes[attribute]}");
                 }
                 else if (levelData.TryGetValue("value", out dynamic? value))
                 {
@@ -139,7 +137,6 @@ namespace Bot.Characters
                                 mod = 1;
                             }
                             _attributes[attribute] += mod;
-                            Console.WriteLine($"{attribute} modified by +{mod}: {_attributes[attribute]}");
                         }
                     }
                 }
@@ -148,8 +145,6 @@ namespace Bot.Characters
             Dictionary<string, dynamic> flawsData = systemData["flaws"].ToObject<
                 Dictionary<string, dynamic>
             >();
-            Console.WriteLine($"Flaws from Ancestry");
-            Console.WriteLine($"---");
             foreach (string level in flawsData.Keys)
             {
                 Dictionary<string, dynamic> levelData = flawsData[level].ToObject<
@@ -165,7 +160,6 @@ namespace Bot.Characters
                         mod = 1;
                     }
                     _attributes[attribute] -= mod;
-                    Console.WriteLine($"{attribute} modified by -{mod}: {_attributes[attribute]}");
                 }
                 else if (levelData.TryGetValue("value", out dynamic? value))
                 {
@@ -180,7 +174,6 @@ namespace Bot.Characters
                                 mod = 1;
                             }
                             _attributes[attribute] += mod;
-                            Console.WriteLine($"{attribute} modified by +{mod}: {_attributes[attribute]}");
                         }
                     }
                 }
@@ -192,12 +185,9 @@ namespace Bot.Characters
             Dictionary<string, List<string>> boostData = attributeData["boosts"].ToObject<
                 Dictionary<string, List<string>>
             >();
-            Console.WriteLine($"Boosts from Levels");
-            Console.WriteLine($"---");
 
             foreach (string level in boostData.Keys)
             {
-                Console.WriteLine($"Level {level}");
                 foreach (string attribute in boostData[level])
                 {
                     uint mod = 2;
@@ -206,7 +196,6 @@ namespace Bot.Characters
                         mod = 1;
                     }
                     _attributes[attribute] += mod;
-                    Console.WriteLine($"{attribute} modified by +{mod}: {_attributes[attribute]}");
                 }
             }
         }
@@ -242,7 +231,8 @@ namespace Bot.Characters
 
             if (details.ContainsKey("age"))
             {
-                _age = details["age"]["value"];
+                string ageValue = details["age"]["value"];
+                _age = CleanAge(ageValue);
             }
             if (details.ContainsKey("height"))
             {
@@ -279,26 +269,42 @@ namespace Bot.Characters
                 _skills.Add(skillName, (int)skillRank);
             }
 
-            Dictionary<string, Dictionary<string, int>> saves = systemData["saves"].ToObject<
-                Dictionary<string, Dictionary<string, int>>
-            >();
-            foreach (string save in saves.Keys)
+
+            if (systemData.TryGetValue("saves", out dynamic? value))
             {
-                Dictionary<string, int> saveHolder = saves[save];
-                string valueKey = "value";
-                if (!saveHolder.ContainsKey("value"))
+                Dictionary<string, Dictionary<string, int>> saves = value.ToObject<Dictionary<string, Dictionary<string, int>>>();
+                foreach (string save in saves.Keys)
                 {
-                    if (saveHolder.ContainsKey("rank"))
+                    Dictionary<string, int> saveHolder = saves[save];
+                    string valueKey = "value";
+                    if (!saveHolder.ContainsKey("value"))
                     {
-                        valueKey = "rank";
+                        if (saveHolder.ContainsKey("rank"))
+                        {
+                            valueKey = "rank";
+                        }
+                        else
+                        {
+                            valueKey = "tank";
+                        }
                     }
-                    else
-                    {
-                        valueKey = "tank";
-                    }
+                    int saveRank = saves[save][valueKey];
+                    _saves.Add(save, saveRank);
                 }
-                int saveRank = saves[save][valueKey];
-                _saves.Add(save, saveRank);
+            }
+            else
+            {
+                Dictionary<string, dynamic> classData = _itemData.First(x => x["type"] == "class");
+                _class = classData["name"];
+                Dictionary<string, dynamic> classSystem = classData["system"].ToObject<
+                    Dictionary<string, dynamic>
+                >();
+                Dictionary<string, int> saves = classSystem["savingThrows"].ToObject<Dictionary<string, int>>();
+
+                foreach (string save in saves.Keys)
+                {
+                    _saves.Add(save, saves[save]);
+                }
             }
         }
 
@@ -310,8 +316,6 @@ namespace Bot.Characters
                 Dictionary<string, dynamic>
             >();
             _perception = (int)classSystem["perception"];
-            Console.WriteLine($"Boosts from Class");
-            Console.WriteLine($"---");
             Dictionary<string, dynamic> boostsData = new();
             if (classSystem.ContainsKey("keyability"))
             {
@@ -331,7 +335,6 @@ namespace Bot.Characters
                     mod = 1;
                 }
                 _attributes[attribute] += mod;
-                Console.WriteLine($"{attribute} modified by +{mod}: {_attributes[attribute]}");
             }
             else if (boostsData.ContainsKey("value"))
             {
@@ -345,7 +348,6 @@ namespace Bot.Characters
                         mod = 1;
                     }
                     _attributes[attribute] += mod;
-                    Console.WriteLine($"{attribute} modified by +{mod}: {_attributes[attribute]}");
                 }
             }
 
@@ -361,8 +363,6 @@ namespace Bot.Characters
                 Dictionary<string, dynamic>
             >();
             _background = backgroundData["name"];
-            Console.WriteLine($"Boosts from Background");
-            Console.WriteLine($"---");
 
             if (backgroundSystem.ContainsKey("boosts"))
             {
@@ -382,9 +382,6 @@ namespace Bot.Characters
                             mod = 1;
                         }
                         _attributes[attribute] += mod;
-                        Console.WriteLine(
-                            $"{attribute} modified by +{mod}: {_attributes[attribute]}"
-                        );
                     }
                 }
             }
@@ -445,6 +442,18 @@ namespace Bot.Characters
         {
             CheckCannyAcumen(featName);
             CheckTrainingRanks(featName);
+        }
+
+        private static uint CleanAge(string foundryAge)
+        {
+            foundryAge = foundryAge.Trim();
+            string[] ageText = foundryAge.Split(' ');
+            if (!ageText.Any()) { return 0; }
+
+            string pattern = @"[0-9]+";
+            Match match = Regex.Match(ageText[0], pattern);
+            if (!match.Success) { return 0; }
+            return uint.Parse(match.Value);
         }
 
         private void CheckWillRanks(string featName)

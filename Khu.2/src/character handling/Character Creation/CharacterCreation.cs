@@ -53,7 +53,6 @@ namespace Bot
             Guild guild = GetGuild(guildId);
             FormValue formValues = guild.GetFormValues(modal.Data.CustomId);
             ulong playerId = formValues.User;
-            IUser user = modal.User;
             IUser? player = _client?.GetUser(playerId);
             if (player == null)
             {
@@ -61,6 +60,7 @@ namespace Bot
                 return;
             }
 
+            IUser user = modal.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
                 await modal.RespondAsync(
@@ -69,6 +69,7 @@ namespace Bot
                 );
                 return;
             }
+            await modal.DeferLoadingAsync(true);
             string charName = components.First(x => x.CustomId == "character_name").Value;
             string charDescription = components
                 .First(x => x.CustomId == "character_description")
@@ -88,7 +89,7 @@ namespace Bot
                     uint tokenCount = guild.GetPlayerTokenCount(playerId);
                     if (!isForced && tokenCount < tokenCost)
                     {
-                        await modal.RespondAsync(
+                        await modal.FollowupAsync(
                             "You lack sufficient tokens to create a new character. "
                                 + $"({tokenCost} PT required - {tokenCount} PT remaining.)"
                         );
@@ -98,23 +99,23 @@ namespace Bot
                     charData["description"] = charDescription;
                     Character character =
                         new(player, guild, charData) { Reputation = charReputation };
-                    guild.AddCharacter(user.Id, character);
+                    guild.AddCharacter(playerId, character, false);
 
-                    await modal.RespondAsync(
+                    await modal.FollowupAsync(
                         "Ensure everything looks correct before continuing!",
-                        embed: character.GenerateEmbed(user).Build(),
-                        components: character.GenerateComponents().Build(),
+                        embed: character.GenerateEmbed(player).Build(),
+                        components: character.GenerateComponents(isForced).Build(),
                         ephemeral: true
                     );
                 }
                 else
                 {
-                    await modal.RespondAsync("charData was null");
+                    await modal.FollowupAsync("charData was null");
                 }
             }
             else
             {
-                await modal.RespondAsync("importedCharacter was null");
+                await modal.FollowupAsync("importedCharacter was null");
             }
         }
 
@@ -134,15 +135,22 @@ namespace Bot
             FormValue formValues = guild.GetFormValues(button.Data.CustomId);
 
             ulong playerId = formValues.User;
+            IUser? player = GetGuildUser(guildId, playerId);
+            if (player == null)
+            {
+                await button.RespondAsync("Unable to find user.", ephemeral: true);
+                return;
+            }
+
             IUser user = button.User;
-            if (user.Id != playerId && !guild.IsGamemaster(user))
+            if (!isForced && user.Id != playerId && !guild.IsGamemaster(user))
             {
                 await button.RespondAsync("You lack permission to do that!", ephemeral: true);
                 return;
             }
 
             string charName = formValues.Target;
-            Character? character = guild.GetCharacter(user.Id, charName);
+            Character? character = guild.GetCharacter(playerId, charName);
             if (character == null)
             {
                 await button.UpdateAsync(x =>
@@ -164,26 +172,29 @@ namespace Bot
                 return;
             }
 
-            bool paid = true;
             if (!isForced)
             {
-                paid = guild.DecreasePlayerTokenCount(
-                    user.Id,
-                    (uint)guild.GetNewCharacterCost(user.Id)
+                bool paid = guild.DecreasePlayerTokenCount(
+                    playerId,
+                    (uint)guild.GetNewCharacterCost(playerId)
                 );
-            }
-            if (paid)
-            {
-                await PostCharacter(button, guild, character, user);
+                if (paid)
+                {
+                    await PostCharacter(button, guild, character, player);
+                }
+                else
+                {
+                    await button.UpdateAsync(x =>
+                    {
+                        x.Content = $"You lack sufficient PT to create {charName}.";
+                        x.Embed = null;
+                        x.Components = null;
+                    });
+                }
             }
             else
             {
-                await button.UpdateAsync(x =>
-                {
-                    x.Content = $"You lack sufficient PT to create {charName}.";
-                    x.Embed = null;
-                    x.Components = null;
-                });
+                await PostCharacter(button, guild, character, player);
             }
         }
 
@@ -208,7 +219,7 @@ namespace Bot
             }
 
             string charName = formValues.Target;
-            Character? character = guild.GetCharacter(user.Id, charName);
+            Character? character = guild.GetCharacter(playerId, charName);
             if (character == null)
             {
                 await button.UpdateAsync(x =>
@@ -258,6 +269,8 @@ namespace Bot
                 return;
             }
 
+            await context.DeferLoadingAsync(true);
+
             guild.ClearTempCharacter(user.Id);
             ForumTag[] tags = { guild.CharacterBoard.Tags.First(x => x.Name == "Pending") };
             character.Status = Status.Pending;
@@ -287,13 +300,11 @@ namespace Bot
             await charThread.AddUserAsync((IGuildUser)user);
             await transThread.AddUserAsync((IGuildUser)user);
 
-            await context.UpdateAsync(x =>
-            {
-                x.Content =
-                    $"{character.Name} has been created and is pending approval. (Character: {charThread.Mention} | Transactions: {transThread.Mention})";
-                x.Embed = null;
-                x.Components = null;
-            });
+            await context.FollowupAsync(
+                $"{character.Name} has been created and is pending approval. (Character: {charThread.Mention} | Transactions: {transThread.Mention})",
+                embeds: null,
+                components: null
+            );
         }
 
         public static async Task PendingCharacterRefund(

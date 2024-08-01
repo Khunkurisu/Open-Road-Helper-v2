@@ -53,13 +53,13 @@ namespace Bot.Characters
     public class CharacterManagement : InteractionModuleBase<SocketInteractionContext>
     {
         [SlashCommand("create", "Create a character.")]
-        public async Task CreateCharacter(float height, float weight, uint pathbuilderId = 0)
+        public async Task CreateCharacter(float height, float weight, uint pathbuilderId)
         {
             ulong guildId = Context.Guild.Id;
             IUser player = Context.User;
             HttpClient httpClient = new() { Timeout = TimeSpan.FromSeconds(2) };
 
-            if (pathbuilderId == 0)
+            if (pathbuilderId <= 0)
             {
                 await RespondAsync("Please provide a valid import code.", ephemeral: true);
                 return;
@@ -105,7 +105,7 @@ namespace Bot.Characters
 
             var textBox = new ModalBuilder()
                 .WithTitle("Create Character")
-                .WithCustomId(guild.GenerateFormValues(new() { $"charDisplay", player.Id }))
+                .WithCustomId(guild.GenerateFormValues(new() { $"createCharacter", player.Id }))
                 .AddTextInput(
                     "Name",
                     "character_name",
