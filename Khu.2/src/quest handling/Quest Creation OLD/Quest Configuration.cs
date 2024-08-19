@@ -63,7 +63,7 @@ namespace Bot
                         .WithSelectMenu(threatMenu)
                         .WithButton(
                             "Back",
-                            guild.GenerateFormValues($"createQuest", gmId, name, "back"),
+                            guild.GenerateFormValues(new() { $"createQuest", gmId, name, "back" }),
                             ButtonStyle.Danger
                         );
                     var questEmbed = quest.GenerateEmbed(user);

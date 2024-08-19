@@ -24,7 +24,6 @@ namespace Bot
             IUser user = selectMenu.User;
             if (gamemaster != null && user.Id == gmId)
             {
-
                 string name = formValues.Target;
                 string menuType = formValues.Modifier;
                 string value = string.Join(", ", selectMenu.Data.Values);
@@ -49,7 +48,9 @@ namespace Bot
                                 .WithSelectMenu(maxPlayerMenu)
                                 .WithButton(
                                     "Back",
-                                    guild.GenerateFormValues($"createQuest", gmId, name, "back"),
+                                    guild.GenerateFormValues(
+                                        new() { $"createQuest", gmId, name, "back" }
+                                    ),
                                     ButtonStyle.Danger
                                 );
                             break;
@@ -118,7 +119,7 @@ namespace Bot
                 .WithSelectMenu(threatMenu)
                 .WithButton(
                     "Cancel",
-                    guild.GenerateFormValues($"createQuest", gmId, name, "cancel"),
+                    guild.GenerateFormValues(new() { $"createQuest", gmId, name, "cancel" }),
                     ButtonStyle.Danger
                 );
 
