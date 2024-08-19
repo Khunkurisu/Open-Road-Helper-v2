@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using Bot.Characters;
 using Bot.Quests;
@@ -44,43 +45,33 @@ namespace Bot.Guilds
         private readonly List<Party> _parties = new();
         private readonly Dictionary<ulong, uint> _playerTokens = new();
 
-        public Dictionary<string, FormValue> _formValues = new();
-        private bool _formValuesLocked = false;
+        public ConcurrentDictionary<string, FormValue> _formValues = new();
 
         public string GenerateFormValues(List<dynamic> values)
         {
             string guid = Guid.NewGuid().ToString();
-            Task.Run(() => StoreFormValues(guid, new(values)));
+            Task.Run(() => StoreFormValues(guid, values));
             return guid;
         }
 
-        public string GenerateFormValues(string context, ulong user, string target, string modifier)
+        public async Task StoreFormValues(string guid, List<dynamic> values)
         {
-            string guid = Guid.NewGuid().ToString();
-            Task.Run(() => StoreFormValues(guid, new(context, user, target, modifier)));
-            return guid;
-        }
-
-        public async Task StoreFormValues(string guid, FormValue formValue)
-        {
-            while (_formValuesLocked)
+            while (true)
             {
-                await Task.Delay(5);
+                if (_formValues.TryAdd(guid, new(values)))
+                {
+                    break;
+                }
+                await Task.Yield();
             }
-            await Task.Yield();
-            _formValuesLocked = true;
-            await Task.Yield();
-            _formValues.Add(guid, formValue);
-            await Task.Yield();
-            _formValuesLocked = false;
             await Task.CompletedTask;
         }
 
         public FormValue GetFormValues(string formId)
         {
-            if (_formValues.ContainsKey(formId))
+            if (_formValues.TryGetValue(formId, out FormValue value))
             {
-                return _formValues[formId];
+                return value;
             }
             return new();
         }
@@ -171,7 +162,10 @@ namespace Bot.Guilds
                 return false;
             }
 
-            var userRoles = user.Roles.Where(x => _gmRoles.Contains(x.Name));
+            var userRoles = user.Roles.Where(x =>
+            {
+                return _gmRoles.Contains(x.Name);
+            });
             return userRoles.Any();
         }
 
@@ -545,14 +539,17 @@ namespace Bot.Guilds
             }
         }
 
-        public void AddCharacter(ulong playerId, Character character)
+        public void AddCharacter(ulong playerId, Character character, bool queueSave = true)
         {
             if (!_characters.ContainsKey(playerId))
             {
                 _characters[playerId] = new();
             }
             _characters[playerId].Add(character);
-            QueueSave("characters", true);
+            if (queueSave)
+            {
+                QueueSave("characters", true);
+            }
         }
 
         public void AddQuest(Quest quest)

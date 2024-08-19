@@ -49,7 +49,17 @@ namespace Bot.Characters
         }
         public string Description
         {
-            get => _desc ?? string.Empty;
+            get {
+                string descParsed = _desc ?? string.Empty;
+                descParsed = descParsed.Replace("<br>", "\n");
+                descParsed = descParsed.Replace("<br />", "\n");
+                descParsed = descParsed.Replace("<p>", "");
+                descParsed = descParsed.Replace("</p>", "\n");
+                descParsed = descParsed.Replace("<ul>", "");
+                descParsed = descParsed.Replace("<ol>", "");
+                descParsed = descParsed.Replace("<li>", "* ");
+                return descParsed;
+            }
             set
             {
                 _desc = value;

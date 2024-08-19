@@ -32,27 +32,31 @@ namespace Bot.Characters
             _feats = data["feats"];
             _spells = data["spells"];
             _attributes = data["attributes"];
-            if (data.ContainsKey("foundry image"))
+            if (data.TryGetValue("foundry image", out dynamic? img))
             {
                 if (_avatars.ContainsKey("FoundryVTT"))
                 {
-                    _avatars["FoundryVTT"] = data["foundry image"];
+                    _avatars["FoundryVTT"] = img;
                 }
                 else
                 {
-                    _avatars.Add("FoundryVTT", data["foundry image"]);
+                    _avatars.Add("FoundryVTT", img);
                 }
             }
 
-            if (data.ContainsKey("edicts"))
+            if (data.TryGetValue("edicts", out dynamic? edicts))
             {
-                _edicts = data["edicts"];
+                _edicts = edicts;
             }
 
-            if (data.ContainsKey("anathema"))
+            if (data.TryGetValue("anathema", out dynamic? anathema))
             {
-                _anathema = data["anathema"];
+                _anathema = anathema;
             }
+            _ancestry = _ancestry.Replace(" (Tiny)", "");
+            _ancestry = _ancestry.Replace(" (Small)", "");
+            _ancestry = _ancestry.Replace(" (Medium)", "");
+            _ancestry = _ancestry.Replace(" (Large)", "");
 
             if (Heritage.Contains(_ancestry))
             {

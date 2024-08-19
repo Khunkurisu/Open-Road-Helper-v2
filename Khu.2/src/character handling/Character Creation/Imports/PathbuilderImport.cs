@@ -1,3 +1,5 @@
+using Bot.PF2;
+
 namespace Bot.Characters
 {
     public class PathbuilderImport : IImportable
@@ -15,6 +17,14 @@ namespace Bot.Characters
             _heritage = buildData["heritage"];
             _background = buildData["background"];
             _deity = buildData["deity"];
+            if (buildData.TryGetValue("height", out dynamic? height))
+            {
+                _height = height;
+            }
+            if (buildData.TryGetValue("weight", out dynamic? weight))
+            {
+                _weight = weight;
+            }
             _age =
                 buildData["age"] == "not set"
                 || buildData["age"] == "Not set"
@@ -30,6 +40,97 @@ namespace Bot.Characters
             CollateSpells(buildData);
             CollateCoinage(buildData);
             CollateAttributeData(buildData);
+
+            UpdateProficiencies();
+        }
+
+        public void UpdateProficiencies()
+        {
+            foreach (string skill in _skills.Keys)
+            {
+                _skills[skill] = SkillBonus(skill);
+            }
+        }
+        private int SkillBonus(string skillName)
+        {
+            int skillRank = _skills[skillName] / 2;
+            int attributeBonus = GetAttributeBonus(skillName);
+            int levelBonus = LevelBonus(skillRank);
+            return _skills[skillName] + levelBonus + attributeBonus;
+        }
+
+        private int GetAttributeBonus(string skillName)
+        {
+            if (new List<string> { "athletics" }.Contains(skillName))
+            {
+                return Helper.AttributeToModifier(_attributes["str"]);
+            }
+            else if (new List<string> { "acrobatics", "stealth", "thievery" }.Contains(skillName))
+            {
+                return Helper.AttributeToModifier(_attributes["dex"]);
+            }
+            else if (
+                new List<string> { "arcana", "crafting", "occultism", "society" }.Contains(
+                    skillName
+                )
+            )
+            {
+                return Helper.AttributeToModifier(_attributes["int"]);
+            }
+            else if (
+                new List<string> { "medicine", "nature", "religion", "survival" }.Contains(
+                    skillName
+                )
+            )
+            {
+                return Helper.AttributeToModifier(_attributes["wis"]);
+            }
+            else if (
+                new List<string>
+                {
+                    "deception",
+                    "diplomacy",
+                    "intimidation",
+                    "performance"
+                }.Contains(skillName)
+            )
+            {
+                return Helper.AttributeToModifier(_attributes["cha"]);
+            }
+            else if (skillName == "fortitude")
+            {
+                return Helper.AttributeToModifier(_attributes["con"]);
+            }
+            else if (skillName == "will")
+            {
+                return Helper.AttributeToModifier(_attributes["wis"]);
+            }
+            else if (skillName == "reflex")
+            {
+                return Helper.AttributeToModifier(_attributes["dex"]);
+            }
+            else if (skillName == "perception")
+            {
+                return Helper.AttributeToModifier(_attributes["wis"]);
+            }
+            else
+            {
+                return Helper.AttributeToModifier(_attributes["int"]);
+            }
+        }
+
+        private int LevelBonus(int rank)
+        {
+            if (rank > 0)
+            {
+                return (int)_level;
+            }
+            if (_feats.Contains("Untrained Improvisation"))
+            {
+                return (int)
+                    Math.Max((_level < 7) ? (_level < 5 ? _level - 2 : _level - 1) : _level, 0);
+            }
+            return 0;
         }
 
         public void CollateCoinage(Dictionary<string, dynamic> jsonData)
@@ -268,15 +369,15 @@ namespace Bot.Characters
             switch (key)
             {
                 case "height":
-                {
-                    _height = value;
-                    break;
-                }
+                    {
+                        _height = value;
+                        break;
+                    }
                 case "weight":
-                {
-                    _weight = value;
-                    break;
-                }
+                    {
+                        _weight = value;
+                        break;
+                    }
             }
         }
 

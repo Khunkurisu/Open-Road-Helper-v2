@@ -24,7 +24,7 @@ namespace Bot.Characters
             int birthYear,
             string? ancestry,
             string? heritage,
-            string? charClass,
+            string? Class,
             string? background,
             uint level,
             int generation,
@@ -42,7 +42,7 @@ namespace Bot.Characters
             Dictionary<string, uint> attributes,
             string colorPref,
             Dictionary<string, string> avatars,
-			int avatar,
+            int avatar,
             List<string> notes,
             int lastTokenTrade,
             long created,
@@ -69,7 +69,7 @@ namespace Bot.Characters
             _birthYear = birthYear;
             _ancestry = ancestry;
             _heritage = heritage;
-            _class = charClass;
+            _class = Class;
             _background = background;
             _level = level;
             _generation = generation;
@@ -93,7 +93,7 @@ namespace Bot.Characters
             _updated = updated;
             _status = status;
             _display = display;
-			_currentAvatar = avatar;
+            _currentAvatar = avatar;
         }
     }
 }

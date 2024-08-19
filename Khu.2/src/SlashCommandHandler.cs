@@ -27,7 +27,7 @@ namespace Bot.Commands
                 _serviceProvider
             );
             //await _interactionService.RegisterCommandsGloballyAsync();
-            await _interactionService.RegisterCommandsToGuildAsync(1165262696397152276);
+            await _interactionService.RegisterCommandsToGuildAsync(1123803241793192046);
 
             _client.InteractionCreated += async interaction =>
             {

@@ -22,16 +22,18 @@ namespace Bot
 
             FormValue formValue = guild.GetFormValues(messageComponent.Data.CustomId);
 
-            ulong userId = formValue.User;
-            IUser? user = GetGuildUser(guild.Id, userId);
-            if (user == null)
+            ulong playerId = formValue.User;
+            IUser? player = GetGuildUser(guild.Id, playerId);
+            if (player == null)
             {
                 await messageComponent.RespondAsync(
-                    $"<@{userId}> could not be found in database.",
+                    $"<@{playerId}> could not be found in database.",
                     ephemeral: true
                 );
                 return;
             }
+
+            IUser user = messageComponent.User;
             if (!IsGamemaster(user, guild.Id))
             {
                 await messageComponent.RespondAsync(
@@ -41,7 +43,7 @@ namespace Bot
                 return;
             }
             string charName = formValue.Target;
-            Character? character = GetCharacter(guild.Id, user.Id, charName);
+            Character? character = GetCharacter(guild.Id, player.Id, charName);
             if (character == null)
             {
                 await messageComponent.RespondAsync(
@@ -52,7 +54,7 @@ namespace Bot
             }
             await messageComponent.RespondAsync(
                 $"Would you like to approve {character.Name} or send a note of rejection?",
-                components: ApproveRejectButtons(guildId, user.Id, charName, "judgeCharacter")
+                components: ApproveRejectButtons(guildId, player.Id, charName, "judgeCharacter")
                     .Build(),
                 ephemeral: true
             );
@@ -81,17 +83,18 @@ namespace Bot
 
             FormValue formValue = guild.GetFormValues(messageComponent.Data.CustomId);
 
-            ulong userId = formValue.User;
-            IUser? user = GetGuildUser(guild.Id, userId);
-            if (user == null)
+            ulong playerId = formValue.User;
+            IUser? player = GetGuildUser(guild.Id, playerId);
+            if (player == null)
             {
                 await messageComponent.RespondAsync(
-                    $"<@{userId}> could not be found in database.",
+                    $"<@{playerId}> could not be found in database.",
                     ephemeral: true
                 );
                 return;
             }
 
+            IUser user = messageComponent.User;
             if (!IsGamemaster(user, guild.Id))
             {
                 await messageComponent.RespondAsync(
@@ -102,7 +105,7 @@ namespace Bot
             }
 
             string charName = formValue.Target;
-            Character? character = GetCharacter(guild.Id, user.Id, charName);
+            Character? character = GetCharacter(guild.Id, player.Id, charName);
             if (character == null)
             {
                 await messageComponent.RespondAsync(
@@ -176,17 +179,18 @@ namespace Bot
 
             FormValue formValue = guild.GetFormValues(messageComponent.Data.CustomId);
 
-            ulong userId = formValue.User;
-            IUser? user = GetGuildUser(guild.Id, userId);
-            if (user == null)
+            ulong playerId = formValue.User;
+            IUser? player = GetGuildUser(guild.Id, playerId);
+            if (player == null)
             {
                 await messageComponent.RespondAsync(
-                    $"<@{userId}> could not be found in database.",
+                    $"<@{playerId}> could not be found in database.",
                     ephemeral: true
                 );
                 return;
             }
 
+            IUser user = messageComponent.User;
             if (!IsGamemaster(user, guild.Id))
             {
                 await messageComponent.RespondAsync(
@@ -201,7 +205,7 @@ namespace Bot
             var modal = new ModalBuilder()
                 .WithTitle("Reject Character")
                 .WithCustomId(
-                    guild.GenerateFormValues(new() { $"rejectCharacter", userId, charName })
+                    guild.GenerateFormValues(new() { $"rejectCharacter", playerId, charName })
                 )
                 .AddTextInput(
                     "Reason",
@@ -240,17 +244,18 @@ namespace Bot
 
             FormValue formValue = guild.GetFormValues(modal.Data.CustomId);
 
-            ulong userId = formValue.User;
-            IUser? user = GetGuildUser(guild.Id, userId);
-            if (user == null)
+            ulong playerId = formValue.User;
+            IUser? player = GetGuildUser(guild.Id, playerId);
+            if (player == null)
             {
                 await modal.RespondAsync(
-                    $"<@{userId}> could not be found in database.",
+                    $"<@{playerId}> could not be found in database.",
                     ephemeral: true
                 );
                 return;
             }
 
+            IUser user = modal.User;
             if (!IsGamemaster(user, guild.Id))
             {
                 await modal.RespondAsync(
@@ -261,7 +266,7 @@ namespace Bot
             }
 
             string charName = formValue.Target;
-            Character? character = GetCharacter(guild.Id, user.Id, charName);
+            Character? character = GetCharacter(guild.Id, player.Id, charName);
             if (character == null)
             {
                 await modal.RespondAsync(
@@ -308,7 +313,7 @@ namespace Bot
                 embed: new EmbedBuilder()
                     .WithTitle("Rejection Reason")
                     .WithDescription(reason)
-                    .WithAuthor(user.Username)
+                    .WithAuthor(player.Username)
                     .Build()
             );
             string msgLink = $"https://discord.com/channels/{guildId}/{msg.Channel.Id}/{msg.Id}";
