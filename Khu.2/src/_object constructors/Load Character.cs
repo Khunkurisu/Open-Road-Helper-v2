@@ -24,7 +24,7 @@ namespace Bot.Characters
             int birthYear,
             string? ancestry,
             string? heritage,
-            string? charClass,
+            string? Class,
             string? background,
             uint level,
             int generation,
@@ -69,7 +69,7 @@ namespace Bot.Characters
             _birthYear = birthYear;
             _ancestry = ancestry;
             _heritage = heritage;
-            _class = charClass;
+            _class = Class;
             _background = background;
             _level = level;
             _generation = generation;

@@ -268,7 +268,7 @@ namespace Bot.Characters
                 uint skillRank = skills[skill]["rank"];
                 _skills.Add(skillName, (int)skillRank);
             }
-
+            Dictionary<string, dynamic> classData = _itemData.First(x => x["type"] == "class");
 
             if (systemData.TryGetValue("saves", out dynamic? value))
             {
@@ -294,8 +294,6 @@ namespace Bot.Characters
             }
             else
             {
-                Dictionary<string, dynamic> classData = _itemData.First(x => x["type"] == "class");
-                _class = classData["name"];
                 Dictionary<string, dynamic> classSystem = classData["system"].ToObject<
                     Dictionary<string, dynamic>
                 >();

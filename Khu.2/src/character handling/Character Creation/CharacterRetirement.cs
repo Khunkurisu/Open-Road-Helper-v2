@@ -23,6 +23,13 @@ namespace Bot
             FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
             ulong playerId = formValues.User;
+            IUser? player = GetGuildUser(guildId, playerId);
+            if (player == null)
+            {
+                await component.RespondAsync($"Unable to find <@{playerId}> in database.", ephemeral: true);
+                return;
+            }
+
             IUser user = component.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
@@ -31,11 +38,11 @@ namespace Bot
             }
 
             string charName = formValues.Target;
-            Character? character = guild.GetCharacter(user.Id, charName);
+            Character? character = guild.GetCharacter(playerId, charName);
             if (character == null)
             {
                 await component.RespondAsync(
-                    $"{charName} could not be found in database for {user.Username}.",
+                    $"{charName} could not be found in database for {player.Username}.",
                     ephemeral: true
                 );
                 return;
