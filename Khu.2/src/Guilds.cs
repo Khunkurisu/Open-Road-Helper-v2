@@ -694,8 +694,13 @@ namespace Bot.Guilds
             return null;
         }
 
-        public Party? GetParty(Guid partyId)
+        public Party? GetParty(Guid? partyId)
         {
+            if (partyId == null)
+            {
+                return null;
+            }
+
             return _parties.First(x => x.Id == partyId);
         }
 
