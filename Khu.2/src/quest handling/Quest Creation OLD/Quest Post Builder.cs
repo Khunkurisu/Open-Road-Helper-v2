@@ -1,5 +1,6 @@
 using Bot.Guilds;
 using Discord;
+using Discord.WebSocket;
 
 namespace Bot.Quests
 {
@@ -106,6 +107,65 @@ namespace Bot.Quests
                     guild.GenerateFormValues(new() { $"createQuest", gm, name, "cancel" }),
                     ButtonStyle.Danger
                 );
+        }
+
+        public ComponentBuilder GenerateComponents()
+        {
+            return new();
+        }
+
+        public async Task DrawQuestPost(SocketMessageComponent component)
+        {
+            if (component.GuildId == null)
+            {
+                await component.RespondAsync("This must be run in a guild.", ephemeral: true);
+                return;
+            }
+            Guild guild = Manager.GetGuild(_guild);
+
+            IUser user = component.User;
+            if (user.Id != _gameMaster || !guild.IsGamemaster(user))
+            {
+                await component.RespondAsync("You lack permission to do that!", ephemeral: true);
+                return;
+            }
+
+            IUser? gm = Manager.GetGuildUser(_guild, _gameMaster);
+            if (gm == null)
+            {
+                await component.RespondAsync($"Unable to find user.", ephemeral: true);
+                return;
+            }
+
+            await component.UpdateAsync(x =>
+            {
+                x.Embed = GenerateEmbed(user).Build();
+                x.Components = GenerateComponents().Build();
+            });
+        }
+
+        public async Task DrawQuestPost()
+        {
+            IThreadChannel? threadChannel = Manager.GetThreadChannel(_guild, ThreadId);
+            if (threadChannel == null)
+            {
+                return;
+            }
+            IUser? user = Manager.GetGuildUser(_guild, _gameMaster);
+            if (user == null)
+            {
+                return;
+            }
+
+            await threadChannel.ModifyMessageAsync(
+                MessageId,
+                msg =>
+                {
+                    msg.Embed = GenerateEmbed(user).Build();
+                    msg.Components = GenerateComponents().Build();
+                    msg.Content = string.Empty;
+                }
+            );
         }
     }
 }

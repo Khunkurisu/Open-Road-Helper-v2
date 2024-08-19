@@ -405,6 +405,7 @@ namespace Bot.Guilds
             foreach (Quest quest in _quests)
             {
                 await Manager.AwakenThread(quest);
+				await quest.DrawQuestPost();
             }
             await Task.CompletedTask;
         }

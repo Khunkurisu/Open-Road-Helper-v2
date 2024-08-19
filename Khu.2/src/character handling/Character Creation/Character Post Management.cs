@@ -8,31 +8,25 @@ namespace Bot
     public partial class Manager
     {
         public static async Task DrawCharacterPost(
-            SocketMessageComponent messageComponent,
+            SocketMessageComponent component,
             bool updateDisplay = false
         )
         {
-            if (messageComponent.GuildId == null)
+            if (component.GuildId == null)
             {
-                await messageComponent.RespondAsync(
-                    "This must be run in a guild.",
-                    ephemeral: true
-                );
+                await component.RespondAsync("This must be run in a guild.", ephemeral: true);
                 return;
             }
-            ulong guildId = (ulong)messageComponent.GuildId;
+            ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
 
-            FormValue formValues = guild.GetFormValues(messageComponent.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
             ulong playerId = formValues.User;
-            IUser user = messageComponent.User;
+            IUser user = component.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
-                await messageComponent.RespondAsync(
-                    "You lack permission to do that!",
-                    ephemeral: true
-                );
+                await component.RespondAsync("You lack permission to do that!", ephemeral: true);
                 return;
             }
 
@@ -41,13 +35,13 @@ namespace Bot
 
             if (player == null)
             {
-                await messageComponent.RespondAsync($"Unable to find user.", ephemeral: true);
+                await component.RespondAsync($"Unable to find user.", ephemeral: true);
                 return;
             }
 
             if (player != user && !guild.IsGamemaster(user))
             {
-                await messageComponent.RespondAsync(
+                await component.RespondAsync(
                     $"You lack permission to perform that action.",
                     ephemeral: true
                 );
@@ -57,7 +51,7 @@ namespace Bot
             Character? character = guild.GetCharacter(player.Id, charName);
             if (character == null)
             {
-                await messageComponent.RespondAsync(
+                await component.RespondAsync(
                     $"Unable to locate {charName} for user <@{player.Id}>.",
                     ephemeral: true
                 );
@@ -66,7 +60,7 @@ namespace Bot
 
             if (updateDisplay)
             {
-                string displayName = string.Join(", ", messageComponent.Data.Values);
+                string displayName = string.Join(", ", component.Data.Values);
                 if (Enum.TryParse(displayName, out Character.Display displayValue))
                 {
                     character.DisplayMode = displayValue;
@@ -74,7 +68,7 @@ namespace Bot
                 }
             }
 
-            await messageComponent.UpdateAsync(x =>
+            await component.UpdateAsync(x =>
             {
                 x.Embed = character.GenerateEmbed(user).Build();
                 x.Components = character.GenerateComponents().Build();
