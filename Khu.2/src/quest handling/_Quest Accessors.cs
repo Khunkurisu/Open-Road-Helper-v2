@@ -36,7 +36,7 @@ namespace Bot.Quests
                 _lastUpdated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
-        public List<string> Tags
+        public List<string> TagsList
         {
             get => _tags;
             set
@@ -45,6 +45,7 @@ namespace Bot.Quests
                 _lastUpdated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
+        public string Tags => string.Join(", ", TagsList);
         public int MinPlayers
         {
             get => _minPlayers;
@@ -115,11 +116,6 @@ namespace Bot.Quests
         public long LastUpdated
         {
             get => _lastUpdated;
-        }
-
-        public string GetTags()
-        {
-            return string.Join(", ", Tags);
         }
 
         public void SetStatus(Status status)
