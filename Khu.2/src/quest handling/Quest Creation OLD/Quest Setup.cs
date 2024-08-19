@@ -49,7 +49,7 @@ namespace Bot
                                 .WithSelectMenu(maxPlayerMenu)
                                 .WithButton(
                                     "Back",
-                                    "createQuest+" + guildId + "+" + gmId + "+" + name + "+back",
+                                    guild.GenerateFormValues($"createQuest", gmId, name, "back"),
                                     ButtonStyle.Danger
                                 );
                             break;

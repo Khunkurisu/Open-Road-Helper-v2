@@ -134,8 +134,15 @@ namespace Bot
             FormValue formValues = guild.GetFormValues(button.Data.CustomId);
 
             ulong playerId = formValues.User;
+            IUser? player = GetGuildUser(guildId, playerId);
+            if (player == null)
+            {
+                await button.RespondAsync("Unable to find user.", ephemeral: true);
+                return;
+            }
+
             IUser user = button.User;
-            if (user.Id != playerId && !guild.IsGamemaster(user))
+            if (!isForced && user.Id != playerId && !guild.IsGamemaster(user))
             {
                 await button.RespondAsync("You lack permission to do that!", ephemeral: true);
                 return;
@@ -164,26 +171,30 @@ namespace Bot
                 return;
             }
 
-            bool paid = true;
             if (!isForced)
             {
-                paid = guild.DecreasePlayerTokenCount(
-                    user.Id,
-                    (uint)guild.GetNewCharacterCost(user.Id)
+                bool paid = guild.DecreasePlayerTokenCount(
+                    playerId,
+                    (uint)guild.GetNewCharacterCost(playerId)
                 );
-            }
-            if (paid)
-            {
-                await PostCharacter(button, guild, character, user);
+                if (paid)
+                {
+                    await PostCharacter(button, guild, character, user);
+                }
+                else
+                {
+                    await button.UpdateAsync(x =>
+                    {
+                        x.Content = $"You lack sufficient PT to create {charName}.";
+                        x.Embed = null;
+                        x.Components = null;
+                    });
+                }
             }
             else
             {
-                await button.UpdateAsync(x =>
-                {
-                    x.Content = $"You lack sufficient PT to create {charName}.";
-                    x.Embed = null;
-                    x.Components = null;
-                });
+
+                await PostCharacter(button, guild, character, user);
             }
         }
 
