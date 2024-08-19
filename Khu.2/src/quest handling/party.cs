@@ -8,42 +8,43 @@ namespace Bot.Quests
         public Guid Id;
         public ulong Guild;
         public string Name;
-        public List<Guid> Members;
+        public List<Guid> MembersList;
+        public string Members => string.Join(", ", MembersList);
 
         public Party(Character creator)
         {
             Name = creator.Name + "'s Party";
-            Members = new() { creator.Id };
+            MembersList = new() { creator.Id };
         }
 
         public Party(List<Character> members)
         {
             Name = members[0].Name + "'s Party";
-            Members = new();
+            MembersList = new();
             foreach (Character character in members)
             {
-                Members.Add(character.Id);
+                MembersList.Add(character.Id);
             }
         }
 
         public void AddMember(Character character)
         {
-            Members.Add(character.Id);
+            MembersList.Add(character.Id);
         }
 
         public void AddMember(Guid characterId)
         {
-            Members.Add(characterId);
+            MembersList.Add(characterId);
         }
 
         public void RemoveMember(Guid characterId)
         {
-            Members.Remove(characterId);
+            MembersList.Remove(characterId);
         }
 
         public void RemoveMember(Character character)
         {
-            Members.Remove(character.Id);
+            MembersList.Remove(character.Id);
         }
     }
 }
