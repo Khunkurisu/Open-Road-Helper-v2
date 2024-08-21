@@ -4,7 +4,7 @@ namespace Bot.Quests
     {
         private readonly Guid _id;
         private readonly string _name = "temp";
-		private readonly ulong _guild;
+        private readonly ulong _guild;
         private readonly ulong _gameMaster;
         private string _description = "temp";
         private Threats _threat;
@@ -15,8 +15,10 @@ namespace Bot.Quests
         private Guid? _selectedParty;
         private Status _status = 0;
         private ulong _thread;
-		private ulong _message;
+        private ulong _message;
         private readonly long _createdAt;
         private long _lastUpdated;
+        private List<string> _images = new();
+		private uint _selectedImage = 0;
     }
 }

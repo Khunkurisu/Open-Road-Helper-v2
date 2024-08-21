@@ -132,7 +132,7 @@ namespace Bot.Characters
         [SlashCommand("update", "Update a character.")]
         public async Task UpdateCharacter(
             [Autocomplete(typeof(CharacterNameAutocompleteHandler))] string charName,
-            IAttachment? sheet
+            IAttachment sheet
         )
         {
             ulong guildId = Context.Guild.Id;

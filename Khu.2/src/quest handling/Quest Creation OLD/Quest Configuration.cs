@@ -7,7 +7,7 @@ namespace Bot
 {
     public partial class Manager
     {
-        private static async Task QuestCreateConfirm(SocketMessageComponent button)
+        private static async Task QuestCreateConfirmOLD(SocketMessageComponent button)
         {
             IUser user = button.User;
             string gm = button.Data.CustomId.Split("+")[2];
@@ -87,7 +87,7 @@ namespace Bot
             }
         }
 
-        private static async Task QuestCreateCancel(SocketMessageComponent button)
+        private static async Task QuestCreateCancelOLD(SocketMessageComponent button)
         {
             IUser user = button.User;
             string gm = button.Data.CustomId.Split("+")[2];

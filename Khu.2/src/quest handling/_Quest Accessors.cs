@@ -140,6 +140,19 @@ namespace Bot.Quests
                 Threat = threats;
             }
         }
+
+        public string? Image => Images[(int)SelectedImage];
+
+        public List<string> Images
+        {
+            get => _images;
+        }
+
+        public int SelectedImage
+        {
+            get => (int)(_selectedImage + 1 <= _images.Count ? _selectedImage : 0);
+            set { _selectedImage = (uint)(_images.Any() ? Math.Min(value, _images.Count - 1) : 0); }
+        }
     }
 
     public enum Status
