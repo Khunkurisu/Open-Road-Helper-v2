@@ -13,7 +13,7 @@ namespace Bot.Quests
                 .WithDescription(Description)
                 .AddField("Threat", Threat.ToString(), true)
                 .AddField("Player Count", MinPlayers + " to " + MaxPlayers, true)
-                .WithImageUrl("");
+                .WithImageUrl(Image);
 
             Guild guild = Manager.GetGuild(_guild);
             Party? selectedParty = guild.GetParty(SelectedParty);

@@ -405,7 +405,7 @@ namespace Bot.Guilds
             foreach (Quest quest in _quests)
             {
                 await Manager.AwakenThread(quest);
-				await quest.DrawQuestPost();
+                await quest.DrawQuestPost();
             }
             await Task.CompletedTask;
         }
@@ -730,6 +730,20 @@ namespace Bot.Guilds
             }
         }
 
+        public void ReplaceAvailability(IUser gm, Timeframe newTimeframe)
+        {
+            if (_gmAvailabilities.ContainsKey(gm.Username))
+            {
+                Availability availability = _gmAvailabilities[gm.Username];
+                availability.ReplaceTimeframe(newTimeframe);
+            }
+            else
+            {
+                Availability gmAvailability = new(gm, newTimeframe);
+                _gmAvailabilities.Add(gm.Username, gmAvailability);
+            }
+        }
+
         public void RemoveAvailability(IUser gm, Timeframe time)
         {
             if (_gmAvailabilities.ContainsKey(gm.Username))
@@ -745,6 +759,15 @@ namespace Bot.Guilds
             {
                 Availability availability = _gmAvailabilities[gm.Username];
                 availability.RemoveTimeframe(index);
+            }
+        }
+
+        public void RemoveAvailability(IUser gm, Guid id)
+        {
+            if (_gmAvailabilities.ContainsKey(gm.Username))
+            {
+                Availability availability = _gmAvailabilities[gm.Username];
+                availability.RemoveTimeframe(id);
             }
         }
 

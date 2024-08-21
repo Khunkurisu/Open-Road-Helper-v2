@@ -57,10 +57,45 @@ namespace Bot.Quests
         public void RemoveTimeframe(int index)
         {
             CheckShouldClearPast();
-            if (index < _times.Count)
+            if (index < _times.Count - 1)
             {
                 _times.Remove(_times[index]);
                 _lastUpdate = DateTime.Now;
+            }
+        }
+
+        public void RemoveTimeframe(Guid id)
+        {
+            CheckShouldClearPast();
+            foreach (Timeframe timeframe in _times)
+            {
+                if (timeframe.Id == id)
+                {
+                    _times.Remove(timeframe);
+                }
+            }
+            _lastUpdate = DateTime.Now;
+        }
+
+        public Timeframe? GetTimeframe(Guid id)
+        {
+            foreach (Timeframe timeframe in _times)
+            {
+                if (timeframe.Id == id)
+                {
+                    return timeframe;
+                }
+            }
+            return null;
+        }
+
+        public void ReplaceTimeframe(Timeframe newTimeframe)
+        {
+            Timeframe? timeframe = GetTimeframe(newTimeframe.Id);
+            if (timeframe != null)
+            {
+                AddTimeframe(newTimeframe);
+                RemoveTimeframe((Timeframe)timeframe);
             }
         }
 
@@ -127,15 +162,28 @@ namespace Bot.Quests
 
     public struct Timeframe
     {
+        private readonly Guid _id;
+        public readonly Guid Id
+        {
+            get => _id;
+        }
         public DateTime EarliestStart;
         public DateTime LatestStart;
         public DateTime Cutoff;
 
+        public Timeframe()
+        {
+            _id = Guid.NewGuid();
+        }
+
         public readonly bool IsEqual(Timeframe timeframe)
         {
-            return timeframe.EarliestStart == EarliestStart
-                && timeframe.LatestStart == LatestStart
-                && timeframe.Cutoff == Cutoff;
+            return timeframe.Id == _id
+                || (
+                    timeframe.EarliestStart == EarliestStart
+                    && timeframe.LatestStart == LatestStart
+                    && timeframe.Cutoff == Cutoff
+                );
         }
 
         public readonly bool IsAvailableTime(DateTime time)

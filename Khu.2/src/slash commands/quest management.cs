@@ -70,35 +70,5 @@ namespace Bot.Quests
 
             await Context.Interaction.RespondAsync(embeds: questEmbeds.ToArray());
         }
-
-        [SlashCommand("availability", "Update your availability for GMing.")]
-        public async Task ModifyAvailability(uint earlyStart, uint latestStart, uint cutoff)
-        {
-            IUser gm = Context.User;
-            ulong guildId = Context.Guild.Id;
-
-            if (!Manager.IsGamemaster(gm, guildId))
-            {
-                await Context.Interaction.RespondAsync(
-                    "Only GMs can use this command.",
-                    ephemeral: true
-                );
-                return;
-            }
-            await RespondAsync("<t:" + earlyStart + ":F>");
-            await RespondAsync("<t:" + latestStart + ":F>");
-            await RespondAsync("<t:" + cutoff + ":F>");
-
-            Timeframe newTimeframe =
-                new()
-                {
-                    EarliestStart = GenericHelpers.DateTimeFromUnixSeconds(earlyStart),
-                    LatestStart = GenericHelpers.DateTimeFromUnixSeconds(latestStart),
-                    Cutoff = GenericHelpers.DateTimeFromUnixSeconds(cutoff)
-                };
-
-            Guild guild = Manager.GetGuild(Context.Guild.Id);
-            guild.AddAvailability(gm, newTimeframe);
-        }
     }
 }
