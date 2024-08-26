@@ -11,6 +11,25 @@ namespace OpenRoadHelper
             return await client.GetStringAsync(url);
         }
 
+        public async static Task DownloadImage(string url, string filename)
+        {
+            using var client = new HttpClient();
+            try
+            {
+                var response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                using var stream = await response.Content.ReadAsStreamAsync();
+                using var fileStream = new FileStream(filename, FileMode.Create);
+                await stream.CopyToAsync(fileStream);
+                Console.WriteLine("Image downloaded successfully: " + filename);
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine("Failed to download image: " + ex.Message);
+            }
+        }
+
         public static string ExpandSkillAbbreviation(string skillAbbreviation)
         {
             return skillAbbreviation switch
@@ -95,6 +114,11 @@ namespace OpenRoadHelper
             }
 
             return height;
+        }
+
+        public static string GuidToBase64(Guid guid)
+        {
+            return Convert.ToBase64String(guid.ToByteArray()).Replace("==", "");
         }
 
         public static int[] HexStringToRGB(string hexColor)
