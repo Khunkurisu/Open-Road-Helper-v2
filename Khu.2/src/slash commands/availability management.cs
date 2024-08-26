@@ -8,7 +8,7 @@ namespace OpenRoadHelper.Quests
     [Group("availability", "Update your availability for GMing.")]
     public class AvailabilityManagement : InteractionModuleBase<SocketInteractionContext>
     {
-        [SlashCommand("Add", "Add a new availability slot for GMing.")]
+        [SlashCommand("add", "Add a new availability slot for GMing.")]
         public async Task AddAvailability(uint earlyStart, uint latestStart, uint cutoff)
         {
             IUser gm = Context.User;
@@ -42,7 +42,7 @@ namespace OpenRoadHelper.Quests
             guild.AddAvailability(gm, newTimeframe);
         }
 
-        [SlashCommand("Replace", "Replace an existing availability slot for GMing.")]
+        [SlashCommand("replace", "Replace an existing availability slot for GMing.")]
         public async Task ReplaceAvailability(
             uint earlyStart = 0,
             uint latestStart = 0,
