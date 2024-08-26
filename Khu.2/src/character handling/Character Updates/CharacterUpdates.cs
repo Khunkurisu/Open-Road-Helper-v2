@@ -1,8 +1,6 @@
-using Bot.Guilds;
-using Bot.Helpers;
-using Bot.PF2;
+using OpenRoadHelper.Guilds;
 
-namespace Bot.Characters
+namespace OpenRoadHelper.Characters
 {
     public partial class Character { }
 }

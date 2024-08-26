@@ -1,15 +1,13 @@
-using Bot.Guilds;
-using Bot.Helpers;
-using Bot.PF2;
+using OpenRoadHelper.Guilds;
 using Discord;
 
-namespace Bot.Characters
+namespace OpenRoadHelper.Characters
 {
     public partial class Character
     {
         private Color GetDiscordColor()
         {
-            int[] colorValues = GenericHelpers.HexStringToRGB(_colorPref);
+            int[] colorValues = Generic.HexStringToRGB(_colorPref);
             return new Color(colorValues[0], colorValues[1], colorValues[2]);
         }
 
@@ -52,7 +50,7 @@ namespace Bot.Characters
                     "**"
                         + StringExtensions.FirstCharToUpper(k)
                         + "** "
-                        + Helper.ModifierToString(Modifiers[k])
+                        + PF2E.ModifierToString(Modifiers[k])
                 );
             }
             attributesEmbed.AddField("Attributes", string.Join(", ", attributes));
@@ -64,11 +62,11 @@ namespace Bot.Characters
                     "**"
                         + StringExtensions.FirstCharToUpper(k)
                         + "** "
-                        + Helper.ModifierToString(Saves[k])
+                        + PF2E.ModifierToString(Saves[k])
                 );
             }
             attributesEmbed.AddField("Saves", string.Join(", ", saves));
-            attributesEmbed.AddField("Perception", Helper.ModifierToString((int)Perception));
+            attributesEmbed.AddField("Perception", PF2E.ModifierToString((int)Perception));
 
             List<string> skills = new();
             foreach (string k in Skills.Keys)
@@ -78,7 +76,7 @@ namespace Bot.Characters
                     continue;
                 }
                 skills.Add(
-                    StringExtensions.FirstCharToUpper(k) + " " + Helper.ModifierToString(Skills[k])
+                    StringExtensions.FirstCharToUpper(k) + " " + PF2E.ModifierToString(Skills[k])
                 );
             }
             string skillField = "**Skills** " + string.Join(", ", skills);
@@ -94,7 +92,7 @@ namespace Bot.Characters
                     lore.Add(
                         StringExtensions.FirstCharToUpper(k)
                             + " "
-                            + Helper.ModifierToString(Lore[k])
+                            + PF2E.ModifierToString(Lore[k])
                     );
                 }
                 skillField += "; **Lore** " + string.Join(", ", lore);

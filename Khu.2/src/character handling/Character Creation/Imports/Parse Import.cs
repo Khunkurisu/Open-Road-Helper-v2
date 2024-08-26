@@ -1,6 +1,6 @@
-using Bot.Helpers;
 
-namespace Bot.Characters
+
+namespace OpenRoadHelper.Characters
 {
     public partial class Character
     {
@@ -9,8 +9,8 @@ namespace Bot.Characters
             ImportType importType = data["type"];
             if (importType == ImportType.Foundry)
             {
-                _height = GenericHelpers.GetHeightFromString(data["height"]);
-                _weight = GenericHelpers.GetWeightFromString(data["weight"]);
+                _height = Generic.GetHeightFromString(data["height"]);
+                _weight = Generic.GetWeightFromString(data["weight"]);
             }
 
             _name = data["name"];

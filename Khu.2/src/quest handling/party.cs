@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
-using Bot.Characters;
+using OpenRoadHelper.Characters;
 
-namespace Bot.Quests
+namespace OpenRoadHelper.Quests
 {
     public class Party
     {

@@ -1,10 +1,10 @@
-using Bot.Guilds;
+using OpenRoadHelper.Guilds;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 
-namespace Bot.Characters
+namespace OpenRoadHelper.Characters
 {
     public partial class Character
     {

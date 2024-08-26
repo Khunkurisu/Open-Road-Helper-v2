@@ -1,8 +1,6 @@
 using System.Text.RegularExpressions;
-using Bot.Helpers;
-using Bot.PF2;
 
-namespace Bot.Characters
+namespace OpenRoadHelper.Characters
 {
     public class FoundryImport : IImportable
     {
@@ -95,7 +93,7 @@ namespace Bot.Characters
             }
 
             int perceptionModifier = (int)
-                Enum.Parse<Helper.ProficiencyBonus>(((Helper.Proficiency)_perception).ToString());
+                Enum.Parse<PF2E.ProficiencyBonus>(((PF2E.Proficiency)_perception).ToString());
             _perception = perceptionModifier + (int)_level + GetAttributeBonus("perception");
         }
 
@@ -264,7 +262,7 @@ namespace Bot.Characters
             >();
             foreach (string skill in skills.Keys)
             {
-                string skillName = GenericHelpers.ExpandSkillAbbreviation(skill);
+                string skillName = Generic.ExpandSkillAbbreviation(skill);
                 uint skillRank = skills[skill]["rank"];
                 _skills.Add(skillName, (int)skillRank);
             }
@@ -497,15 +495,15 @@ namespace Bot.Characters
             int save = _saves["will"];
             if (willExpertFeats.Contains(featName))
             {
-                save = Math.Max(save, (int)Helper.Proficiency.Expert);
+                save = Math.Max(save, (int)PF2E.Proficiency.Expert);
             }
             else if (willMasterFeats.Contains(featName))
             {
-                save = Math.Max(save, (int)Helper.Proficiency.Master);
+                save = Math.Max(save, (int)PF2E.Proficiency.Master);
             }
             else if (willLegendaryFeats.Contains(featName))
             {
-                save = Math.Max(save, (int)Helper.Proficiency.Legendary);
+                save = Math.Max(save, (int)PF2E.Proficiency.Legendary);
             }
 
             _saves["will"] = save;
@@ -545,15 +543,15 @@ namespace Bot.Characters
             int save = _saves["fortitude"];
             if (fortitudeExpertFeats.Contains(featName))
             {
-                save = Math.Max(save, (int)Helper.Proficiency.Expert);
+                save = Math.Max(save, (int)PF2E.Proficiency.Expert);
             }
             else if (fortitudeMasterFeats.Contains(featName))
             {
-                save = Math.Max(save, (int)Helper.Proficiency.Master);
+                save = Math.Max(save, (int)PF2E.Proficiency.Master);
             }
             else if (fortitudeLegendaryFeats.Contains(featName))
             {
-                save = Math.Max(save, (int)Helper.Proficiency.Legendary);
+                save = Math.Max(save, (int)PF2E.Proficiency.Legendary);
             }
 
             _saves["fortitude"] = save;
@@ -592,15 +590,15 @@ namespace Bot.Characters
             int save = _saves["reflex"];
             if (reflexExpertFeats.Contains(featName))
             {
-                save = Math.Max(save, (int)Helper.Proficiency.Expert);
+                save = Math.Max(save, (int)PF2E.Proficiency.Expert);
             }
             else if (reflexMasterFeats.Contains(featName))
             {
-                save = Math.Max(save, (int)Helper.Proficiency.Master);
+                save = Math.Max(save, (int)PF2E.Proficiency.Master);
             }
             else if (reflexLegendaryFeats.Contains(featName))
             {
-                save = Math.Max(save, (int)Helper.Proficiency.Legendary);
+                save = Math.Max(save, (int)PF2E.Proficiency.Legendary);
             }
 
             _saves["reflex"] = save;
@@ -630,15 +628,15 @@ namespace Bot.Characters
             int proficiency = _perception;
             if (perceptionExpertFeats.Contains(featName))
             {
-                proficiency = Math.Max(proficiency, (int)Helper.Proficiency.Expert);
+                proficiency = Math.Max(proficiency, (int)PF2E.Proficiency.Expert);
             }
             else if (perceptionMasterFeats.Contains(featName))
             {
-                proficiency = Math.Max(proficiency, (int)Helper.Proficiency.Master);
+                proficiency = Math.Max(proficiency, (int)PF2E.Proficiency.Master);
             }
             else if (perceptionLegendaryFeats.Contains(featName))
             {
-                proficiency = Math.Max(proficiency, (int)Helper.Proficiency.Legendary);
+                proficiency = Math.Max(proficiency, (int)PF2E.Proficiency.Legendary);
             }
 
             _perception = proficiency;
@@ -679,11 +677,11 @@ namespace Bot.Characters
         {
             if (new List<string> { "athletics" }.Contains(skillName))
             {
-                return Helper.AttributeToModifier(_attributes["str"]);
+                return PF2E.AttributeToModifier(_attributes["str"]);
             }
             else if (new List<string> { "acrobatics", "stealth", "thievery" }.Contains(skillName))
             {
-                return Helper.AttributeToModifier(_attributes["dex"]);
+                return PF2E.AttributeToModifier(_attributes["dex"]);
             }
             else if (
                 new List<string> { "arcana", "crafting", "occultism", "society" }.Contains(
@@ -691,7 +689,7 @@ namespace Bot.Characters
                 )
             )
             {
-                return Helper.AttributeToModifier(_attributes["int"]);
+                return PF2E.AttributeToModifier(_attributes["int"]);
             }
             else if (
                 new List<string> { "medicine", "nature", "religion", "survival" }.Contains(
@@ -699,7 +697,7 @@ namespace Bot.Characters
                 )
             )
             {
-                return Helper.AttributeToModifier(_attributes["wis"]);
+                return PF2E.AttributeToModifier(_attributes["wis"]);
             }
             else if (
                 new List<string>
@@ -711,34 +709,34 @@ namespace Bot.Characters
                 }.Contains(skillName)
             )
             {
-                return Helper.AttributeToModifier(_attributes["cha"]);
+                return PF2E.AttributeToModifier(_attributes["cha"]);
             }
             else if (skillName == "fortitude")
             {
-                return Helper.AttributeToModifier(_attributes["con"]);
+                return PF2E.AttributeToModifier(_attributes["con"]);
             }
             else if (skillName == "will")
             {
-                return Helper.AttributeToModifier(_attributes["wis"]);
+                return PF2E.AttributeToModifier(_attributes["wis"]);
             }
             else if (skillName == "reflex")
             {
-                return Helper.AttributeToModifier(_attributes["dex"]);
+                return PF2E.AttributeToModifier(_attributes["dex"]);
             }
             else if (skillName == "perception")
             {
-                return Helper.AttributeToModifier(_attributes["wis"]);
+                return PF2E.AttributeToModifier(_attributes["wis"]);
             }
             else
             {
-                return Helper.AttributeToModifier(_attributes["int"]);
+                return PF2E.AttributeToModifier(_attributes["int"]);
             }
         }
 
         private int SkillBonus(string skillName)
         {
             int skillRank = _skills[skillName];
-            int skillModifier = Helper.RankToBonus(skillRank);
+            int skillModifier = PF2E.RankToBonus(skillRank);
             int attributeBonus = GetAttributeBonus(skillName);
             int levelBonus = LevelBonus(skillRank);
             return skillModifier + levelBonus + attributeBonus;
@@ -747,7 +745,7 @@ namespace Bot.Characters
         private int LoreBonus(string loreName)
         {
             int loreRank = _lore[loreName];
-            int loreModifier = Helper.RankToBonus(loreRank);
+            int loreModifier = PF2E.RankToBonus(loreRank);
             int attributeBonus = GetAttributeBonus(loreName);
             int levelBonus = LevelBonus(loreRank);
             return loreModifier + levelBonus + attributeBonus;
@@ -756,7 +754,7 @@ namespace Bot.Characters
         private int SaveBonus(string saveName)
         {
             int saveRank = _saves[saveName];
-            int saveModifier = Helper.RankToBonus(saveRank);
+            int saveModifier = PF2E.RankToBonus(saveRank);
             int attributeBonus = GetAttributeBonus(saveName);
             return saveModifier + (int)_level + attributeBonus;
         }

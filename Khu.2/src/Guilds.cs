@@ -1,13 +1,13 @@
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
-using Bot.Characters;
-using Bot.Quests;
+using OpenRoadHelper.Characters;
+using OpenRoadHelper.Quests;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 
-namespace Bot.Guilds
+namespace OpenRoadHelper.Guilds
 {
     public class Guild
     {
@@ -104,7 +104,7 @@ namespace Bot.Guilds
                 return 1;
             }
             return new List<Character>(
-                    _characters[playerId].Where(x => x.Status == Bot.Characters.Status.Approved)
+                    _characters[playerId].Where(x => x.Status == OpenRoadHelper.Characters.Status.Approved)
                 ).Count + 1;
         }
 

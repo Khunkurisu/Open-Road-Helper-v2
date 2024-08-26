@@ -1,9 +1,9 @@
-using Bot.Characters;
-using Bot.Guilds;
+using OpenRoadHelper.Characters;
+using OpenRoadHelper.Guilds;
 using Discord;
 using Discord.WebSocket;
 
-namespace Bot
+namespace OpenRoadHelper
 {
     public partial class Manager
     {

@@ -1,8 +1,7 @@
-using Bot.Guilds;
-using Bot.Helpers;
+using OpenRoadHelper.Guilds;
 using Discord;
 
-namespace Bot.Characters
+namespace OpenRoadHelper.Characters
 {
     public partial class Character
     {

@@ -1,4 +1,4 @@
-namespace Bot.Characters
+namespace OpenRoadHelper.Characters
 {
     public partial class Character
     {
@@ -17,7 +17,7 @@ namespace Bot.Characters
         private float _height = 100;
         private float _weight = 80;
         private int _birthDay = 1;
-        private Months _birthMonth;
+        private PF2E.Months _birthMonth;
         private int _birthYear = 4706;
 
         private string? _ancestry;
@@ -62,7 +62,6 @@ namespace Bot.Characters
         private Status _status = 0;
         private Display _display = 0;
         private int _currentAvatar = 0;
-        private const string _avatarPrefix =
-            "http://pf2.khunkurisu.com/open-road/character-images/";
+        private const string _avatarPrefix = @".\data\images\characters\";
     }
 }

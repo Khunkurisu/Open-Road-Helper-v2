@@ -1,4 +1,4 @@
-namespace Bot.Characters
+namespace OpenRoadHelper.Characters
 {
     public interface IImportable
     {

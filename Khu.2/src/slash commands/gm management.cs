@@ -1,11 +1,12 @@
-using Bot.Characters;
-using Bot.Guilds;
+using OpenRoadHelper.Characters;
+using OpenRoadHelper.Guilds;
 using Discord;
 using Discord.Interactions;
 using Newtonsoft.Json;
 
-namespace Bot.GameMaster
+namespace OpenRoadHelper.GameMaster
 {
+    [RequireGM(Group = "gm")]
     [Group("gm", "Perform gm related tasks with these commands.")]
     public partial class GameMasterManagement : InteractionModuleBase<SocketInteractionContext>
     {

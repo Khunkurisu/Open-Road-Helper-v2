@@ -1,10 +1,8 @@
-using Bot.Characters;
-using Bot.Guilds;
+using OpenRoadHelper.Guilds;
 using Discord;
 using Discord.Interactions;
-using Newtonsoft.Json;
 
-namespace Bot.GameMaster
+namespace OpenRoadHelper.GameMaster
 {
     [Group("admin", "Perform admin related tasks with these commands.")]
     public partial class AdminManagement : InteractionModuleBase<SocketInteractionContext>

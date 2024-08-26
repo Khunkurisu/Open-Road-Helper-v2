@@ -1,8 +1,6 @@
-using Bot.Guilds;
-using Bot.Helpers;
-using Bot.PF2;
+using OpenRoadHelper.Guilds;
 
-namespace Bot.Characters
+namespace OpenRoadHelper.Characters
 {
     public partial class Character
     {
@@ -23,7 +21,7 @@ namespace Bot.Characters
 
         public string GetBirthDate()
         {
-            return $"{GenericHelpers.Ordinal(_birthDay)} {_birthMonth} {_birthYear} AR";
+            return $"{Generic.Ordinal(_birthDay)} {_birthMonth} {_birthYear} AR";
         }
 
         public Guid Id
@@ -131,7 +129,7 @@ namespace Bot.Characters
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
-        public Months BirthMonth
+        public PF2E.Months BirthMonth
         {
             get => _birthMonth;
             set
@@ -390,7 +388,7 @@ namespace Bot.Characters
                     };
                 foreach (string attribute in _attributes.Keys)
                 {
-                    mods[attribute] = Helper.AttributeToModifier(_attributes[attribute]);
+                    mods[attribute] = PF2E.AttributeToModifier(_attributes[attribute]);
                 }
                 return mods;
             }

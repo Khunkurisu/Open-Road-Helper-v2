@@ -1,9 +1,9 @@
-using Bot.Guilds;
+using OpenRoadHelper.Guilds;
 using Discord;
 using Discord.Interactions;
 using Newtonsoft.Json;
 
-namespace Bot.Characters
+namespace OpenRoadHelper.Characters
 {
     public class CharacterNameAutocompleteHandler : AutocompleteHandler
     {
@@ -53,7 +53,7 @@ namespace Bot.Characters
     public class CharacterManagement : InteractionModuleBase<SocketInteractionContext>
     {
         [SlashCommand("create", "Create a character.")]
-        public async Task CreateCharacter(float height, float weight, uint pathbuilderId)
+        public async Task CreateCharacter(float height, float weight, uint pathbuilderId, IAttachment? image = null)
         {
             ulong guildId = Context.Guild.Id;
             IUser player = Context.User;

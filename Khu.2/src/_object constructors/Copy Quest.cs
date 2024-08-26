@@ -1,4 +1,4 @@
-namespace Bot.Quests
+namespace OpenRoadHelper.Quests
 {
     public partial class Quest
     {

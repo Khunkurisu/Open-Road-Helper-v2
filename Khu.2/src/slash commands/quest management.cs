@@ -1,10 +1,10 @@
-using Bot.Guilds;
-using Bot.Helpers;
+using OpenRoadHelper.Guilds;
 using Discord;
 using Discord.Interactions;
 
-namespace Bot.Quests
+namespace OpenRoadHelper.Quests
 {
+    [RequireGM(Group = "quest")]
     [Group("quest", "Manage quests with these commands.")]
     public class QuestManagement : InteractionModuleBase<SocketInteractionContext>
     {

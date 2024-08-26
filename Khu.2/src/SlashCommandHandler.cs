@@ -3,7 +3,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Bot.Commands
+namespace OpenRoadHelper.Commands
 {
     public class SlashCommandHandler
     {

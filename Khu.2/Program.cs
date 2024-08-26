@@ -1,11 +1,11 @@
-﻿using Bot.Commands;
-using Bot;
+﻿using OpenRoadHelper.Commands;
+using OpenRoadHelper;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Bot
+namespace OpenRoadHelper
 {
     public class Program
     {

@@ -1,6 +1,4 @@
-using Bot.PF2;
-
-namespace Bot.Characters
+namespace OpenRoadHelper.Characters
 {
     public class PathbuilderImport : IImportable
     {
@@ -63,11 +61,11 @@ namespace Bot.Characters
         {
             if (new List<string> { "athletics" }.Contains(skillName))
             {
-                return Helper.AttributeToModifier(_attributes["str"]);
+                return PF2E.AttributeToModifier(_attributes["str"]);
             }
             else if (new List<string> { "acrobatics", "stealth", "thievery" }.Contains(skillName))
             {
-                return Helper.AttributeToModifier(_attributes["dex"]);
+                return PF2E.AttributeToModifier(_attributes["dex"]);
             }
             else if (
                 new List<string> { "arcana", "crafting", "occultism", "society" }.Contains(
@@ -75,7 +73,7 @@ namespace Bot.Characters
                 )
             )
             {
-                return Helper.AttributeToModifier(_attributes["int"]);
+                return PF2E.AttributeToModifier(_attributes["int"]);
             }
             else if (
                 new List<string> { "medicine", "nature", "religion", "survival" }.Contains(
@@ -83,7 +81,7 @@ namespace Bot.Characters
                 )
             )
             {
-                return Helper.AttributeToModifier(_attributes["wis"]);
+                return PF2E.AttributeToModifier(_attributes["wis"]);
             }
             else if (
                 new List<string>
@@ -95,27 +93,27 @@ namespace Bot.Characters
                 }.Contains(skillName)
             )
             {
-                return Helper.AttributeToModifier(_attributes["cha"]);
+                return PF2E.AttributeToModifier(_attributes["cha"]);
             }
             else if (skillName == "fortitude")
             {
-                return Helper.AttributeToModifier(_attributes["con"]);
+                return PF2E.AttributeToModifier(_attributes["con"]);
             }
             else if (skillName == "will")
             {
-                return Helper.AttributeToModifier(_attributes["wis"]);
+                return PF2E.AttributeToModifier(_attributes["wis"]);
             }
             else if (skillName == "reflex")
             {
-                return Helper.AttributeToModifier(_attributes["dex"]);
+                return PF2E.AttributeToModifier(_attributes["dex"]);
             }
             else if (skillName == "perception")
             {
-                return Helper.AttributeToModifier(_attributes["wis"]);
+                return PF2E.AttributeToModifier(_attributes["wis"]);
             }
             else
             {
-                return Helper.AttributeToModifier(_attributes["int"]);
+                return PF2E.AttributeToModifier(_attributes["int"]);
             }
         }
 

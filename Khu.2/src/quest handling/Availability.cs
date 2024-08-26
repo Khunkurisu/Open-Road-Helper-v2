@@ -1,7 +1,6 @@
-using Bot.Helpers;
 using Discord;
 
-namespace Bot.Quests
+namespace OpenRoadHelper.Quests
 {
     public class Availability
     {
@@ -136,7 +135,7 @@ namespace Bot.Quests
         {
             foreach (Timeframe timeframe in _times)
             {
-                if (timeframe.IsAvailableTime(GenericHelpers.DateTimeFromUnixSeconds(time)))
+                if (timeframe.IsAvailableTime(Generic.DateTimeFromUnixSeconds(time)))
                 {
                     return true;
                 }

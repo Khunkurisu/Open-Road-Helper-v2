@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Bot.Characters
+namespace OpenRoadHelper.Characters
 {
     public partial class Character
     {
@@ -20,7 +20,7 @@ namespace Bot.Characters
             float height,
             float weight,
             int birthDay,
-            Months birthMonth,
+            PF2E.Months birthMonth,
             int birthYear,
             string? ancestry,
             string? heritage,

@@ -1,10 +1,10 @@
-using Bot.Guilds;
-using Bot.Helpers;
+using OpenRoadHelper.Guilds;
 using Discord;
 using Discord.Interactions;
 
-namespace Bot.Quests
+namespace OpenRoadHelper.Quests
 {
+    [RequireGM(Group = "availability")]
     [Group("availability", "Update your availability for GMing.")]
     public class AvailabilityManagement : InteractionModuleBase<SocketInteractionContext>
     {
@@ -33,9 +33,9 @@ namespace Bot.Quests
             Timeframe newTimeframe =
                 new()
                 {
-                    EarliestStart = GenericHelpers.DateTimeFromUnixSeconds(earlyStart),
-                    LatestStart = GenericHelpers.DateTimeFromUnixSeconds(latestStart),
-                    Cutoff = GenericHelpers.DateTimeFromUnixSeconds(cutoff)
+                    EarliestStart = Generic.DateTimeFromUnixSeconds(earlyStart),
+                    LatestStart = Generic.DateTimeFromUnixSeconds(latestStart),
+                    Cutoff = Generic.DateTimeFromUnixSeconds(cutoff)
                 };
 
             Guild guild = Manager.GetGuild(Context.Guild.Id);
@@ -43,7 +43,11 @@ namespace Bot.Quests
         }
 
         [SlashCommand("Replace", "Replace an existing availability slot for GMing.")]
-        public async Task ReplaceAvailability(uint earlyStart = 0, uint latestStart = 0, uint cutoff = 0)
+        public async Task ReplaceAvailability(
+            uint earlyStart = 0,
+            uint latestStart = 0,
+            uint cutoff = 0
+        )
         {
             IUser gm = Context.User;
             ulong guildId = Context.Guild.Id;
@@ -67,9 +71,9 @@ namespace Bot.Quests
             Timeframe newTimeframe =
                 new()
                 {
-                    EarliestStart = GenericHelpers.DateTimeFromUnixSeconds(earlyStart),
-                    LatestStart = GenericHelpers.DateTimeFromUnixSeconds(latestStart),
-                    Cutoff = GenericHelpers.DateTimeFromUnixSeconds(cutoff)
+                    EarliestStart = Generic.DateTimeFromUnixSeconds(earlyStart),
+                    LatestStart = Generic.DateTimeFromUnixSeconds(latestStart),
+                    Cutoff = Generic.DateTimeFromUnixSeconds(cutoff)
                 };
 
             Guild guild = Manager.GetGuild(Context.Guild.Id);

@@ -1,9 +1,9 @@
 using System.Drawing;
 using System.Text.RegularExpressions;
 
-namespace Bot.Helpers
+namespace OpenRoadHelper
 {
-    public static class GenericHelpers
+    public static class Generic
     {
         public static async Task<string> GetJson(string url)
         {

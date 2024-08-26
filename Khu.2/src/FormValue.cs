@@ -1,4 +1,4 @@
-namespace Bot
+namespace OpenRoadHelper
 {
     public struct FormValue
     {

@@ -1,8 +1,8 @@
-using Bot.Quests;
+using OpenRoadHelper.Quests;
 
-namespace Bot.PF2
+namespace OpenRoadHelper
 {
-    public static class Helper
+    public static partial class PF2E
     {
         public static int[] LevelBasedDCs { get; } =
             new int[]

@@ -2,7 +2,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
-namespace Bot
+namespace OpenRoadHelper
 {
     public class LoggingService
     {
