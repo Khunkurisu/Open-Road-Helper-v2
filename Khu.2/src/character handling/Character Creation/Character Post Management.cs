@@ -23,19 +23,20 @@ namespace OpenRoadHelper
             FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
             ulong playerId = formValues.User;
+            IUser? player = GetGuildUser(guildId, playerId);
+            if (player == null)
+            {
+                await component.RespondAsync(
+                    $"Unable to find <@{playerId}> in database.",
+                    ephemeral: true
+                );
+                return;
+            }
+
             IUser user = component.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
                 await component.RespondAsync("You lack permission to do that!", ephemeral: true);
-                return;
-            }
-
-            string charName = formValues.Target;
-            IUser? player = GetGuildUser(guild.Id, playerId);
-
-            if (player == null)
-            {
-                await component.RespondAsync($"Unable to find user.", ephemeral: true);
                 return;
             }
 
@@ -48,6 +49,7 @@ namespace OpenRoadHelper
                 return;
             }
 
+            string charName = formValues.Target;
             Character? character = guild.GetCharacter(player.Id, charName);
             if (character == null)
             {

@@ -26,7 +26,10 @@ namespace OpenRoadHelper
             IUser? player = GetGuildUser(guildId, playerId);
             if (player == null)
             {
-                await component.RespondAsync($"Unable to find <@{playerId}> in database.", ephemeral: true);
+                await component.RespondAsync(
+                    $"Unable to find <@{playerId}> in database.",
+                    ephemeral: true
+                );
                 return;
             }
 
@@ -93,6 +96,16 @@ namespace OpenRoadHelper
             FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
             ulong playerId = formValues.User;
+            IUser? player = GetGuildUser(guildId, playerId);
+            if (player == null)
+            {
+                await component.RespondAsync(
+                    $"Unable to find <@{playerId}> in database.",
+                    ephemeral: true
+                );
+                return;
+            }
+
             IUser user = component.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
@@ -178,6 +191,16 @@ namespace OpenRoadHelper
             FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
             ulong playerId = formValues.User;
+            IUser? player = GetGuildUser(guildId, playerId);
+            if (player == null)
+            {
+                await component.RespondAsync(
+                    $"Unable to find <@{playerId}> in database.",
+                    ephemeral: true
+                );
+                return;
+            }
+
             IUser user = component.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {

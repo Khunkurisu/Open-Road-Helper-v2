@@ -196,6 +196,16 @@ namespace OpenRoadHelper
             FormValue formValues = guild.GetFormValues(button.Data.CustomId);
 
             ulong playerId = formValues.User;
+            IUser? player = GetGuildUser(guildId, playerId);
+            if (player == null)
+            {
+                await button.RespondAsync(
+                    $"Unable to find <@{playerId}> in database.",
+                    ephemeral: true
+                );
+                return;
+            }
+
             IUser user = button.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
@@ -308,6 +318,16 @@ namespace OpenRoadHelper
             FormValue formValues = guild.GetFormValues(button.Data.CustomId);
 
             ulong playerId = formValues.User;
+            IUser? player = GetGuildUser(guildId, playerId);
+            if (player == null)
+            {
+                await button.RespondAsync(
+                    $"Unable to find <@{playerId}> in database.",
+                    ephemeral: true
+                );
+                return;
+            }
+
             IUser user = button.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
