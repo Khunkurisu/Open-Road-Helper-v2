@@ -262,7 +262,7 @@ namespace OpenRoadHelper.Characters
             >();
             foreach (string skill in skills.Keys)
             {
-                string skillName = Generic.ExpandSkillAbbreviation(skill);
+                string skillName = PF2E.ExpandSkillAbbreviation(skill);
                 uint skillRank = skills[skill]["rank"];
                 _skills.Add(skillName, (int)skillRank);
             }

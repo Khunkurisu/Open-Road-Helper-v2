@@ -36,6 +36,31 @@ namespace OpenRoadHelper
             };
         public static int[] SimpleDCs { get; } = new int[] { 10, 15, 20, 30, 40 };
         public static int[] DCAdjustment { get; } = new int[] { -10, -5, -2, 2, 5, 10 };
+
+        public static string ExpandSkillAbbreviation(string skillAbbreviation)
+        {
+            return skillAbbreviation switch
+            {
+                "acr" => "acrobatics",
+                "arc" => "arcana",
+                "ath" => "athletics",
+                "cra" => "crafting",
+                "dec" => "deception",
+                "dip" => "diplomacy",
+                "itm" => "intimidation",
+                "med" => "medicine",
+                "nat" => "nature",
+                "occ" => "occultism",
+                "prf" => "performance",
+                "rel" => "religion",
+                "soc" => "society",
+                "ste" => "stealth",
+                "sur" => "survival",
+                "thievery" => "thievery",
+                _ => skillAbbreviation,
+            };
+        }
+
         public static double[,] IncomeTable { get; } =
             new double[,]
             {

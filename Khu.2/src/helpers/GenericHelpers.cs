@@ -1,5 +1,7 @@
 using System.Drawing;
 using System.Text.RegularExpressions;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Webp;
 
 namespace OpenRoadHelper
 {
@@ -30,28 +32,27 @@ namespace OpenRoadHelper
             }
         }
 
-        public static string ExpandSkillAbbreviation(string skillAbbreviation)
+        public async static Task DownloadImageAsWebp(string url, string filename)
         {
-            return skillAbbreviation switch
+            using var client = new HttpClient();
+            try
             {
-                "acr" => "acrobatics",
-                "arc" => "arcana",
-                "ath" => "athletics",
-                "cra" => "crafting",
-                "dec" => "deception",
-                "dip" => "diplomacy",
-                "itm" => "intimidation",
-                "med" => "medicine",
-                "nat" => "nature",
-                "occ" => "occultism",
-                "prf" => "performance",
-                "rel" => "religion",
-                "soc" => "society",
-                "ste" => "stealth",
-                "sur" => "survival",
-                "thievery" => "thievery",
-                _ => skillAbbreviation,
-            };
+                var response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                var imageBytes = await response.Content.ReadAsByteArrayAsync();
+                using var inStream = new MemoryStream(imageBytes);
+                using var image = await Image.LoadAsync(inStream);
+                using var outStream = new MemoryStream();
+                await image.SaveAsync(outStream, new WebpEncoder());
+                await outStream.CopyToAsync(new FileStream(filename, FileMode.Create));
+
+                Console.WriteLine("Image downloaded successfully: " + filename);
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine("Failed to download image: " + ex.Message);
+            }
         }
 
         public static string Ordinal(float num)
@@ -123,7 +124,7 @@ namespace OpenRoadHelper
 
         public static int[] HexStringToRGB(string hexColor)
         {
-            Color color = ColorTranslator.FromHtml(hexColor);
+            System.Drawing.Color color = ColorTranslator.FromHtml(hexColor);
             return new int[]
             {
                 Convert.ToInt16(color.R),
