@@ -6,7 +6,7 @@ namespace OpenRoadHelper.Characters
     {
         [JsonConstructor]
         public Character(
-            Guid id,
+            string id,
             ulong user,
             ulong guild,
             ulong charThread,
@@ -51,7 +51,7 @@ namespace OpenRoadHelper.Characters
             Display display
         )
         {
-            _id = id;
+            _id = new(Convert.FromBase64String(id + "=="));
             _user = user;
             _guild = guild;
             _characterThread = charThread;
