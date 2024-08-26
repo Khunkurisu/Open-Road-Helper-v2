@@ -53,11 +53,17 @@ namespace OpenRoadHelper.Characters
     public class CharacterManagement : InteractionModuleBase<SocketInteractionContext>
     {
         [SlashCommand("create", "Create a character.")]
-        public async Task CreateCharacter(float height, float weight, uint pathbuilderId, IAttachment? image = null)
+        public async Task CreateCharacter(
+            [Summary("Height", "Character's height in centimeters.")] float height,
+            [Summary("Weight", "Character's weight in kilograms.")] float weight,
+            [Summary("PathbuilderID", "Export ID for Pathbuilder export.")] uint pathbuilderId,
+            [Summary("Avatar", "Image to be associated with the character.")] IAttachment image
+        )
         {
             ulong guildId = Context.Guild.Id;
             IUser player = Context.User;
-            HttpClient httpClient = new() { Timeout = TimeSpan.FromSeconds(2) };
+
+            HttpClient httpClient = new() { Timeout = TimeSpan.FromSeconds(3) };
 
             if (pathbuilderId <= 0)
             {
@@ -83,25 +89,41 @@ namespace OpenRoadHelper.Characters
             }
 
             PathbuilderImport characterImport = new(importData);
-            Manager.StoreTempCharacter(characterImport, guildId, player, height, weight);
+            characterImport.AddValue("height", height);
+            characterImport.AddValue("weight", weight);
+            Manager.StoreTempCharacter(characterImport, guildId, player);
 
             Guild guild = Manager.GetGuild(guildId);
             Dictionary<string, dynamic>? charData = guild
                 .GetCharacterJson(player.Id)
                 ?.GetCharacterData();
+            if (charData == null)
+            {
+                await RespondAsync("Failed to process pathbuilder data.", ephemeral: true);
+                return;
+            }
+
             string charName = string.Empty;
             string charDesc = string.Empty;
-            if (charData != null)
+            if (charData.ContainsKey("name"))
             {
-                if (charData.ContainsKey("name"))
-                {
-                    charName = charData["name"];
-                }
-                if (charData.ContainsKey("description"))
-                {
-                    charDesc = charData["description"];
-                }
+                charName = charData["name"];
             }
+            if (charData.ContainsKey("description"))
+            {
+                charDesc = charData["description"];
+            }
+
+            string filepath = @".\data\images\characters\";
+            Directory.CreateDirectory(filepath);
+            string url = image.Url;
+            string filename = $"{charName}--initial.webp";
+            if (!await Generic.DownloadImage(url, filepath + filename))
+            {
+                await RespondAsync("Failed to process image.", ephemeral: true);
+                return;
+            }
+            characterImport.AddValue("avatar", filename);
 
             var textBox = new ModalBuilder()
                 .WithTitle("Create Character")
@@ -131,8 +153,10 @@ namespace OpenRoadHelper.Characters
 
         [SlashCommand("update", "Update a character.")]
         public async Task UpdateCharacter(
-            [Autocomplete(typeof(CharacterNameAutocompleteHandler))] string charName,
-            IAttachment sheet
+            [Summary("name", "Character's name.")]
+            [Autocomplete(typeof(CharacterNameAutocompleteHandler))]
+                string charName,
+            [Summary("sheet", "Foundry sheet exported from Foundry.")] IAttachment sheet
         )
         {
             ulong guildId = Context.Guild.Id;
@@ -156,7 +180,9 @@ namespace OpenRoadHelper.Characters
 
         [SlashCommand("roleplay", "Roleplay as a character.")]
         public async Task Roleplay(
-            [Autocomplete(typeof(CharacterNameAutocompleteHandler))] string charName
+            [Summary("name", "Character's name.")]
+            [Autocomplete(typeof(CharacterNameAutocompleteHandler))]
+                string charName
         )
         {
             ulong guildId = Context.Guild.Id;

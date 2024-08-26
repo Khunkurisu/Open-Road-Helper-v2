@@ -13,45 +13,25 @@ namespace OpenRoadHelper
             return await client.GetStringAsync(url);
         }
 
-        public async static Task DownloadImage(string url, string filename)
+        public async static Task<bool> DownloadImage(string url, string filename)
         {
-            using var client = new HttpClient();
+            using var client = new HttpClient() { Timeout = TimeSpan.FromSeconds(3) };
             try
             {
                 var response = await client.GetAsync(url);
                 response.EnsureSuccessStatusCode();
 
                 using var stream = await response.Content.ReadAsStreamAsync();
-                using var fileStream = new FileStream(filename, FileMode.Create);
-                await stream.CopyToAsync(fileStream);
+                using var image = await Image.LoadAsync(stream);
+                await image.SaveAsync(filename, new WebpEncoder());
+
                 Console.WriteLine("Image downloaded successfully: " + filename);
+                return true;
             }
             catch (HttpRequestException ex)
             {
                 Console.WriteLine("Failed to download image: " + ex.Message);
-            }
-        }
-
-        public async static Task DownloadImageAsWebp(string url, string filename)
-        {
-            using var client = new HttpClient();
-            try
-            {
-                var response = await client.GetAsync(url);
-                response.EnsureSuccessStatusCode();
-
-                var imageBytes = await response.Content.ReadAsByteArrayAsync();
-                using var inStream = new MemoryStream(imageBytes);
-                using var image = await Image.LoadAsync(inStream);
-                using var outStream = new MemoryStream();
-                await image.SaveAsync(outStream, new WebpEncoder());
-                await outStream.CopyToAsync(new FileStream(filename, FileMode.Create));
-
-                Console.WriteLine("Image downloaded successfully: " + filename);
-            }
-            catch (HttpRequestException ex)
-            {
-                Console.WriteLine("Failed to download image: " + ex.Message);
+                return false;
             }
         }
 
@@ -120,6 +100,11 @@ namespace OpenRoadHelper
         public static string GuidToBase64(Guid guid)
         {
             return Convert.ToBase64String(guid.ToByteArray()).Replace("==", "");
+        }
+
+        public static string Base64IdSafe(Guid guid)
+        {
+            return Regex.Replace(GuidToBase64(guid), "[/+=]", "");
         }
 
         public static int[] HexStringToRGB(string hexColor)

@@ -21,7 +21,7 @@ namespace OpenRoadHelper
             return GetGuild(guildId).GetCharacter(playerId, charName);
         }
 
-        public static Character? GetCharacter(ulong guildId, Guid characterId)
+        public static Character? GetCharacter(ulong guildId, string characterId)
         {
             return GetGuild(guildId).GetCharacter(characterId);
         }
@@ -288,7 +288,10 @@ namespace OpenRoadHelper
             {
                 return;
             }
-            await threadChannel.ModifyAsync(x => { x.Archived = false; });
+            await threadChannel.ModifyAsync(x =>
+            {
+                x.Archived = false;
+            });
         }
 
         public static async Task AwakenThread(Quest quest)

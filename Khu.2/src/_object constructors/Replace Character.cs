@@ -10,7 +10,7 @@ namespace OpenRoadHelper.Characters
     {
         public Character(Character template, Dictionary<string, dynamic> data)
         {
-            _id = template.Id;
+            _id = new(Convert.FromBase64String(template.Id + "=="));
             _user = template._user;
             _guild = template._guild;
             _characterThread = template._characterThread;

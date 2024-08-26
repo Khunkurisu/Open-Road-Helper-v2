@@ -8,7 +8,7 @@ namespace OpenRoadHelper.Quests
         public Guid Id;
         public ulong Guild;
         public string Name;
-        public List<Guid> MembersList;
+        public List<string> MembersList;
         public string Members => string.Join(", ", MembersList);
 
         public Party(Character creator)
@@ -32,12 +32,12 @@ namespace OpenRoadHelper.Quests
             MembersList.Add(character.Id);
         }
 
-        public void AddMember(Guid characterId)
+        public void AddMember(string characterId)
         {
             MembersList.Add(characterId);
         }
 
-        public void RemoveMember(Guid characterId)
+        public void RemoveMember(string characterId)
         {
             MembersList.Remove(characterId);
         }

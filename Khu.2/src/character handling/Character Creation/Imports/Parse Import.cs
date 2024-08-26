@@ -1,5 +1,3 @@
-
-
 namespace OpenRoadHelper.Characters
 {
     public partial class Character
@@ -32,16 +30,37 @@ namespace OpenRoadHelper.Characters
             _feats = data["feats"];
             _spells = data["spells"];
             _attributes = data["attributes"];
-            if (data.TryGetValue("foundry image", out dynamic? img))
+            if (data.TryGetValue("foundry image", out dynamic? foundryImage))
             {
                 if (_avatars.ContainsKey("FoundryVTT"))
                 {
-                    _avatars["FoundryVTT"] = img;
+                    _avatars["FoundryVTT"] = foundryImage;
                 }
                 else
                 {
-                    _avatars.Add("FoundryVTT", img);
+                    _avatars.Add("FoundryVTT", foundryImage);
                 }
+            }
+            if (data.TryGetValue("avatar", out dynamic? initialImage))
+            {
+                if (_avatars.ContainsKey("Initial"))
+                {
+                    _avatars["Initial"] = initialImage;
+                }
+                else
+                {
+                    _avatars.Add("Initial", initialImage);
+                }
+                Avatar = GetAvatarIndex("Initial");
+                Console.WriteLine(Avatars.ToString());
+            }
+            if (data.TryGetValue("height", out dynamic? height))
+            {
+                _height = height;
+            }
+            if (data.TryGetValue("weight", out dynamic? weight))
+            {
+                _weight = weight;
             }
 
             if (data.TryGetValue("edicts", out dynamic? edicts))
@@ -63,7 +82,6 @@ namespace OpenRoadHelper.Characters
                 _heritage = _heritage.Replace(_ancestry, "");
                 _heritage = _heritage.Trim();
             }
-
         }
     }
 }

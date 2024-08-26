@@ -62,6 +62,6 @@ namespace OpenRoadHelper.Characters
         private Status _status = 0;
         private Display _display = 0;
         private int _currentAvatar = 0;
-        private const string _avatarPrefix = @".\data\images\characters\";
+        public static readonly string AvatarPrefix = "http://pf2.khunkurisu.com/open-road/character-images/";
     }
 }

@@ -104,7 +104,9 @@ namespace OpenRoadHelper.Guilds
                 return 1;
             }
             return new List<Character>(
-                    _characters[playerId].Where(x => x.Status == OpenRoadHelper.Characters.Status.Approved)
+                    _characters[playerId].Where(
+                        x => x.Status == OpenRoadHelper.Characters.Status.Approved
+                    )
                 ).Count + 1;
         }
 
@@ -121,7 +123,7 @@ namespace OpenRoadHelper.Guilds
         public void SetPlayerTokenCount(ulong playerId, uint tokenCount)
         {
             _playerTokens[playerId] = tokenCount;
-            QueueSave("tokens");
+            QueueSave("tokens", true);
         }
 
         public void IncreasePlayerTokenCount(ulong playerId, uint tokenCount)
@@ -327,25 +329,6 @@ namespace OpenRoadHelper.Guilds
                 {
                     _parties.Add(party);
                 }
-            }
-        }
-
-        public void StoreTempCharacter(
-            ulong playerId,
-            IImportable characterImport,
-            float height,
-            float weight
-        )
-        {
-            characterImport.AddValue("height", height);
-            characterImport.AddValue("weight", weight);
-            if (!_characterValues.ContainsKey(playerId))
-            {
-                _characterValues.Add(playerId, characterImport);
-            }
-            else
-            {
-                _characterValues[playerId] = characterImport;
             }
         }
 
@@ -559,7 +542,7 @@ namespace OpenRoadHelper.Guilds
             QueueSave("quests", true);
         }
 
-        public bool FormParty(Guid creator)
+        public bool FormParty(string creator)
         {
             Character? partyCreator = GetCharacter(creator);
             if (partyCreator != null)
@@ -588,10 +571,10 @@ namespace OpenRoadHelper.Guilds
             return true;
         }
 
-        public bool FormParty(List<Guid> members)
+        public bool FormParty(List<string> members)
         {
             List<Character> partyMembers = new();
-            foreach (Guid member in members)
+            foreach (string member in members)
             {
                 Character? character = GetCharacter(member);
                 if (character != null)
@@ -630,7 +613,7 @@ namespace OpenRoadHelper.Guilds
             }
         }
 
-        public void RemoveCharacter(Guid characterId)
+        public void RemoveCharacter(string characterId)
         {
             Character? character = GetCharacter(characterId);
             if (character != null)
@@ -680,7 +663,7 @@ namespace OpenRoadHelper.Guilds
             return null;
         }
 
-        public Character? GetCharacter(Guid characterId)
+        public Character? GetCharacter(string characterId)
         {
             foreach (ulong playerId in _characters.Keys)
             {

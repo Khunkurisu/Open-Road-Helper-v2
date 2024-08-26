@@ -24,9 +24,9 @@ namespace OpenRoadHelper.Characters
             return $"{Generic.Ordinal(_birthDay)} {_birthMonth} {_birthYear} AR";
         }
 
-        public Guid Id
+        public string Id
         {
-            get => _id;
+            get => Generic.GuidToBase64(_id);
         }
         public ulong User
         {
@@ -47,7 +47,8 @@ namespace OpenRoadHelper.Characters
         }
         public string Description
         {
-            get {
+            get
+            {
                 string descParsed = _desc ?? string.Empty;
                 descParsed = descParsed.Replace("<br>", "\n");
                 descParsed = descParsed.Replace("<br />", "\n");
@@ -429,11 +430,11 @@ namespace OpenRoadHelper.Characters
             {
                 if (Avatars.Count - 1 >= index)
                 {
-                    return $"{_avatarPrefix}{Avatars[Avatars.Keys.ElementAt(index)]}";
+                    return $"{AvatarPrefix}{Avatars[Avatars.Keys.ElementAt(index)]}";
                 }
                 else
                 {
-                    return $"{_avatarPrefix}{Avatars[Avatars.Keys.ElementAt(0)]}";
+                    return $"{AvatarPrefix}{Avatars[Avatars.Keys.ElementAt(0)]}";
                 }
             }
             return string.Empty;
@@ -445,14 +446,19 @@ namespace OpenRoadHelper.Characters
             {
                 if (Avatars.ContainsKey(key))
                 {
-                    return $"{_avatarPrefix}{Avatars[key]}";
+                    return $"{AvatarPrefix}{Avatars[key]}";
                 }
                 else
                 {
-                    return $"{_avatarPrefix}{Avatars.ElementAt(0)}";
+                    return $"{AvatarPrefix}{Avatars.ElementAt(0)}";
                 }
             }
             return string.Empty;
+        }
+
+        public int GetAvatarIndex(string key)
+        {
+            return Avatars.Keys.ToList().IndexOf(key);
         }
 
         public Status RetirementType = Status.Retired;

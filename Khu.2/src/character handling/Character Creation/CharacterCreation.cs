@@ -10,22 +10,6 @@ namespace OpenRoadHelper
         public static void StoreTempCharacter(
             IImportable characterImport,
             ulong guildId,
-            IUser player,
-            float height,
-            float weight
-        )
-        {
-            Guild guild = GetGuild(guildId);
-            if (guild == null)
-            {
-                return;
-            }
-            guild.StoreTempCharacter(player.Id, characterImport, height, weight);
-        }
-
-        public static void StoreTempCharacter(
-            IImportable characterImport,
-            ulong guildId,
             IUser player
         )
         {
@@ -52,6 +36,7 @@ namespace OpenRoadHelper
             ulong guildId = (ulong)guildIdOrNull;
             Guild guild = GetGuild(guildId);
             FormValue formValues = guild.GetFormValues(modal.Data.CustomId);
+
             ulong playerId = formValues.User;
             IUser? player = _client?.GetUser(playerId);
             if (player == null)

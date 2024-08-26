@@ -49,6 +49,7 @@ namespace OpenRoadHelper.Characters
                 _skills[skill] = SkillBonus(skill);
             }
         }
+
         private int SkillBonus(string skillName)
         {
             int skillRank = _skills[skillName] / 2;
@@ -334,6 +335,8 @@ namespace OpenRoadHelper.Characters
             new() { "Canny Acumen", "Assurance", "Additional Lore" };
         private readonly List<string> SaveKeys = new() { "reflex", "will", "fortitude" };
 
+        private string _avatar = string.Empty;
+
         public Dictionary<string, dynamic>? GetCharacterData()
         {
             return new()
@@ -358,7 +361,8 @@ namespace OpenRoadHelper.Characters
                 { "saves", _saves },
                 { "feats", _feats },
                 { "spells", _spells },
-                { "attributes", _attributes }
+                { "attributes", _attributes },
+                { "avatar", _avatar }
             };
         }
 
@@ -367,15 +371,20 @@ namespace OpenRoadHelper.Characters
             switch (key)
             {
                 case "height":
-                    {
-                        _height = value;
-                        break;
-                    }
+                {
+                    _height = value;
+                    break;
+                }
                 case "weight":
-                    {
-                        _weight = value;
-                        break;
-                    }
+                {
+                    _weight = value;
+                    break;
+                }
+                case "avatar":
+                {
+                    _avatar = value;
+                    break;
+                }
             }
         }
 
