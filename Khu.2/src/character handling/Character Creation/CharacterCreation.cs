@@ -236,7 +236,7 @@ namespace OpenRoadHelper
                 return;
             }
 
-            guild.ClearTempCharacter(user.Id);
+            guild.ClearTempCharacter(playerId);
             guild.RemoveCharacter(character);
             await button.UpdateAsync(x =>
             {
@@ -250,7 +250,7 @@ namespace OpenRoadHelper
             SocketMessageComponent context,
             Guild guild,
             Character character,
-            IUser user
+            IUser player
         )
         {
             if (guild.CharacterBoard == null || guild.TransactionBoard == null)
@@ -266,14 +266,14 @@ namespace OpenRoadHelper
 
             await context.DeferLoadingAsync(true);
 
-            guild.ClearTempCharacter(user.Id);
+            guild.ClearTempCharacter(player.Id);
             ForumTag[] tags = { guild.CharacterBoard.Tags.First(x => x.Name == "Pending") };
             character.Status = Status.Pending;
 
             IThreadChannel charThread = await guild.CharacterBoard.CreatePostAsync(
                 character.Name,
                 ThreadArchiveDuration.OneWeek,
-                embed: character.GenerateEmbed(user).Build(),
+                embed: character.GenerateEmbed(player).Build(),
                 tags: tags,
                 components: character.GenerateComponents().Build()
             );
@@ -292,8 +292,8 @@ namespace OpenRoadHelper
             character.TransactionThread = transThread.Id;
             guild.QueueSave("characters", true);
 
-            await charThread.AddUserAsync((IGuildUser)user);
-            await transThread.AddUserAsync((IGuildUser)user);
+            await charThread.AddUserAsync((IGuildUser)player);
+            await transThread.AddUserAsync((IGuildUser)player);
 
             await context.FollowupAsync(
                 $"{character.Name} has been created and is pending approval. (Character: {charThread.Mention} | Transactions: {transThread.Mention})",
@@ -372,10 +372,10 @@ namespace OpenRoadHelper
             string transactionMessage = "Forced character creation canceled.";
             if (!isForced)
             {
-                uint refundAmount = (uint)guild.GetNewCharacterCost(user.Id);
-                guild.IncreasePlayerTokenCount(user.Id, refundAmount);
+                uint refundAmount = (uint)guild.GetNewCharacterCost(playerId);
+                guild.IncreasePlayerTokenCount(playerId, refundAmount);
                 transactionMessage =
-                    $"Pending character refunded and deleted. ({refundAmount} PT gained | {guild.GetPlayerTokenCount(user.Id)} PT remaining)";
+                    $"Pending character refunded and deleted. ({refundAmount} PT gained | {guild.GetPlayerTokenCount(playerId)} PT remaining)";
             }
             await charThread.DeleteAsync();
 

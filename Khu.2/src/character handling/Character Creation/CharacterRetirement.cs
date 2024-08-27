@@ -148,9 +148,9 @@ namespace OpenRoadHelper
 
             character.Status = character.RetirementType;
             guild.RemoveCharacter(character);
-            uint refundAmount = (uint)guild.GetNewCharacterCost(user.Id);
-            guild.IncreasePlayerTokenCount(user.Id, refundAmount);
-            guild.AddCharacter(user.Id, character);
+            uint refundAmount = (uint)guild.GetNewCharacterCost(playerId);
+            guild.IncreasePlayerTokenCount(playerId, refundAmount);
+            guild.AddCharacter(playerId, character);
             if (guild.CharacterBoard == null)
             {
                 await component.RespondAsync(
@@ -166,7 +166,7 @@ namespace OpenRoadHelper
             await charThread.ModifyAsync(x => x.AppliedTags = tags);
 
             IUserMessage msg = await transactionChannel.SendMessageAsync(
-                $"{charName} marked as {character.RetirementType}. ({refundAmount} PT gained | {guild.GetPlayerTokenCount(user.Id)} PT remaining)"
+                $"{charName} marked as {character.RetirementType}. ({refundAmount} PT gained | {guild.GetPlayerTokenCount(playerId)} PT remaining)"
             );
             string msgLink = $"https://discord.com/channels/{guildId}/{msg.Channel.Id}/{msg.Id}";
 
