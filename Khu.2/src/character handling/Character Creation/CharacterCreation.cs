@@ -179,6 +179,7 @@ namespace OpenRoadHelper
             }
             else
             {
+                character.Status = Status.Approved;
                 await PostCharacter(button, guild, character, player);
             }
         }
