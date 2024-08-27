@@ -43,7 +43,7 @@ namespace OpenRoadHelper
                 return;
             }
             string charName = formValue.Target;
-            Character? character = GetCharacter(guild.Id, player.Id, charName);
+            Character? character = GetCharacter(guildId, playerId, charName);
             if (character == null)
             {
                 await messageComponent.RespondAsync(
@@ -105,7 +105,7 @@ namespace OpenRoadHelper
             }
 
             string charName = formValue.Target;
-            Character? character = GetCharacter(guild.Id, player.Id, charName);
+            Character? character = GetCharacter(guildId, playerId, charName);
             if (character == null)
             {
                 await messageComponent.RespondAsync(
@@ -266,7 +266,7 @@ namespace OpenRoadHelper
             }
 
             string charName = formValue.Target;
-            Character? character = GetCharacter(guild.Id, player.Id, charName);
+            Character? character = GetCharacter(guildId, playerId, charName);
             if (character == null)
             {
                 await modal.RespondAsync(

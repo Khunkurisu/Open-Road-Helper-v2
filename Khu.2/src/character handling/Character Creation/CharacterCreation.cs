@@ -264,12 +264,6 @@ namespace OpenRoadHelper
                 return;
             }
 
-            await context.UpdateAsync(x =>
-            {
-                x.Components = null;
-                x.Content = "Confirmed, please wait.";
-                x.Embeds = null;
-            });
             await context.DeferLoadingAsync(true);
 
             guild.ClearTempCharacter(user.Id);
@@ -342,7 +336,7 @@ namespace OpenRoadHelper
             }
 
             string charName = formValues.Target;
-            Character? character = guild.GetCharacter(user.Id, charName);
+            Character? character = guild.GetCharacter(playerId, charName);
             if (character == null)
             {
                 await button.RespondAsync(

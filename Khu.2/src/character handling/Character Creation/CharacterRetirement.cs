@@ -114,7 +114,7 @@ namespace OpenRoadHelper
             }
 
             string charName = formValues.Target;
-            Character? character = guild.GetCharacter(user.Id, charName);
+            Character? character = guild.GetCharacter(playerId, charName);
             if (character == null)
             {
                 await component.RespondAsync(
