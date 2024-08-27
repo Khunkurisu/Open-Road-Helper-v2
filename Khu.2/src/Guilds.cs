@@ -157,6 +157,11 @@ namespace OpenRoadHelper.Guilds
             _lastSave = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
+        public bool BoardsUnset()
+        {
+            return QuestBoard == null || TransactionBoard == null || CharacterBoard == null;
+        }
+
         public bool IsGamemaster(IUser potentialGM)
         {
             if (potentialGM is not SocketGuildUser user)
@@ -373,9 +378,9 @@ namespace OpenRoadHelper.Guilds
 
         public async Task RefreshCharacterPosts(ulong playerId)
         {
-            if (_characters.ContainsKey(playerId))
+            if (_characters.TryGetValue(playerId, out List<Character>? value))
             {
-                foreach (Character character in _characters[playerId])
+                foreach (Character character in value)
                 {
                     await Manager.DrawCharacterPost(character);
                     await Manager.AwakenThread(character);

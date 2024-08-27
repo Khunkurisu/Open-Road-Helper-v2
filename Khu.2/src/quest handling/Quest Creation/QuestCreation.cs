@@ -120,7 +120,7 @@ namespace OpenRoadHelper
             IUser user
         )
         {
-            if (guild.QuestBoard == null)
+            if (guild.BoardsUnset())
             {
                 await context.UpdateAsync(x =>
                 {
