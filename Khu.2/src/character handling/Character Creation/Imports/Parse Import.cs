@@ -56,11 +56,17 @@ namespace OpenRoadHelper.Characters
             }
             if (data.TryGetValue("height", out dynamic? height))
             {
-                _height = height;
+                if (height is not string)
+                {
+                    _height = height;
+                }
             }
             if (data.TryGetValue("weight", out dynamic? weight))
             {
-                _weight = weight;
+                if (weight is not string)
+                {
+                    _weight = weight;
+                }
             }
 
             if (data.TryGetValue("edicts", out dynamic? edicts))

@@ -128,7 +128,7 @@ namespace OpenRoadHelper
             }
 
             IUser user = button.User;
-            if (!isForced && user.Id != playerId && !guild.IsGamemaster(user))
+            if (user.Id != playerId && !guild.IsGamemaster(user))
             {
                 await button.RespondAsync("You lack permission to do that!", ephemeral: true);
                 return;
@@ -264,6 +264,12 @@ namespace OpenRoadHelper
                 return;
             }
 
+            await context.UpdateAsync(x =>
+            {
+                x.Components = null;
+                x.Content = "Confirmed, please wait.";
+                x.Embeds = null;
+            });
             await context.DeferLoadingAsync(true);
 
             guild.ClearTempCharacter(user.Id);
@@ -290,7 +296,7 @@ namespace OpenRoadHelper
 
             character.CharacterThread = charThread.Id;
             character.TransactionThread = transThread.Id;
-            guild.QueueSave("characters");
+            guild.QueueSave("characters", true);
 
             await charThread.AddUserAsync((IGuildUser)user);
             await transThread.AddUserAsync((IGuildUser)user);

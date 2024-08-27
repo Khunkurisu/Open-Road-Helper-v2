@@ -7,7 +7,7 @@ namespace OpenRoadHelper.Characters
     {
         public ComponentBuilder GenerateComponents(bool isForced = false)
         {
-            return GenerateButtons(isForced).WithSelectMenu(CharacterDisplaySelector());
+            return GenerateButtons(isForced).WithSelectMenu(CharacterDisplaySelector(isForced));
         }
 
         public static SelectMenuBuilder CharacterDisplaySelector(
@@ -27,12 +27,12 @@ namespace OpenRoadHelper.Characters
                 .AddOption("Feats", "Feats");
         }
 
-        public SelectMenuBuilder CharacterDisplaySelector()
+        public SelectMenuBuilder CharacterDisplaySelector(bool isForced = false)
         {
             Guild guild = Manager.GetGuild(Guild);
 
             var menu = new SelectMenuBuilder().WithCustomId(
-                guild.GenerateFormValues(new() { $"charDisplay", User, Name })
+                guild.GenerateFormValues(new() { $"charDisplay", User, Name, isForced ? "forced" : "not forced" })
             );
 
             foreach (string k in Enum.GetNames(typeof(Display)))

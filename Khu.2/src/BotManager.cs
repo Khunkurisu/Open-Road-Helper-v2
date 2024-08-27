@@ -265,7 +265,7 @@ namespace OpenRoadHelper
             }
             else if (actionContext.Contains("charDisplay"))
             {
-                await DrawCharacterPost(selectMenu, true);
+                await DrawCharacterPost(selectMenu, true, formValues.Modifier == "forced");
             }
             else if (actionContext.Contains("retirementType"))
             {

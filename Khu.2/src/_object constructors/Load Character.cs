@@ -51,7 +51,14 @@ namespace OpenRoadHelper.Characters
             Display display
         )
         {
-            _id = new(Convert.FromBase64String(id + "=="));
+            if (id.Length > 22)
+            {
+                _id = new(id);
+            }
+            else
+            {
+                _id = new(Convert.FromBase64String(id + "=="));
+            }
             _user = user;
             _guild = guild;
             _characterThread = charThread;

@@ -14,7 +14,10 @@ namespace OpenRoadHelper.GameMaster
         public class ManageCharacters : InteractionModuleBase<SocketInteractionContext>
         {
             [SlashCommand("force-create", "Forcibly create a character from a foundry import.")]
-            public async Task CreateCharacter(IUser player, IAttachment sheet)
+            public async Task CreateCharacter(
+                [Summary("Player", "Discord user associated with the character.")] IUser player,
+                [Summary("Sheet", "Foundry sheet exported from Foundry.")] IAttachment sheet
+            )
             {
                 ulong guildId = Context.Guild.Id;
                 Guild guild = Manager.GetGuild(guildId);

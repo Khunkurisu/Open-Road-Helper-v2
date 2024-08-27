@@ -9,7 +9,7 @@ namespace OpenRoadHelper
     {
         public static async Task DrawCharacterPost(
             SocketMessageComponent component,
-            bool updateDisplay = false
+            bool updateDisplay = false, bool isForced = false
         )
         {
             if (component.GuildId == null)
@@ -73,7 +73,7 @@ namespace OpenRoadHelper
             await component.UpdateAsync(x =>
             {
                 x.Embed = character.GenerateEmbed(user).Build();
-                x.Components = character.GenerateComponents().Build();
+                x.Components = character.GenerateComponents(isForced).Build();
             });
         }
 
