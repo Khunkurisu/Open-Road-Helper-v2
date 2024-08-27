@@ -165,6 +165,7 @@ namespace OpenRoadHelper
                 );
                 if (paid)
                 {
+                    character.Status = Status.Pending;
                     await PostCharacter(button, guild, character, player);
                 }
                 else
@@ -268,8 +269,7 @@ namespace OpenRoadHelper
             await context.DeferLoadingAsync(true);
 
             guild.ClearTempCharacter(player.Id);
-            ForumTag[] tags = { guild.CharacterBoard.Tags.First(x => x.Name == "Pending") };
-            character.Status = Status.Pending;
+            ForumTag[] tags = { guild.CharacterBoard.Tags.First(x => x.Name == character.Status.ToString()) };
 
             IThreadChannel charThread = await guild.CharacterBoard.CreatePostAsync(
                 character.Name,
