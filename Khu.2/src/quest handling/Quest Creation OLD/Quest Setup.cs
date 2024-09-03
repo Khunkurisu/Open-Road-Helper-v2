@@ -109,7 +109,7 @@ namespace OpenRoadHelper
                 ",",
                 StringSplitOptions.TrimEntries & StringSplitOptions.RemoveEmptyEntries
             );
-            Quest quest = new(gamemaster.Id, name, description, new(tags));
+            Quest quest = new(gamemaster.Id, guildId, name, description, new(tags));
             guild.AddQuest(quest);
 
             var messageComponents = new ComponentBuilder(); //Quest.ConfirmationButtons(guildId, gm, name);

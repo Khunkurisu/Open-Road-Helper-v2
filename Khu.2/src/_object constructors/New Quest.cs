@@ -2,14 +2,16 @@ namespace OpenRoadHelper.Quests
 {
     public partial class Quest
     {
-        public Quest()
+        public Quest(ulong guild)
         {
             _id = Guid.NewGuid();
+            _guild = guild;
             _createdAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
         public Quest(
             ulong gm,
+            ulong guild,
             string name,
             string desc,
             int threat,
@@ -20,6 +22,7 @@ namespace OpenRoadHelper.Quests
         {
             _id = Guid.NewGuid();
             _name = name;
+            _guild = guild;
             _gameMaster = gm;
             _description = desc;
             _threat = (Threats)threat;
@@ -31,6 +34,7 @@ namespace OpenRoadHelper.Quests
 
         public Quest(
             ulong gm,
+            ulong guild,
             string name,
             string desc,
             int threat,
@@ -39,6 +43,7 @@ namespace OpenRoadHelper.Quests
         )
         {
             _id = Guid.NewGuid();
+            _guild = guild;
             _name = name;
             _gameMaster = gm;
             _description = desc;
@@ -48,9 +53,10 @@ namespace OpenRoadHelper.Quests
             _createdAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
-        public Quest(ulong gm, string name, string desc, List<string> tags)
+        public Quest(ulong gm, ulong guild, string name, string desc, List<string> tags)
         {
             _id = Guid.NewGuid();
+            _guild = guild;
             _name = name;
             _gameMaster = gm;
             _description = desc;

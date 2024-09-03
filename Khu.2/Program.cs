@@ -20,9 +20,7 @@ namespace OpenRoadHelper
         }
 
         private readonly CommandService _commands;
-        private LoggingService? _logging;
         private readonly IServiceProvider _serviceProvider;
-        private SlashCommandHandler? _slashCommandHandler;
 
         static IServiceProvider CreateProvider()
         {
@@ -49,9 +47,9 @@ namespace OpenRoadHelper
 
             var _client = _serviceProvider.GetRequiredService<DiscordSocketClient>();
             Bot = new(_client);
-            _logging = new LoggingService(_client, _commands);
+            LoggingService _logging = new (_client, _commands);
 
-            _slashCommandHandler = new SlashCommandHandler(_client, _serviceProvider);
+            SlashCommandHandler _slashCommandHandler = new (_client, _serviceProvider);
 
             // login asynchronously to discord with client as bot using token
             await _client.LoginAsync(TokenType.Bot, token);

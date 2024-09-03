@@ -16,9 +16,9 @@ namespace OpenRoadHelper
                 await button.RespondAsync("This must be run in a guild.", ephemeral: true);
                 return;
             }
+
             ulong guildId = (ulong)button.GuildId;
             Guild guild = GetGuild(guildId);
-
             FormValue formValues = guild.GetFormValues(button.Data.CustomId);
 
             ulong gmId = formValues.User;
@@ -48,6 +48,7 @@ namespace OpenRoadHelper
                 });
                 return;
             }
+
             if (quest.Status != Status.Unplayed)
             {
                 await button.UpdateAsync(x =>
@@ -58,6 +59,7 @@ namespace OpenRoadHelper
                 });
                 return;
             }
+
             await PostQuest(button, guild, quest, gm);
         }
 
@@ -68,6 +70,7 @@ namespace OpenRoadHelper
                 await button.RespondAsync("This must be run in a guild.", ephemeral: true);
                 return;
             }
+
             ulong guildId = (ulong)button.GuildId;
             Guild guild = GetGuild(guildId);
 
@@ -130,8 +133,6 @@ namespace OpenRoadHelper
                 });
                 return;
             }
-
-            await context.DeferLoadingAsync(true);
 
             ForumTag[] tags = { guild.QuestBoard.Tags.First(x => x.Name == "Pending") };
             quest.Status = Status.Unplayed;

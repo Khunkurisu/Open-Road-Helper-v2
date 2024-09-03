@@ -141,7 +141,7 @@ namespace OpenRoadHelper.Quests
             }
         }
 
-        public string? Image => Images[(int)SelectedImage];
+        public string? Image => Images.Any() ? Images[(int)SelectedImage] : string.Empty;
 
         public List<string> Images
         {

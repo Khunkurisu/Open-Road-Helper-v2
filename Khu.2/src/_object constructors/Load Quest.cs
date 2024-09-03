@@ -12,7 +12,7 @@ namespace OpenRoadHelper.Quests
             ulong guildId,
             string description,
             Threats threat,
-            List<string> tags,
+            dynamic loadedTags,
             int minPlayers,
             int maxPlayers,
             List<Guid> parties,
@@ -30,7 +30,19 @@ namespace OpenRoadHelper.Quests
             _guild = guildId;
             _description = description;
             _threat = threat;
-            _tags = tags;
+            if (loadedTags is string allTags)
+            {
+                _tags = new(
+                    allTags.Split(
+                        ",",
+                        StringSplitOptions.TrimEntries & StringSplitOptions.RemoveEmptyEntries
+                    )
+                );
+            }
+            else
+            {
+                _tags = loadedTags;
+            }
             _minPlayers = minPlayers;
             _maxPlayers = maxPlayers;
             _parties = parties;
