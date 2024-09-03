@@ -97,7 +97,7 @@ namespace OpenRoadHelper
             string[] guildIds = Directory.GetDirectories(guildData);
             while (_client == null)
             {
-                await Task.Delay(TimeSpan.FromSeconds(0.5));
+                await Task.Yield();
             }
             foreach (string guildId in guildIds)
             {
@@ -125,7 +125,7 @@ namespace OpenRoadHelper
                     await guild.RefreshQuestPosts();
                 }
             }
-            await Task.Delay(10);
+            await Task.Yield();
         }
 
         private async Task OnButtonExecuted(SocketMessageComponent button)

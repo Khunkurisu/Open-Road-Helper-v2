@@ -11,6 +11,8 @@ namespace OpenRoadHelper
     {
         public static Task Main(string[] args) => new Program().MainAsync();
 
+        public static string RunningLocation { get; private set; } = string.Empty;
+
         public Manager? Bot;
 
         public Program()
@@ -45,11 +47,14 @@ namespace OpenRoadHelper
             // assign token from file (token.txt added to .gitignore for security)
             var token = File.ReadAllText("token.txt");
 
+            // read local-only file to see what computer is running the app
+            RunningLocation = File.ReadAllText("debug.txt").Trim();
+
             var _client = _serviceProvider.GetRequiredService<DiscordSocketClient>();
             Bot = new(_client);
-            LoggingService _logging = new (_client, _commands);
+            LoggingService _logging = new(_client, _commands);
 
-            SlashCommandHandler _slashCommandHandler = new (_client, _serviceProvider);
+            SlashCommandHandler _slashCommandHandler = new(_client, _serviceProvider);
 
             // login asynchronously to discord with client as bot using token
             await _client.LoginAsync(TokenType.Bot, token);

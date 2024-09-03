@@ -1,6 +1,7 @@
 *.config
 *.code-workspace
 token.txt
+debug.txt
 [Oo]bj/
 [Bb]in/
 [Dd]ata/

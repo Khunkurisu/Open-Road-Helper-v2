@@ -27,8 +27,14 @@ namespace OpenRoadHelper.Commands
                 _serviceProvider
             );
             //await _interactionService.RegisterCommandsGloballyAsync();
-            await _interactionService.RegisterCommandsToGuildAsync(1123803241793192046);
-            //await _interactionService.RegisterCommandsToGuildAsync(1165262696397152276);
+            if (Program.RunningLocation.Contains("home"))
+            {
+                await _interactionService.RegisterCommandsToGuildAsync(1165262696397152276);
+            }
+            else
+            {
+                await _interactionService.RegisterCommandsToGuildAsync(1123803241793192046);
+            }
 
             _client.InteractionCreated += async interaction =>
             {
