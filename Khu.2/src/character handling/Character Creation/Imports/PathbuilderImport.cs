@@ -48,6 +48,10 @@ namespace OpenRoadHelper.Characters
             {
                 _skills[skill] = SkillBonus(skill);
             }
+			foreach (string save in _saves.Keys) {
+				_saves[save] = SaveBonus(save);
+			}
+			_perception = PerceptionBonus();
         }
 
         private int SkillBonus(string skillName)
@@ -58,19 +62,35 @@ namespace OpenRoadHelper.Characters
             return _skills[skillName] + levelBonus + attributeBonus;
         }
 
-        private int GetAttributeBonus(string skillName)
+        private int SaveBonus(string saveName)
         {
-            if (new List<string> { "athletics" }.Contains(skillName))
+            int saveRank = _saves[saveName] / 2;
+            int attributeBonus = GetAttributeBonus(saveName);
+            int levelBonus = LevelBonus(saveRank);
+            return _saves[saveName] + levelBonus + attributeBonus;
+        }
+
+        private int PerceptionBonus()
+        {
+            int perceptionRank = _perception / 2;
+            int attributeBonus = GetAttributeBonus("perception");
+            int levelBonus = LevelBonus(perceptionRank);
+            return _perception + levelBonus + attributeBonus;
+        }
+
+        private int GetAttributeBonus(string profName)
+        {
+            if (new List<string> { "athletics" }.Contains(profName))
             {
                 return PF2E.AttributeToModifier(_attributes["str"]);
             }
-            else if (new List<string> { "acrobatics", "stealth", "thievery" }.Contains(skillName))
+            else if (new List<string> { "acrobatics", "stealth", "thievery" }.Contains(profName))
             {
                 return PF2E.AttributeToModifier(_attributes["dex"]);
             }
             else if (
                 new List<string> { "arcana", "crafting", "occultism", "society" }.Contains(
-                    skillName
+                    profName
                 )
             )
             {
@@ -78,7 +98,7 @@ namespace OpenRoadHelper.Characters
             }
             else if (
                 new List<string> { "medicine", "nature", "religion", "survival" }.Contains(
-                    skillName
+                    profName
                 )
             )
             {
@@ -91,24 +111,24 @@ namespace OpenRoadHelper.Characters
                     "diplomacy",
                     "intimidation",
                     "performance"
-                }.Contains(skillName)
+                }.Contains(profName)
             )
             {
                 return PF2E.AttributeToModifier(_attributes["cha"]);
             }
-            else if (skillName == "fortitude")
+            else if (profName == "fortitude")
             {
                 return PF2E.AttributeToModifier(_attributes["con"]);
             }
-            else if (skillName == "will")
+            else if (profName == "will")
             {
                 return PF2E.AttributeToModifier(_attributes["wis"]);
             }
-            else if (skillName == "reflex")
+            else if (profName == "reflex")
             {
                 return PF2E.AttributeToModifier(_attributes["dex"]);
             }
-            else if (skillName == "perception")
+            else if (profName == "perception")
             {
                 return PF2E.AttributeToModifier(_attributes["wis"]);
             }
