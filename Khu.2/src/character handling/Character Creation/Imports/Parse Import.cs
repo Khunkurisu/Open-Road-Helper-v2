@@ -4,8 +4,8 @@ namespace OpenRoadHelper.Characters
     {
         private void ParseImport(Dictionary<string, dynamic> data)
         {
-            ImportType importType = data["type"];
-            if (importType == ImportType.Foundry)
+            _importType = data["type"];
+            if (_importType == ImportType.Foundry)
             {
                 _height = Generic.GetHeightFromString(data["height"]);
                 _weight = Generic.GetWeightFromString(data["weight"]);

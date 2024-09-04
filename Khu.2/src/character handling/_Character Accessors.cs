@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using OpenRoadHelper.Guilds;
 
 namespace OpenRoadHelper.Characters
@@ -270,6 +272,8 @@ namespace OpenRoadHelper.Characters
         {
             get => _updated;
         }
+
+        [JsonConverter(typeof(StringEnumConverter))]
         public Status Status
         {
             get => _status;
@@ -461,7 +465,15 @@ namespace OpenRoadHelper.Characters
             return Avatars.Keys.ToList().IndexOf(key);
         }
 
+        [JsonConverter(typeof(StringEnumConverter))]
         public Status RetirementType = Status.Retired;
+
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ImportType ImportType => _importType;
+
+        public static float SaveVersion => _saveVersion;
+        public static readonly string AvatarPrefix =
+            "http://pf2.khunkurisu.com/open-road/character-images/";
     }
 
     public enum Status

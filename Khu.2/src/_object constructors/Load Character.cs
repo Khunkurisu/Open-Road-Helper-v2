@@ -48,7 +48,9 @@ namespace OpenRoadHelper.Characters
             long created,
             long updated,
             Status status,
-            Display display
+            Display display,
+            ImportType? importType,
+            float? saveVersion
         )
         {
             if (id.Length > 22)
@@ -101,6 +103,26 @@ namespace OpenRoadHelper.Characters
             _status = status;
             _display = display;
             _currentAvatar = avatar;
+            _importType = importType ?? ImportType.Foundry;
+            saveVersion ??= 0.0f;
+            if (saveVersion < _saveVersion)
+            {
+                MigrateSave((float)saveVersion);
+            }
+        }
+
+        private void MigrateSave(float saveVersion)
+        {
+            if (saveVersion < 0.1 && ImportType == ImportType.Pathbuilder)
+            {
+                foreach (string save in _saves.Keys)
+                {
+                    _saves[save] = PF2E.SaveBonus(save, (int)_level, _feats, _attributes, _saves);
+                }
+                _perception = (uint)
+                    PF2E.PerceptionBonus((int)_perception, (int)_level, _feats, _attributes);
+                Manager.GetGuild(_guild).QueueSave(SaveType.Characters, true);
+            }
         }
     }
 }

@@ -62,6 +62,7 @@ namespace OpenRoadHelper.Characters
         private Status _status = 0;
         private Display _display = 0;
         private int _currentAvatar = 0;
-        public static readonly string AvatarPrefix = "http://pf2.khunkurisu.com/open-road/character-images/";
+        private ImportType _importType = ImportType.Pathbuilder;
+        private static readonly float _saveVersion = 0.1f;
     }
 }
