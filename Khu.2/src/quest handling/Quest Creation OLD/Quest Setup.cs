@@ -49,7 +49,7 @@ namespace OpenRoadHelper
                                 .WithButton(
                                     "Back",
                                     guild.GenerateFormValues(
-                                        new() { $"createQuest", gmId, name, "back" }
+                                        new($"createQuest", gmId, name, "back", new())
                                     ),
                                     ButtonStyle.Danger
                                 );
@@ -104,6 +104,21 @@ namespace OpenRoadHelper
 
             string name = components.First(x => x.CustomId == "quest_name").Value;
             string description = components.First(x => x.CustomId == "quest_description").Value;
+
+            List<string> imgUrls = formValues.MetaData;
+            string filepath = @".\data\images\quests\";
+            Directory.CreateDirectory(filepath);
+            foreach (string url in imgUrls)
+            {
+                string filename = $"{name}--initial.webp";
+
+                if (!await Generic.DownloadImage(url, filepath + filename))
+                {
+                    await modal.RespondAsync("Failed to process image.", ephemeral: true);
+                    return;
+                }
+            }
+
             string allTags = components.First(x => x.CustomId == "quest_tags").Value;
             string[] tags = allTags.Split(
                 ",",
@@ -119,7 +134,9 @@ namespace OpenRoadHelper
                 .WithSelectMenu(threatMenu)
                 .WithButton(
                     "Cancel",
-                    guild.GenerateFormValues(new() { $"createQuest", gmId, name, "cancel" }),
+                    guild.GenerateFormValues(
+                        new($"createQuest", gmId, name, "cancel", new())
+                    ),
                     ButtonStyle.Danger
                 );
 

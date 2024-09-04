@@ -127,7 +127,11 @@ namespace OpenRoadHelper.Characters
 
             var textBox = new ModalBuilder()
                 .WithTitle("Create Character")
-                .WithCustomId(guild.GenerateFormValues(new() { $"createCharacter", player.Id }))
+                .WithCustomId(
+                    guild.GenerateFormValues(
+                        new($"createCharacter", player.Id, string.Empty, string.Empty, new())
+                    )
+                )
                 .AddTextInput(
                     "Name",
                     "character_name",
@@ -191,7 +195,11 @@ namespace OpenRoadHelper.Characters
 
             var textBox = new ModalBuilder()
                 .WithTitle("Roleplay Post")
-                .WithCustomId(guild.GenerateFormValues(new() { $"createRP", player.Id, charName }))
+                .WithCustomId(
+                    guild.GenerateFormValues(
+                        new($"createRP", player.Id, charName, string.Empty, new())
+                    )
+                )
                 .AddTextInput(
                     "Display Name",
                     "display_name",

@@ -12,7 +12,7 @@ namespace OpenRoadHelper.Quests
             return new SelectMenuBuilder()
                 .WithPlaceholder("Quest Threat")
                 .WithCustomId(
-                    guild.GenerateFormValues(new() { $"createQuest", gm, name, "questThreat" })
+                    guild.GenerateFormValues(new($"createQuest", gm, name, "questThreat", new()))
                 )
                 .WithMinValues(1)
                 .AddOption("Trivial", "Trivial", "Highest threat encounter is trivial.")
@@ -28,7 +28,7 @@ namespace OpenRoadHelper.Quests
             return new SelectMenuBuilder()
                 .WithPlaceholder("Max Players")
                 .WithCustomId(
-                    guild.GenerateFormValues(new() { $"createQuest", gm, name, "questPlayerMax" })
+                    guild.GenerateFormValues(new($"createQuest", gm, name, "questPlayerMax", new()))
                 )
                 .WithMinValues(1)
                 .AddOption("Four", "4", "No more than four players in the party.")
@@ -42,7 +42,7 @@ namespace OpenRoadHelper.Quests
             return new SelectMenuBuilder()
                 .WithPlaceholder("Min Players")
                 .WithCustomId(
-                    guild.GenerateFormValues(new() { $"createQuest", gm, name, "questPlayerMin" })
+                    guild.GenerateFormValues(new($"createQuest", gm, name, "questPlayerMin", new()))
                 )
                 .WithMinValues(1)
                 .AddOption("Two", "2", "No fewer than two players in the party.")
@@ -56,7 +56,7 @@ namespace OpenRoadHelper.Quests
             SelectMenuBuilder partySelector = new SelectMenuBuilder()
                 .WithPlaceholder("Select Party")
                 .WithCustomId(
-                    guild.GenerateFormValues(new() { $"editQuest", gm, name, "questPartySelect" })
+                    guild.GenerateFormValues(new($"editQuest", gm, name, "questPartySelect", new()))
                 )
                 .WithMinValues(1);
             return partySelector;
@@ -68,12 +68,12 @@ namespace OpenRoadHelper.Quests
             return new ComponentBuilder()
                 .WithButton(
                     "Confirm",
-                    guild.GenerateFormValues(new() { $"createQuest", gm, name, "confirm" }),
+                    guild.GenerateFormValues(new($"createQuest", gm, name, "confirm", new())),
                     ButtonStyle.Success
                 )
                 .WithButton(
                     "Cancel",
-                    guild.GenerateFormValues(new() { $"createQuest", gm, name, "cancel" }),
+                    guild.GenerateFormValues(new($"createQuest", gm, name, "cancel", new())),
                     ButtonStyle.Danger
                 );
         }

@@ -18,14 +18,14 @@ namespace OpenRoadHelper.Characters
                 .WithButton(
                     "Confirm",
                     guild.GenerateFormValues(
-                        new() { $"{context}Character", playerId, charName, "confirm" }
+                        new($"{context}Character", playerId, charName, "confirm", new())
                     ),
                     ButtonStyle.Success
                 )
                 .WithButton(
                     "Cancel",
                     guild.GenerateFormValues(
-                        new() { $"{context}Character", playerId, charName, "cancel" }
+                        new($"{context}Character", playerId, charName, "cancel", new())
                     ),
                     ButtonStyle.Danger
                 );
@@ -53,14 +53,14 @@ namespace OpenRoadHelper.Characters
             return button
                 .WithButton(
                     "Previous Avatar",
-                    guild.GenerateFormValues(new() { $"shiftAvatar", User, Name, "back" }),
+                    guild.GenerateFormValues(new($"shiftAvatar", User, Name, "back", new())),
                     ButtonStyle.Primary,
                     row: 1,
                     disabled: CheckMoreAvatars(false)
                 )
                 .WithButton(
                     "Next Avatar",
-                    guild.GenerateFormValues(new() { $"shiftAvatar", User, Name, "forward" }),
+                    guild.GenerateFormValues(new($"shiftAvatar", User, Name, "forward", new())),
                     ButtonStyle.Primary,
                     row: 1,
                     disabled: CheckMoreAvatars()
@@ -84,7 +84,7 @@ namespace OpenRoadHelper.Characters
 
             buttons.WithButton(
                 "Edit",
-                guild.GenerateFormValues(new() { $"editCharacter", User, Name, "init" }),
+                guild.GenerateFormValues(new($"editCharacter", User, Name, "init", new())),
                 ButtonStyle.Primary
             );
 
@@ -96,14 +96,14 @@ namespace OpenRoadHelper.Characters
                         .WithButton(
                             "Judge",
                             guild.GenerateFormValues(
-                                new() { $"judgeCharacter", User, Name, "init" }
+                                new($"judgeCharacter", User, Name, "init", new())
                             ),
                             ButtonStyle.Primary
                         )
                         .WithButton(
                             "Refund",
                             guild.GenerateFormValues(
-                                new() { $"refundCharacterFromForced", User, Name, "init" }
+                                new($"refundCharacterFromForced", User, Name, "init", new())
                             ),
                             ButtonStyle.Danger
                         );
@@ -113,7 +113,7 @@ namespace OpenRoadHelper.Characters
                     buttons.WithButton(
                         "Refund",
                         guild.GenerateFormValues(
-                            new() { $"refundCharacterFromForced", User, Name, "init" }
+                            new($"refundCharacterFromForced", User, Name, "init", new())
                         ),
                         ButtonStyle.Danger
                     );
@@ -127,14 +127,14 @@ namespace OpenRoadHelper.Characters
                         .WithButton(
                             "Judge",
                             guild.GenerateFormValues(
-                                new() { $"judgeCharacter", User, Name, "init" }
+                                new($"judgeCharacter", User, Name, "init", new())
                             ),
                             ButtonStyle.Primary
                         )
                         .WithButton(
                             "Refund",
                             guild.GenerateFormValues(
-                                new() { $"refundCharacter", User, Name, "init" }
+                                new($"refundCharacter", User, Name, "init", new())
                             ),
                             ButtonStyle.Danger
                         );
@@ -143,7 +143,9 @@ namespace OpenRoadHelper.Characters
                 {
                     buttons.WithButton(
                         "Refund",
-                        guild.GenerateFormValues(new() { $"refundCharacter", User, Name, "init" }),
+                        guild.GenerateFormValues(
+                            new($"refundCharacter", User, Name, "init", new())
+                        ),
                         ButtonStyle.Danger
                     );
                 }
@@ -151,7 +153,9 @@ namespace OpenRoadHelper.Characters
                 {
                     buttons.WithButton(
                         "Retire",
-                        guild.GenerateFormValues(new() { $"retireCharacter", User, Name, "init" }),
+                        guild.GenerateFormValues(
+                            new($"retireCharacter", User, Name, "init", new())
+                        ),
                         ButtonStyle.Danger
                     );
                     buttons = AvatarButtons(buttons);

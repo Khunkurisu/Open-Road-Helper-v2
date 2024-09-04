@@ -75,7 +75,15 @@ namespace OpenRoadHelper.GameMaster
                 var textBox = new ModalBuilder()
                     .WithTitle("Create Character")
                     .WithCustomId(
-                        guild.GenerateFormValues(new() { $"forceCreateCharacter", player.Id })
+                        guild.GenerateFormValues(
+                            new(
+                                $"forceCreateCharacter",
+                                player.Id,
+                                string.Empty,
+                                string.Empty,
+                                new()
+                            )
+                        )
                     )
                     .AddTextInput(
                         "Name",

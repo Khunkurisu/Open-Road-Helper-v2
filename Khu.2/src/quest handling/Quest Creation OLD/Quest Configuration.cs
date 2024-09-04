@@ -63,7 +63,9 @@ namespace OpenRoadHelper
                         .WithSelectMenu(threatMenu)
                         .WithButton(
                             "Back",
-                            guild.GenerateFormValues(new() { $"createQuest", gmId, name, "back" }),
+                            guild.GenerateFormValues(
+                                new($"createQuest", gmId, name, "back", new())
+                            ),
                             ButtonStyle.Danger
                         );
                     var questEmbed = quest.GenerateEmbed(user);

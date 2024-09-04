@@ -10,7 +10,6 @@ namespace OpenRoadHelper.Quests
     {
         [SlashCommand("create", "Create a quest.")]
         public async Task CreateQuest(
-            [Summary("name", "Name of the quest.")] string name,
             [Summary("image", "Flavor image or splash art for quest.")] IAttachment? image = null
         )
         {
@@ -26,31 +25,37 @@ namespace OpenRoadHelper.Quests
                 return;
             }
 
+            List<string> url = new();
+
             if (image != null)
             {
-                string filepath = @".\data\images\quests\";
-                Directory.CreateDirectory(filepath);
-                string url = image.Url;
-                string filename = $"{name}--initial.webp";
-
-                if (!await Generic.DownloadImage(url, filepath + filename))
-                {
-                    await RespondAsync("Failed to process image.", ephemeral: true);
-                    return;
-                }
+                url.Add(image.Url);
             }
 
             Guild guild = Manager.GetGuild(guildId);
             var textBox = new ModalBuilder()
                 .WithTitle("Create Quest")
-                .WithCustomId(guild.GenerateFormValues(new() { $"createQuest", gm.Id }))
+                .WithCustomId(
+                    guild.GenerateFormValues(
+                        new("createQuest", gm.Id, string.Empty, string.Empty, url)
+                    )
+                )
+                .AddTextInput(
+                    "Name",
+                    "quest_name",
+                    TextInputStyle.Short,
+                    "Quest Name",
+                    5,
+                    required: true
+                )
                 .AddTextInput(
                     "Description",
                     "quest_description",
                     TextInputStyle.Paragraph,
-                    "Quest description."
-                )
-                .AddTextInput("Tags", "quest_tags", placeholder: "Comma, Separated, Tags");
+                    "Detailed description of the quest.",
+                    10,
+                    required: true
+                );
 
             await Context.Interaction.RespondWithModalAsync(textBox.Build());
         }

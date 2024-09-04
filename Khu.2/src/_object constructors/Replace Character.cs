@@ -97,7 +97,11 @@ namespace OpenRoadHelper.Characters
 
             var textBox = new ModalBuilder()
                 .WithTitle($"Update {Name}")
-                .WithCustomId(guild.GenerateFormValues(new() { $"replaceCharacter", User, Name }))
+                .WithCustomId(
+                    guild.GenerateFormValues(
+                        new($"replaceCharacter", User, Name, string.Empty, new())
+                    )
+                )
                 .AddTextInput(
                     "Reputation",
                     "character_reputation",

@@ -1,11 +1,12 @@
 namespace OpenRoadHelper
 {
-    public struct FormValue
+    public readonly struct FormValue
     {
-        public string Context;
-        public ulong User;
-        public string Target;
-        public string Modifier;
+        public readonly string Context;
+        public readonly ulong User;
+        public readonly string Target;
+        public readonly string Modifier;
+        public readonly List<string> MetaData;
 
         public FormValue()
         {
@@ -13,14 +14,22 @@ namespace OpenRoadHelper
             User = 0;
             Target = string.Empty;
             Modifier = string.Empty;
+            MetaData = new();
         }
 
-        public FormValue(string context, ulong user, string target, string modifier)
+        public FormValue(
+            string context,
+            ulong user,
+            string target,
+            string modifier,
+            List<string> metaData
+        )
         {
             Context = context ?? string.Empty;
             User = user;
             Target = target ?? string.Empty;
             Modifier = modifier ?? string.Empty;
+            MetaData = metaData;
         }
 
         public FormValue(List<dynamic> values)
@@ -29,6 +38,7 @@ namespace OpenRoadHelper
             User = 0;
             Target = string.Empty;
             Modifier = string.Empty;
+            MetaData = new();
             if (values.Any())
             {
                 Context = values[0];
@@ -44,6 +54,10 @@ namespace OpenRoadHelper
             if (values.Count > 3)
             {
                 Modifier = values[3];
+            }
+            if (values.Count < 4)
+            {
+                MetaData = values[4];
             }
         }
     }

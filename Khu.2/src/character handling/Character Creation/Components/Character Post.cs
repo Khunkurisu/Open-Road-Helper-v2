@@ -19,7 +19,11 @@ namespace OpenRoadHelper.Characters
             Guild guild = Manager.GetGuild(guildId);
 
             return new SelectMenuBuilder()
-                .WithCustomId(guild.GenerateFormValues(new() { $"charDisplay", userId, charName }))
+                .WithCustomId(
+                    guild.GenerateFormValues(
+                        new($"charDisplay", userId, charName, string.Empty, new())
+                    )
+                )
                 .AddOption("Details", "Details", isDefault: true)
                 .AddOption("Attributes", "Attributes")
                 .AddOption("Equipment", "Equipment")
@@ -32,7 +36,9 @@ namespace OpenRoadHelper.Characters
             Guild guild = Manager.GetGuild(Guild);
 
             var menu = new SelectMenuBuilder().WithCustomId(
-                guild.GenerateFormValues(new() { $"charDisplay", User, Name, isForced ? "forced" : "not forced" })
+                guild.GenerateFormValues(
+                    new($"charDisplay", User, Name, isForced ? "forced" : "not forced", new())
+                )
             );
 
             foreach (string k in Enum.GetNames(typeof(Display)))
@@ -48,7 +54,11 @@ namespace OpenRoadHelper.Characters
             Guild guild = Manager.GetGuild(Guild);
 
             var menu = new SelectMenuBuilder()
-                .WithCustomId(guild.GenerateFormValues(new() { $"retirementType", User, Name }))
+                .WithCustomId(
+                    guild.GenerateFormValues(
+                        new($"retirementType", User, Name, string.Empty, new())
+                    )
+                )
                 .AddOption(
                     Status.Retired.ToString(),
                     Status.Retired.ToString(),
@@ -71,13 +81,13 @@ namespace OpenRoadHelper.Characters
                 .WithSelectMenu(RetirementTypeSelector())
                 .WithButton(
                     "Confirm",
-                    guild.GenerateFormValues(new() { $"retireCharacter", User, Name, "confirm" }),
+                    guild.GenerateFormValues(new($"retireCharacter", User, Name, "confirm", new())),
                     ButtonStyle.Success,
                     row: 1
                 )
                 .WithButton(
                     "Cancel",
-                    guild.GenerateFormValues(new() { $"retireCharacter", User, Name, "cancel" }),
+                    guild.GenerateFormValues(new($"retireCharacter", User, Name, "cancel", new())),
                     ButtonStyle.Danger,
                     row: 1
                 );

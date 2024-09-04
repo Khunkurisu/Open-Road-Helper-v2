@@ -205,7 +205,9 @@ namespace OpenRoadHelper
             var modal = new ModalBuilder()
                 .WithTitle("Reject Character")
                 .WithCustomId(
-                    guild.GenerateFormValues(new() { $"rejectCharacter", playerId, charName })
+                    guild.GenerateFormValues(
+                        new($"rejectCharacter", playerId, charName, string.Empty, new())
+                    )
                 )
                 .AddTextInput(
                     "Reason",
@@ -334,14 +336,14 @@ namespace OpenRoadHelper
                 .WithButton(
                     "Approve",
                     guild.GenerateFormValues(
-                        new() { $"{context}Character", playerId, charName, "approve" }
+                        new($"{context}Character", playerId, charName, "approve", new())
                     ),
                     ButtonStyle.Success
                 )
                 .WithButton(
                     "Reject",
                     guild.GenerateFormValues(
-                        new() { $"{context}Character", playerId, charName, "reject" }
+                        new($"{context}Character", playerId, charName, "reject", new())
                     ),
                     ButtonStyle.Danger
                 );

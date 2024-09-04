@@ -47,18 +47,18 @@ namespace OpenRoadHelper.Guilds
 
         public ConcurrentDictionary<string, FormValue> _formValues = new();
 
-        public string GenerateFormValues(List<dynamic> values)
+        public string GenerateFormValues(FormValue formValue)
         {
-            string guid = Guid.NewGuid().ToString();
-            Task.Run(() => StoreFormValues(guid, values));
-            return guid;
+            string id = Guid.NewGuid().ToString();
+            Task.Run(() => StoreFormValues(id, formValue));
+            return id;
         }
 
-        public async Task StoreFormValues(string guid, List<dynamic> values)
+        public async Task StoreFormValues(string guid, FormValue formValue)
         {
             while (true)
             {
-                if (_formValues.TryAdd(guid, new(values)))
+                if (_formValues.TryAdd(guid, formValue))
                 {
                     break;
                 }
