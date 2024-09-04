@@ -46,110 +46,13 @@ namespace OpenRoadHelper.Characters
         {
             foreach (string skill in _skills.Keys)
             {
-                _skills[skill] = SkillBonus(skill);
+                _skills[skill] = PF2E.SkillBonus(skill, (int)_level, _feats, _attributes, _skills);
             }
-			foreach (string save in _saves.Keys) {
-				_saves[save] = SaveBonus(save);
-			}
-			_perception = PerceptionBonus();
-        }
-
-        private int SkillBonus(string skillName)
-        {
-            int skillRank = _skills[skillName] / 2;
-            int attributeBonus = GetAttributeBonus(skillName);
-            int levelBonus = LevelBonus(skillRank);
-            return _skills[skillName] + levelBonus + attributeBonus;
-        }
-
-        private int SaveBonus(string saveName)
-        {
-            int saveRank = _saves[saveName] / 2;
-            int attributeBonus = GetAttributeBonus(saveName);
-            int levelBonus = LevelBonus(saveRank);
-            return _saves[saveName] + levelBonus + attributeBonus;
-        }
-
-        private int PerceptionBonus()
-        {
-            int perceptionRank = _perception / 2;
-            int attributeBonus = GetAttributeBonus("perception");
-            int levelBonus = LevelBonus(perceptionRank);
-            return _perception + levelBonus + attributeBonus;
-        }
-
-        private int GetAttributeBonus(string profName)
-        {
-            if (new List<string> { "athletics" }.Contains(profName))
+            foreach (string save in _saves.Keys)
             {
-                return PF2E.AttributeToModifier(_attributes["str"]);
+                _saves[save] = PF2E.SaveBonus(save, (int)_level, _feats, _attributes, _saves);
             }
-            else if (new List<string> { "acrobatics", "stealth", "thievery" }.Contains(profName))
-            {
-                return PF2E.AttributeToModifier(_attributes["dex"]);
-            }
-            else if (
-                new List<string> { "arcana", "crafting", "occultism", "society" }.Contains(
-                    profName
-                )
-            )
-            {
-                return PF2E.AttributeToModifier(_attributes["int"]);
-            }
-            else if (
-                new List<string> { "medicine", "nature", "religion", "survival" }.Contains(
-                    profName
-                )
-            )
-            {
-                return PF2E.AttributeToModifier(_attributes["wis"]);
-            }
-            else if (
-                new List<string>
-                {
-                    "deception",
-                    "diplomacy",
-                    "intimidation",
-                    "performance"
-                }.Contains(profName)
-            )
-            {
-                return PF2E.AttributeToModifier(_attributes["cha"]);
-            }
-            else if (profName == "fortitude")
-            {
-                return PF2E.AttributeToModifier(_attributes["con"]);
-            }
-            else if (profName == "will")
-            {
-                return PF2E.AttributeToModifier(_attributes["wis"]);
-            }
-            else if (profName == "reflex")
-            {
-                return PF2E.AttributeToModifier(_attributes["dex"]);
-            }
-            else if (profName == "perception")
-            {
-                return PF2E.AttributeToModifier(_attributes["wis"]);
-            }
-            else
-            {
-                return PF2E.AttributeToModifier(_attributes["int"]);
-            }
-        }
-
-        private int LevelBonus(int rank)
-        {
-            if (rank > 0)
-            {
-                return (int)_level;
-            }
-            if (_feats.Contains("Untrained Improvisation"))
-            {
-                return (int)
-                    Math.Max((_level < 7) ? (_level < 5 ? _level - 2 : _level - 1) : _level, 0);
-            }
-            return 0;
+            _perception = PF2E.PerceptionBonus(_perception, (int)_level, _feats, _attributes);
         }
 
         public void CollateCoinage(Dictionary<string, dynamic> jsonData)
