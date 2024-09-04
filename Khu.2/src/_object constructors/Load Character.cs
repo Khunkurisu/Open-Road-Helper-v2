@@ -119,6 +119,10 @@ namespace OpenRoadHelper.Characters
                 {
                     _saves[save] = PF2E.SaveBonus(save, (int)_level, _feats, _attributes, _saves);
                 }
+                foreach (string lore in _lore.Keys)
+                {
+                    _lore[lore] = PF2E.SkillBonus(lore, (int)_level, _feats, _attributes, _lore);
+                }
                 _perception = (uint)
                     PF2E.PerceptionBonus((int)_perception, (int)_level, _feats, _attributes);
                 Manager.GetGuild(_guild).QueueSave(SaveType.Characters, true);

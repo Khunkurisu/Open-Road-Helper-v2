@@ -48,6 +48,10 @@ namespace OpenRoadHelper.Characters
             {
                 _skills[skill] = PF2E.SkillBonus(skill, (int)_level, _feats, _attributes, _skills);
             }
+            foreach (string lore in _lore.Keys)
+            {
+                _lore[lore] = PF2E.SkillBonus(lore, (int)_level, _feats, _attributes, _lore);
+            }
             foreach (string save in _saves.Keys)
             {
                 _saves[save] = PF2E.SaveBonus(save, (int)_level, _feats, _attributes, _saves);
