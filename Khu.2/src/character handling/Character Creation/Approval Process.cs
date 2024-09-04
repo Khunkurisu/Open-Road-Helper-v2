@@ -136,7 +136,7 @@ namespace OpenRoadHelper
             }
 
             character.Status = Status.Approved;
-            guild.QueueSave("characters");
+            guild.QueueSave(SaveType.Characters);
 
             var msg = await transactions.SendMessageAsync(
                 $"{threadChannel.Mention} has been approved."
@@ -297,7 +297,7 @@ namespace OpenRoadHelper
             }
 
             character.Status = Status.Rejected;
-            guild.QueueSave("characters");
+            guild.QueueSave(SaveType.Characters);
 
             ulong[] tags = { guild.CharacterBoard.Tags.First(x => x.Name == "Rejected").Id };
 

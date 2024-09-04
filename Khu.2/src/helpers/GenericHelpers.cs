@@ -178,4 +178,14 @@ namespace OpenRoadHelper
                 _ => string.Concat(input[0].ToString().ToUpper(), input.AsSpan(1))
             };
     }
+
+	public enum SaveType {
+		Characters,
+		Quests,
+		Parties,
+		Availability,
+		Boards,
+		Tokens,
+		Roles
+	}
 }

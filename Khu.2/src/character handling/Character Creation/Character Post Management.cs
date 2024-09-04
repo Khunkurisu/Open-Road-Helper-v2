@@ -66,7 +66,7 @@ namespace OpenRoadHelper
                 if (Enum.TryParse(displayName, out Character.Display displayValue))
                 {
                     character.DisplayMode = displayValue;
-                    guild.QueueSave("characters");
+                    guild.QueueSave(SaveType.Characters);
                 }
             }
 

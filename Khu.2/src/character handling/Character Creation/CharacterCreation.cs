@@ -291,7 +291,7 @@ namespace OpenRoadHelper
 
             character.CharacterThread = charThread.Id;
             character.TransactionThread = transThread.Id;
-            guild.QueueSave("characters", true);
+            guild.QueueSave(SaveType.Characters, true);
 
             await charThread.AddUserAsync((IGuildUser)player);
             await transThread.AddUserAsync((IGuildUser)player);

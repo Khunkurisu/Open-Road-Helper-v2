@@ -14,16 +14,16 @@ namespace OpenRoadHelper.Guilds
         private readonly ulong _id;
         private long _lastSave;
         private bool _saveProcessing;
-        private readonly Dictionary<string, bool> _shouldSave =
+        private readonly Dictionary<SaveType, bool> _shouldSave =
             new()
             {
-                { "characters", false },
-                { "quests", false },
-                { "parties", false },
-                { "availability", false },
-                { "boards", false },
-                { "tokens", false },
-                { "roles", false }
+                { SaveType.Characters, false },
+                { SaveType.Quests, false },
+                { SaveType.Parties, false },
+                { SaveType.Availability, false },
+                { SaveType.Boards, false },
+                { SaveType.Tokens, false },
+                { SaveType.Roles, false }
             };
         private const string _guildDataPath = @".\data\guilds\";
         private const string _availabilityPath = @"\availability.json";
@@ -123,7 +123,7 @@ namespace OpenRoadHelper.Guilds
         public void SetPlayerTokenCount(ulong playerId, uint tokenCount)
         {
             _playerTokens[playerId] = tokenCount;
-            QueueSave("tokens", true);
+            QueueSave(SaveType.Tokens, true);
         }
 
         public void IncreasePlayerTokenCount(ulong playerId, uint tokenCount)
@@ -419,15 +419,13 @@ namespace OpenRoadHelper.Guilds
             _lastSave = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
-        private bool ShouldSave(string save)
+        private bool ShouldSave(SaveType save)
         {
-            save = save.ToLower();
             return _shouldSave.ContainsKey(save) && _shouldSave[save];
         }
 
-        public void QueueSave(string save, bool noWait = false)
+        public void QueueSave(SaveType save, bool noWait = false)
         {
-            save = save.ToLower();
             if (_shouldSave.ContainsKey(save) && !_shouldSave[save])
             {
                 _shouldSave[save] = true;
@@ -454,7 +452,7 @@ namespace OpenRoadHelper.Guilds
 
         private void SaveRoles()
         {
-            if (_gmRoles.Count > 0 && ShouldSave("Roles"))
+            if (_gmRoles.Count > 0 && ShouldSave(SaveType.Roles))
             {
                 string json = JsonConvert.SerializeObject(_gmRoles);
                 File.WriteAllText(_guildDataPath + _id + _rolesPath, json);
@@ -463,7 +461,7 @@ namespace OpenRoadHelper.Guilds
 
         private void SaveTokens()
         {
-            if (_playerTokens.Count > 0 && ShouldSave("tokens"))
+            if (_playerTokens.Count > 0 && ShouldSave(SaveType.Tokens))
             {
                 string json = JsonConvert.SerializeObject(_playerTokens);
                 File.WriteAllText(_guildDataPath + _id + _tokensPath, json);
@@ -485,7 +483,7 @@ namespace OpenRoadHelper.Guilds
             {
                 boards.Add("Transactions", TransactionBoard.Id);
             }
-            if (boards.Count > 0 && ShouldSave("boards"))
+            if (boards.Count > 0 && ShouldSave(SaveType.Boards))
             {
                 string json = JsonConvert.SerializeObject(boards);
                 File.WriteAllText(_guildDataPath + _id + _boardsPath, json);
@@ -494,7 +492,7 @@ namespace OpenRoadHelper.Guilds
 
         private void SaveAvailability()
         {
-            if (_gmAvailabilities.Count > 0 && ShouldSave("availability"))
+            if (_gmAvailabilities.Count > 0 && ShouldSave(SaveType.Availability))
             {
                 string json = JsonConvert.SerializeObject(_gmAvailabilities);
                 File.WriteAllText(_guildDataPath + _id + _availabilityPath, json);
@@ -503,7 +501,7 @@ namespace OpenRoadHelper.Guilds
 
         private void SaveCharacters()
         {
-            if (_characters.Count > 0 && ShouldSave("characters"))
+            if (_characters.Count > 0 && ShouldSave(SaveType.Characters))
             {
                 string json = JsonConvert.SerializeObject(_characters);
                 File.WriteAllText(_guildDataPath + _id + _charactersPath, json);
@@ -512,7 +510,7 @@ namespace OpenRoadHelper.Guilds
 
         private void SaveQuests()
         {
-            if (_quests.Count > 0 && ShouldSave("quests"))
+            if (_quests.Count > 0 && ShouldSave(SaveType.Quests))
             {
                 string json = JsonConvert.SerializeObject(_quests);
                 File.WriteAllText(_guildDataPath + _id + _questsPath, json);
@@ -521,7 +519,7 @@ namespace OpenRoadHelper.Guilds
 
         private void SaveParties()
         {
-            if (_parties.Count > 0 && ShouldSave("parties"))
+            if (_parties.Count > 0 && ShouldSave(SaveType.Parties))
             {
                 string json = JsonConvert.SerializeObject(_parties);
                 File.WriteAllText(_guildDataPath + _id + _partiesPath, json);
@@ -537,14 +535,14 @@ namespace OpenRoadHelper.Guilds
             _characters[playerId].Add(character);
             if (queueSave)
             {
-                QueueSave("characters", true);
+                QueueSave(SaveType.Characters, true);
             }
         }
 
         public void AddQuest(Quest quest)
         {
             _quests.Add(quest);
-            QueueSave("quests", true);
+            QueueSave(SaveType.Quests, true);
         }
 
         public bool FormParty(string creator)
@@ -554,7 +552,7 @@ namespace OpenRoadHelper.Guilds
             {
                 _parties.Add(new(partyCreator));
 
-                QueueSave("parties");
+                QueueSave(SaveType.Parties);
                 return true;
             }
             return false;
@@ -564,7 +562,7 @@ namespace OpenRoadHelper.Guilds
         {
             _parties.Add(new(members));
 
-            QueueSave("parties");
+            QueueSave(SaveType.Parties);
             return true;
         }
 
@@ -572,7 +570,7 @@ namespace OpenRoadHelper.Guilds
         {
             _parties.Add(new(creator));
 
-            QueueSave("parties");
+            QueueSave(SaveType.Parties);
             return true;
         }
 
@@ -591,7 +589,7 @@ namespace OpenRoadHelper.Guilds
             {
                 _parties.Add(new(partyMembers));
 
-                QueueSave("parties");
+                QueueSave(SaveType.Parties);
                 return true;
             }
             return false;
@@ -602,7 +600,7 @@ namespace OpenRoadHelper.Guilds
             if (_characters.ContainsKey(playerId))
             {
                 _characters[playerId].RemoveAt(index);
-                QueueSave("characters");
+                QueueSave(SaveType.Characters);
             }
         }
 
@@ -633,20 +631,20 @@ namespace OpenRoadHelper.Guilds
             if (_characters.ContainsKey(playerId) && _characters[playerId].Contains(character))
             {
                 _characters[playerId].Remove(character);
-                QueueSave("characters", true);
+                QueueSave(SaveType.Characters, true);
             }
         }
 
         public void RemoveQuest(int index)
         {
             _quests.RemoveAt(index);
-            QueueSave("quests", true);
+            QueueSave(SaveType.Quests, true);
         }
 
         public void RemoveQuest(Quest quest)
         {
             _quests.Remove(quest);
-            QueueSave("quests", true);
+            QueueSave(SaveType.Quests, true);
         }
 
         public Quest? GetQuest(string name, IUser gm)
@@ -700,7 +698,7 @@ namespace OpenRoadHelper.Guilds
                 _gmAvailabilities.Add(gm.Username, new(gm));
             }
 
-            QueueSave("availability");
+            QueueSave(SaveType.Availability);
             return _gmAvailabilities[gm.Username];
         }
 
@@ -766,14 +764,14 @@ namespace OpenRoadHelper.Guilds
                 return false;
             }
             _gmRoles.Add(role.Name);
-            QueueSave("roles");
+            QueueSave(SaveType.Roles);
             return true;
         }
 
         public bool RemoveGMRole(IRole role)
         {
             bool success = _gmRoles.Remove(role.Name);
-            QueueSave("roles");
+            QueueSave(SaveType.Roles);
             return success;
         }
 

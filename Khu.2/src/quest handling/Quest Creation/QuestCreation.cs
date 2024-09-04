@@ -7,9 +7,7 @@ namespace OpenRoadHelper
 {
     public partial class Manager
     {
-        private static async Task QuestCreateConfirm(
-            SocketMessageComponent button
-        )
+        private static async Task QuestCreateConfirm(SocketMessageComponent button)
         {
             if (button.GuildId == null)
             {
@@ -134,6 +132,7 @@ namespace OpenRoadHelper
                 return;
             }
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             ForumTag[] tags = { guild.QuestBoard.Tags.First(x => x.Name == "Pending") };
             quest.Status = Status.Unplayed;
 
@@ -150,13 +149,14 @@ namespace OpenRoadHelper
                 ThreadArchiveDuration.OneWeek,
                 text: $"{quest.Name} Transactions"
             );
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             await transThread.SendMessageAsync(
                 $"{questThread.Mention} has been created and is pending approval."
             );
 
             quest.ThreadId = questThread.Id;
-            guild.QueueSave("quests");
+            guild.QueueSave(SaveType.Quests);
 
             await questThread.AddUserAsync((IGuildUser)user);
             await transThread.AddUserAsync((IGuildUser)user);

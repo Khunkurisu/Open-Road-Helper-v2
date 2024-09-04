@@ -114,7 +114,7 @@ namespace OpenRoadHelper.GameMaster
                     return;
                 }
                 guild.QuestBoard = forumChannel;
-                guild.QueueSave("boards");
+                guild.QueueSave(SaveType.Boards);
 
                 await Context.Interaction.RespondAsync(
                     "Quest board has been assigned to " + forumChannel.Mention
@@ -134,7 +134,7 @@ namespace OpenRoadHelper.GameMaster
                     return;
                 }
                 guild.CharacterBoard = forumChannel;
-                guild.QueueSave("boards");
+                guild.QueueSave(SaveType.Boards);
 
                 await Context.Interaction.RespondAsync(
                     "Character board has been assigned to " + forumChannel.Mention
