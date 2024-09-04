@@ -125,8 +125,8 @@ namespace OpenRoadHelper.Characters
                 }
                 _perception = (uint)
                     PF2E.PerceptionBonus((int)_perception, (int)_level, _feats, _attributes);
-                Manager.GetGuild(_guild).QueueSave(SaveType.Characters, true);
             }
+            Manager.GetGuild(_guild).QueueSave(SaveType.Characters, true);
         }
     }
 }

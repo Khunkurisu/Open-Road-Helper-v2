@@ -471,6 +471,7 @@ namespace OpenRoadHelper.Characters
         [JsonConverter(typeof(StringEnumConverter))]
         public ImportType ImportType => _importType;
 
+        [JsonProperty]
         public static float SaveVersion => _saveVersion;
         public static readonly string AvatarPrefix =
             "http://pf2.khunkurisu.com/open-road/character-images/";
