@@ -62,18 +62,23 @@ namespace OpenRoadHelper.Quests
             return partySelector;
         }
 
-        public static ComponentBuilder ConfirmationButtons(ulong guildId, ulong gm, string name)
+        public static ComponentBuilder ConfirmationButtons(
+            ulong guildId,
+            ulong gm,
+            string name,
+            string context
+        )
         {
             Guild guild = Manager.GetGuild(guildId);
             return new ComponentBuilder()
                 .WithButton(
                     "Confirm",
-                    guild.GenerateFormValues(new($"createQuest", gm, name, "confirm", new())),
+                    guild.GenerateFormValues(new($"{context}", gm, name, "confirm", new())),
                     ButtonStyle.Success
                 )
                 .WithButton(
                     "Cancel",
-                    guild.GenerateFormValues(new($"createQuest", gm, name, "cancel", new())),
+                    guild.GenerateFormValues(new($"{context}", gm, name, "cancel", new())),
                     ButtonStyle.Danger
                 );
         }

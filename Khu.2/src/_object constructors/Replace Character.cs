@@ -179,7 +179,7 @@ namespace OpenRoadHelper.Characters
                         guildId,
                         playerId,
                         $"{newCharacter.Name}+{character.Name}",
-                        "replace"
+                        "replaceCharacter"
                     )
                     .Build()
             );

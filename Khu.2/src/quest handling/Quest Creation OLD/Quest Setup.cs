@@ -38,7 +38,7 @@ namespace OpenRoadHelper
                         case "questPlayerMax":
                         {
                             quest.SetMaxPlayers(value);
-                            messageComponents = Quest.ConfirmationButtons(guildId, gmId, name);
+                            messageComponents = Quest.ConfirmationButtons(guildId, gmId, name, "questCreate");
                             break;
                         }
                         case "questThreat":
@@ -105,7 +105,7 @@ namespace OpenRoadHelper
             string name = components.First(x => x.CustomId == "quest_name").Value;
             string description = components.First(x => x.CustomId == "quest_description").Value;
 
-            List<string> imgUrls = formValues.MetaData;
+            List<string> imgUrls = formValues.Metadata;
             string filepath = @".\data\images\quests\";
             Directory.CreateDirectory(filepath);
             foreach (string url in imgUrls)
@@ -122,7 +122,7 @@ namespace OpenRoadHelper
             Quest quest = new(gamemaster.Id, guildId, name, description, new());
             guild.AddQuest(quest);
 
-            var messageComponents = new ComponentBuilder(); //Quest.ConfirmationButtons(guildId, gm, name);
+            var messageComponents = new ComponentBuilder();
             var threatMenu = Quest.ThreatSelector(guildId, gmId, name);
             var maxPlayerMenu = Quest.PlayerMaxSelector(guildId, gmId, name);
             messageComponents

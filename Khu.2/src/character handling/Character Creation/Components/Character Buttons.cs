@@ -18,14 +18,14 @@ namespace OpenRoadHelper.Characters
                 .WithButton(
                     "Confirm",
                     guild.GenerateFormValues(
-                        new($"{context}Character", playerId, charName, "confirm", new())
+                        new($"{context}", playerId, charName, "confirm", new())
                     ),
                     ButtonStyle.Success
                 )
                 .WithButton(
                     "Cancel",
                     guild.GenerateFormValues(
-                        new($"{context}Character", playerId, charName, "cancel", new())
+                        new($"{context}", playerId, charName, "cancel", new())
                     ),
                     ButtonStyle.Danger
                 );
@@ -39,6 +39,69 @@ namespace OpenRoadHelper.Characters
         )
         {
             return ConfirmationButtons(ulong.Parse(guildId), playerId, charName, context);
+        }
+
+        public ComponentBuilder PowerTokenButtons()
+        {
+            return PowerTokenButtons(new());
+        }
+
+        public ComponentBuilder PowerTokenButtons(ComponentBuilder button)
+        {
+            Guild guild = Manager.GetGuild(Guild);
+
+            return button
+                .WithButton(
+                    "PT2GP",
+                    guild.GenerateFormValues(new("pt2gp", User, Name, "gp", new())),
+                    ButtonStyle.Primary,
+                    disabled: !CanTradePT2GP()
+                )
+                .WithButton(
+                    "PT2DT",
+                    guild.GenerateFormValues(new("pt2dt", User, Name, "dt", new())),
+                    ButtonStyle.Primary,
+                    disabled: !CanTradePT2DT()
+                );
+        }
+
+        public ComponentBuilder QuantityButtons(
+            string context,
+            List<string> metadata,
+            List<bool> disabledButtons
+        )
+        {
+            Guild guild = Manager.GetGuild(Guild);
+
+            return new ComponentBuilder()
+                .WithButton(
+                    "-5",
+                    guild.GenerateFormValues(
+                        new($"decrement{context}", User, Name, "-5", metadata)
+                    ),
+                    disabled: disabledButtons[0]
+                )
+                .WithButton(
+                    "-1",
+                    guild.GenerateFormValues(
+                        new($"decrement{context}", User, Name, "-1", metadata)
+                    ),
+                    disabled: disabledButtons[1]
+                )
+                .WithButton(
+                    "+1",
+                    guild.GenerateFormValues(
+                        new($"increment{context}", User, Name, "+1", metadata)
+                    ),
+                    disabled: disabledButtons[2]
+                )
+                .WithButton(
+                    "+5",
+                    guild.GenerateFormValues(
+                        new($"increment{context}", User, Name, "+5", metadata)
+                    ),
+                    disabled: disabledButtons[3]
+                );
         }
 
         public ComponentBuilder AvatarButtons()
@@ -158,6 +221,7 @@ namespace OpenRoadHelper.Characters
                         ),
                         ButtonStyle.Danger
                     );
+                    buttons = PowerTokenButtons(buttons);
                     buttons = AvatarButtons(buttons);
                 }
             }
@@ -169,11 +233,11 @@ namespace OpenRoadHelper.Characters
         {
             if (!isForced && Status == Status.Temp)
             {
-                return ConfirmationButtons(Guild, User, Name, "create");
+                return ConfirmationButtons(Guild, User, Name, "createCharacter");
             }
             if (isForced && Status == Status.Temp)
             {
-                return ConfirmationButtons(Guild, User, Name, "forceCreate");
+                return ConfirmationButtons(Guild, User, Name, "forceCreateCharacter");
             }
 
             return GenerateButtons(new(), isForced);

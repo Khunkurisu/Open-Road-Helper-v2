@@ -182,13 +182,13 @@ namespace OpenRoadHelper.Guilds
             {
                 Directory.CreateDirectory(_guildDataPath + _id);
             }
-            LoadCharacters();
-            LoadQuests();
-            LoadAvailability();
-            LoadParties();
+            LoadRoles();
             LoadBoards();
             LoadTokens();
-            LoadRoles();
+            LoadAvailability();
+            LoadQuests();
+            LoadCharacters();
+            LoadParties();
         }
 
         private void LoadRoles()

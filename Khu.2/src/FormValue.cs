@@ -6,7 +6,7 @@ namespace OpenRoadHelper
         public readonly ulong User;
         public readonly string Target;
         public readonly string Modifier;
-        public readonly List<string> MetaData;
+        public readonly List<string> Metadata;
 
         public FormValue()
         {
@@ -14,7 +14,7 @@ namespace OpenRoadHelper
             User = 0;
             Target = string.Empty;
             Modifier = string.Empty;
-            MetaData = new();
+            Metadata = new();
         }
 
         public FormValue(
@@ -29,7 +29,7 @@ namespace OpenRoadHelper
             User = user;
             Target = target ?? string.Empty;
             Modifier = modifier ?? string.Empty;
-            MetaData = metaData;
+            Metadata = metaData;
         }
 
         public FormValue(List<dynamic> values)
@@ -38,7 +38,7 @@ namespace OpenRoadHelper
             User = 0;
             Target = string.Empty;
             Modifier = string.Empty;
-            MetaData = new();
+            Metadata = new();
             if (values.Any())
             {
                 Context = values[0];
@@ -57,7 +57,7 @@ namespace OpenRoadHelper
             }
             if (values.Count < 4)
             {
-                MetaData = values[4];
+                Metadata = values[4];
             }
         }
     }

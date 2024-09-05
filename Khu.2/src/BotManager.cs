@@ -168,6 +168,30 @@ namespace OpenRoadHelper
                     await CharacterCreateConfirm(button);
                 }
             }
+            else if (actionContext.Contains("pt2gp"))
+            {
+                await GainGoldFromPT(button);
+            }
+            else if (actionContext.Contains("pt2dt"))
+            {
+                await GainDowntimeFromPT(button);
+            }
+            else if (actionContext.Contains("decrementGold"))
+            {
+                await DecrementGold(button);
+            }
+            else if (actionContext.Contains("decrementDowntime"))
+            {
+                await DecrementDowntime(button);
+            }
+            else if (actionContext.Contains("incrementGold"))
+            {
+                await IncrementGold(button);
+            }
+            else if (actionContext.Contains("incrementDowntime"))
+            {
+                await IncrementDowntime(button);
+            }
             else if (actionContext.Contains("replaceCharacter"))
             {
                 actionContext = formValues.Modifier;
