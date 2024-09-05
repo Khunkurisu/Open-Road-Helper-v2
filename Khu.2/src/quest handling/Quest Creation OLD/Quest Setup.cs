@@ -119,12 +119,7 @@ namespace OpenRoadHelper
                 }
             }
 
-            string allTags = components.First(x => x.CustomId == "quest_tags").Value;
-            string[] tags = allTags.Split(
-                ",",
-                StringSplitOptions.TrimEntries & StringSplitOptions.RemoveEmptyEntries
-            );
-            Quest quest = new(gamemaster.Id, guildId, name, description, new(tags));
+            Quest quest = new(gamemaster.Id, guildId, name, description, new());
             guild.AddQuest(quest);
 
             var messageComponents = new ComponentBuilder(); //Quest.ConfirmationButtons(guildId, gm, name);
@@ -134,9 +129,7 @@ namespace OpenRoadHelper
                 .WithSelectMenu(threatMenu)
                 .WithButton(
                     "Cancel",
-                    guild.GenerateFormValues(
-                        new($"createQuest", gmId, name, "cancel", new())
-                    ),
+                    guild.GenerateFormValues(new($"createQuest", gmId, name, "cancel", new())),
                     ButtonStyle.Danger
                 );
 

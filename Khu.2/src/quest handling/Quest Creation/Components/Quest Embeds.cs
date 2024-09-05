@@ -22,7 +22,10 @@ namespace OpenRoadHelper.Quests
                 embed.AddField(selectedParty.Name, selectedParty.Members);
             }
 
-            embed.AddField("Tags", Tags);
+            if (Tags.Any())
+            {
+                embed.AddField("Tags", Tags);
+            }
 
             return embed;
         }
