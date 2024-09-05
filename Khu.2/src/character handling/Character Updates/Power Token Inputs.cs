@@ -41,7 +41,7 @@ namespace OpenRoadHelper
             await character.BuyGold(button);
         }
 
-        public static async Task IncrementGold(SocketMessageComponent button)
+        public static async Task ModifyGoldFromPT(SocketMessageComponent button)
         {
             if (button.GuildId == null)
             {
@@ -71,40 +71,7 @@ namespace OpenRoadHelper
                 );
                 return;
             }
-            await character.IncrementGold(button);
-        }
-
-        public static async Task DecrementGold(SocketMessageComponent button)
-        {
-            if (button.GuildId == null)
-            {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
-                return;
-            }
-            ulong guildId = (ulong)button.GuildId;
-            Guild guild = GetGuild(guildId);
-
-            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
-
-            ulong playerId = formValues.User;
-            IUser user = button.User;
-            if (user.Id != playerId)
-            {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
-                return;
-            }
-
-            string charName = formValues.Target;
-            Character? character = GetCharacter(guildId, playerId, charName);
-            if (character == null)
-            {
-                await button.RespondAsync(
-                    $"{charName} could not be found in database.",
-                    ephemeral: true
-                );
-                return;
-            }
-            await character.DecrementGold(button);
+            await character.ModifyGoldFromPT(button);
         }
 
         public static async Task ConfirmBuyGold(SocketMessageComponent button)
@@ -174,7 +141,7 @@ namespace OpenRoadHelper
             await character.BuyDowntime(button);
         }
 
-        public static async Task IncrementDowntime(SocketMessageComponent button)
+        public static async Task ModifyDowntimeFromPT(SocketMessageComponent button)
         {
             if (button.GuildId == null)
             {
@@ -204,40 +171,7 @@ namespace OpenRoadHelper
                 );
                 return;
             }
-            await character.IncrementDowntime(button);
-        }
-
-        public static async Task DecrementDowntime(SocketMessageComponent button)
-        {
-            if (button.GuildId == null)
-            {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
-                return;
-            }
-            ulong guildId = (ulong)button.GuildId;
-            Guild guild = GetGuild(guildId);
-
-            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
-
-            ulong playerId = formValues.User;
-            IUser user = button.User;
-            if (user.Id != playerId)
-            {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
-                return;
-            }
-
-            string charName = formValues.Target;
-            Character? character = GetCharacter(guildId, playerId, charName);
-            if (character == null)
-            {
-                await button.RespondAsync(
-                    $"{charName} could not be found in database.",
-                    ephemeral: true
-                );
-                return;
-            }
-            await character.DecrementDowntime(button);
+            await character.ModifyDowntimeFromPT(button);
         }
 
         public static async Task ConfirmBuyDowntime(SocketMessageComponent button)

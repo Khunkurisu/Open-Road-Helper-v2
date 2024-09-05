@@ -41,6 +41,70 @@ namespace OpenRoadHelper.Characters
             return ConfirmationButtons(ulong.Parse(guildId), playerId, charName, context);
         }
 
+        public static ButtonBuilder ConfirmButton(
+            ulong guildId,
+            ulong playerId,
+            string charName,
+            string context,
+            List<string> metadata
+        )
+        {
+            Guild guild = Manager.GetGuild(guildId);
+
+            return new ButtonBuilder()
+                .WithLabel("Confirm")
+                .WithCustomId(
+                    guild.GenerateFormValues(
+                        new($"{context}", playerId, charName, "confirm", metadata)
+                    )
+                )
+                .WithStyle(ButtonStyle.Success);
+        }
+
+        public ButtonBuilder ConfirmButton(string context, List<string> metadata)
+        {
+            Guild guild = Manager.GetGuild(Guild);
+
+            return new ButtonBuilder()
+                .WithLabel("Confirm")
+                .WithCustomId(
+                    guild.GenerateFormValues(new($"{context}", User, Name, "confirm", metadata))
+                )
+                .WithStyle(ButtonStyle.Success);
+        }
+
+        public static ButtonBuilder CancelButton(
+            ulong guildId,
+            ulong playerId,
+            string charName,
+            string context,
+            List<string> metadata
+        )
+        {
+            Guild guild = Manager.GetGuild(guildId);
+
+            return new ButtonBuilder()
+                .WithLabel("Cancel")
+                .WithCustomId(
+                    guild.GenerateFormValues(
+                        new($"{context}", playerId, charName, "cancel", metadata)
+                    )
+                )
+                .WithStyle(ButtonStyle.Danger);
+        }
+
+        public ButtonBuilder CancelButton(string context, List<string> metadata)
+        {
+            Guild guild = Manager.GetGuild(Guild);
+
+            return new ButtonBuilder()
+                .WithLabel("Cancel")
+                .WithCustomId(
+                    guild.GenerateFormValues(new($"{context}", User, Name, "cancel", metadata))
+                )
+                .WithStyle(ButtonStyle.Danger);
+        }
+
         public ComponentBuilder PowerTokenButtons()
         {
             return PowerTokenButtons(new());
@@ -77,28 +141,28 @@ namespace OpenRoadHelper.Characters
                 .WithButton(
                     "-5",
                     guild.GenerateFormValues(
-                        new($"decrement{context}", User, Name, "-5", metadata)
+                        new($"modify{context}", User, Name, "-5", metadata)
                     ),
                     disabled: disabledButtons[0]
                 )
                 .WithButton(
                     "-1",
                     guild.GenerateFormValues(
-                        new($"decrement{context}", User, Name, "-1", metadata)
+                        new($"modify{context}", User, Name, "-1", metadata)
                     ),
                     disabled: disabledButtons[1]
                 )
                 .WithButton(
                     "+1",
                     guild.GenerateFormValues(
-                        new($"increment{context}", User, Name, "+1", metadata)
+                        new($"modify{context}", User, Name, "+1", metadata)
                     ),
                     disabled: disabledButtons[2]
                 )
                 .WithButton(
                     "+5",
                     guild.GenerateFormValues(
-                        new($"increment{context}", User, Name, "+5", metadata)
+                        new($"modify{context}", User, Name, "+5", metadata)
                     ),
                     disabled: disabledButtons[3]
                 );

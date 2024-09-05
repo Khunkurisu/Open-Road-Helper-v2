@@ -176,21 +176,39 @@ namespace OpenRoadHelper
             {
                 await GainDowntimeFromPT(button);
             }
-            else if (actionContext.Contains("decrementGold"))
+            else if (actionContext.Contains("modifyGold"))
             {
-                await DecrementGold(button);
+                await ModifyGoldFromPT(button);
             }
-            else if (actionContext.Contains("decrementDowntime"))
+            else if (actionContext.Contains("modifyDowntime"))
             {
-                await DecrementDowntime(button);
+                await ModifyDowntimeFromPT(button);
             }
-            else if (actionContext.Contains("incrementGold"))
+            else if (actionContext.Contains("confirmBuyGold"))
             {
-                await IncrementGold(button);
+                await ConfirmBuyGold(button);
             }
-            else if (actionContext.Contains("incrementDowntime"))
+            else if (actionContext.Contains("confirmBuyDowntime"))
             {
-                await IncrementDowntime(button);
+                await ConfirmBuyDowntime(button);
+            }
+            else if (actionContext.Contains("cancelBuyGold"))
+            {
+                await button.UpdateAsync(x =>
+                {
+                    x.Content = "Gold purchase canceled.";
+                    x.Embeds = null;
+                    x.Components = null;
+                });
+            }
+            else if (actionContext.Contains("cancelBuyDowntime"))
+            {
+                await button.UpdateAsync(x =>
+                {
+                    x.Content = "Downtime purchase canceled.";
+                    x.Embeds = null;
+                    x.Components = null;
+                });
             }
             else if (actionContext.Contains("replaceCharacter"))
             {
