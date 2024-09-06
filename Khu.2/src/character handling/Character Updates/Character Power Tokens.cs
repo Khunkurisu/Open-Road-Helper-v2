@@ -51,25 +51,25 @@ namespace OpenRoadHelper.Characters
                 .WithTitle("PT to Gold")
                 .AddField("Current", $"Levels: 1; Tokens: 2")
                 .AddField("Payout", $"+{payout} gp");
-            await button.RespondAsync(
-                "How many levels worth of tokens would you like to spend?",
-                embed: embed.Build(),
-                components: QuantityButtons(
+            await button.UpdateAsync(x =>
+            {
+                x.Content = "How many levels worth of tokens would you like to spend?";
+                x.Embed = embed.Build();
+                x.Components = QuantityButtons(
                         "Gold",
                         metadata,
                         new()
                         {
                             currentLevel - 5 <= _lastTokenTrade,
                             currentLevel - 1 <= _lastTokenTrade,
-                            currentLevel + 1 >= _level,
-                            currentLevel + 5 >= _level
+                            currentLevel + 1 > _level,
+                            currentLevel + 5 > _level
                         }
                     )
                     .WithButton(ConfirmButton("confirmBuyGold", metadata), row: 1)
                     .WithButton(CancelButton("cancelBuyGold", metadata), row: 1)
-                    .Build(),
-                ephemeral: true
-            );
+                    .Build();
+            });
         }
 
         public async Task ModifyGoldFromPT(SocketMessageComponent button)
