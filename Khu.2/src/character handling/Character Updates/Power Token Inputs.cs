@@ -7,6 +7,44 @@ namespace OpenRoadHelper
 {
     public partial class Manager
     {
+        public static async Task SpendPTPrompt(SocketMessageComponent button)
+        {
+            if (button.GuildId == null)
+            {
+                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+                return;
+            }
+            ulong guildId = (ulong)button.GuildId;
+            Guild guild = GetGuild(guildId);
+
+            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
+
+            ulong playerId = formValues.User;
+            IUser user = button.User;
+            if (user.Id != playerId)
+            {
+                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                return;
+            }
+
+            string charName = formValues.Target;
+            Character? character = GetCharacter(guildId, playerId, charName);
+            if (character == null)
+            {
+                await button.RespondAsync(
+                    $"{charName} could not be found in database.",
+                    ephemeral: true
+                );
+                return;
+            }
+
+            await button.RespondAsync(
+                "How would you like to spend your PT?",
+                components: character.PowerTokenButtons().Build(),
+                ephemeral: true
+            );
+        }
+
         public static async Task GainGoldFromPT(SocketMessageComponent button)
         {
             if (button.GuildId == null)

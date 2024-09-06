@@ -168,6 +168,9 @@ namespace OpenRoadHelper
                     await CharacterCreateConfirm(button);
                 }
             }
+			else if (actionContext.Contains("spendPT")) {
+				await SpendPTPrompt(button);
+			}
             else if (actionContext.Contains("pt2gp"))
             {
                 await GainGoldFromPT(button);

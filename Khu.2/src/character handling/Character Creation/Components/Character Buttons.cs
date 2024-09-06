@@ -105,6 +105,18 @@ namespace OpenRoadHelper.Characters
                 .WithStyle(ButtonStyle.Danger);
         }
 
+        public ComponentBuilder SpendPTButton(ComponentBuilder button)
+        {
+            Guild guild = Manager.GetGuild(Guild);
+
+            return button.WithButton(
+                "Spend PT",
+                guild.GenerateFormValues(new("spendPT", User, Name, string.Empty, new())),
+                ButtonStyle.Primary,
+                disabled: guild.GetPlayerTokenCount(User) < 1
+            );
+        }
+
         public ComponentBuilder PowerTokenButtons()
         {
             return PowerTokenButtons(new());
@@ -116,13 +128,13 @@ namespace OpenRoadHelper.Characters
 
             return button
                 .WithButton(
-                    "PT2GP",
+                    "Buy Gold",
                     guild.GenerateFormValues(new("pt2gp", User, Name, "gp", new())),
                     ButtonStyle.Primary,
                     disabled: !CanTradePT2GP()
                 )
                 .WithButton(
-                    "PT2DT",
+                    "Buy Downtime",
                     guild.GenerateFormValues(new("pt2dt", User, Name, "dt", new())),
                     ButtonStyle.Primary,
                     disabled: !CanTradePT2DT()
@@ -140,30 +152,22 @@ namespace OpenRoadHelper.Characters
             return new ComponentBuilder()
                 .WithButton(
                     "-5",
-                    guild.GenerateFormValues(
-                        new($"modify{context}", User, Name, "-5", metadata)
-                    ),
+                    guild.GenerateFormValues(new($"modify{context}", User, Name, "-5", metadata)),
                     disabled: disabledButtons[0]
                 )
                 .WithButton(
                     "-1",
-                    guild.GenerateFormValues(
-                        new($"modify{context}", User, Name, "-1", metadata)
-                    ),
+                    guild.GenerateFormValues(new($"modify{context}", User, Name, "-1", metadata)),
                     disabled: disabledButtons[1]
                 )
                 .WithButton(
                     "+1",
-                    guild.GenerateFormValues(
-                        new($"modify{context}", User, Name, "+1", metadata)
-                    ),
+                    guild.GenerateFormValues(new($"modify{context}", User, Name, "+1", metadata)),
                     disabled: disabledButtons[2]
                 )
                 .WithButton(
                     "+5",
-                    guild.GenerateFormValues(
-                        new($"modify{context}", User, Name, "+5", metadata)
-                    ),
+                    guild.GenerateFormValues(new($"modify{context}", User, Name, "+5", metadata)),
                     disabled: disabledButtons[3]
                 );
         }
@@ -285,7 +289,7 @@ namespace OpenRoadHelper.Characters
                         ),
                         ButtonStyle.Danger
                     );
-                    buttons = PowerTokenButtons(buttons);
+                    buttons = SpendPTButton(buttons);
                     buttons = AvatarButtons(buttons);
                 }
             }
