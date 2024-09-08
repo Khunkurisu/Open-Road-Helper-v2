@@ -176,22 +176,26 @@ namespace OpenRoadHelper.Guilds
             return userRoles.Any();
         }
 
-        public void LoadAll()
+        public async Task LoadAll()
         {
             if (!Directory.Exists(_guildDataPath + _id))
             {
                 Directory.CreateDirectory(_guildDataPath + _id);
             }
-            LoadRoles();
-            LoadBoards();
-            LoadTokens();
-            LoadAvailability();
-            LoadQuests();
-            LoadCharacters();
-            LoadParties();
+            while (!Manager.ClientReady)
+            {
+                await Task.Yield();
+            }
+            await LoadRoles();
+            await LoadBoards();
+            await LoadTokens();
+            await LoadAvailability();
+            await LoadQuests();
+            await LoadCharacters();
+            await LoadParties();
         }
 
-        private void LoadRoles()
+        private async Task LoadRoles()
         {
             if (!File.Exists(_guildDataPath + _id + _rolesPath))
             {
@@ -204,11 +208,12 @@ namespace OpenRoadHelper.Guilds
                 foreach (string roleName in gmRoles)
                 {
                     _gmRoles.Add(roleName);
+                    await Task.Yield();
                 }
             }
         }
 
-        private void LoadTokens()
+        private async Task LoadTokens()
         {
             if (!File.Exists(_guildDataPath + _id + _tokensPath))
             {
@@ -230,11 +235,12 @@ namespace OpenRoadHelper.Guilds
                     {
                         _playerTokens.Add(playerId, playerTokens[playerId]);
                     }
+                    await Task.Yield();
                 }
             }
         }
 
-        private void LoadAvailability()
+        private async Task LoadAvailability()
         {
             if (!File.Exists(_guildDataPath + _id + _availabilityPath))
             {
@@ -249,11 +255,12 @@ namespace OpenRoadHelper.Guilds
                 foreach (string gm in gmAvailabilities.Keys)
                 {
                     _gmAvailabilities.Add(gm, gmAvailabilities[gm]);
+                    await Task.Yield();
                 }
             }
         }
 
-        private void LoadCharacters()
+        private async Task LoadCharacters()
         {
             if (!File.Exists(_guildDataPath + _id + _charactersPath))
             {
@@ -268,13 +275,14 @@ namespace OpenRoadHelper.Guilds
                 foreach (ulong playerId in characters.Keys)
                 {
                     _characters[playerId] = characters[playerId];
+                    await Task.Yield();
                 }
             }
 
-            Task.Run(() => RefreshCharacterPosts());
+            //await RefreshCharacterPosts();
         }
 
-        private void LoadBoards()
+        private async Task LoadBoards()
         {
             if (!File.Exists(_guildDataPath + _id + _boardsPath))
             {
@@ -286,22 +294,23 @@ namespace OpenRoadHelper.Guilds
             >(jsonString);
             if (boards != null)
             {
-                if (boards.ContainsKey("Characters"))
+                if (boards.TryGetValue("Characters", out ulong character))
                 {
-                    CharacterBoard = Manager.GetForumChannel(Id, boards["Characters"]);
+                    CharacterBoard = Manager.GetForumChannel(Id, character);
                 }
-                if (boards.ContainsKey("Quests"))
+                if (boards.TryGetValue("Quests", out ulong quest))
                 {
-                    QuestBoard = Manager.GetForumChannel(Id, boards["Quests"]);
+                    QuestBoard = Manager.GetForumChannel(Id, quest);
                 }
-                if (boards.ContainsKey("Transactions"))
+                if (boards.TryGetValue("Transactions", out ulong transaction))
                 {
-                    TransactionBoard = Manager.GetForumChannel(Id, boards["Transactions"]);
+                    TransactionBoard = Manager.GetForumChannel(Id, transaction);
                 }
+                await Task.Yield();
             }
         }
 
-        private void LoadQuests()
+        private async Task LoadQuests()
         {
             if (!File.Exists(_guildDataPath + _id + _questsPath))
             {
@@ -314,13 +323,14 @@ namespace OpenRoadHelper.Guilds
                 foreach (Quest quest in quests)
                 {
                     _quests.Add(quest);
+					await Task.Yield();
                 }
             }
 
-            Task.Run(() => RefreshQuestPosts());
+			await RefreshQuestPosts();
         }
 
-        private void LoadParties()
+        private async Task LoadParties()
         {
             if (!File.Exists(_guildDataPath + _id + _partiesPath))
             {
@@ -333,6 +343,7 @@ namespace OpenRoadHelper.Guilds
                 foreach (Party party in parties)
                 {
                     _parties.Add(party);
+					await Task.Yield();
                 }
             }
         }

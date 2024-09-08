@@ -11,6 +11,7 @@ namespace OpenRoadHelper
     public partial class Manager
     {
         private static DiscordSocketClient? _client;
+        public static bool ClientReady { get; private set; } = false;
         private static readonly List<string> _imageExtensions =
             new() { ".png", ".jpeg", ".jpg", ".webp", ".tga", ".gif", ".bmp" };
         public static readonly List<Guild> Guilds = new();
@@ -104,16 +105,17 @@ namespace OpenRoadHelper
             {
                 await Task.Yield();
             }
+            ClientReady = true;
             foreach (string guildId in guildIds)
             {
                 Guild guild = new(ulong.Parse(guildId.Replace(guildData, "")));
                 Guilds.Add(guild);
                 SocketGuild socketGuild = _client.GetGuild(guild.Id);
                 await socketGuild.DownloadUsersAsync();
-                guild.LoadAll();
+                await guild.LoadAll();
                 await Task.Yield();
             }
-            await Task.Run(RefreshLoop);
+            await RefreshLoop();
             await Task.CompletedTask;
         }
 
@@ -128,6 +130,7 @@ namespace OpenRoadHelper
                 {
                     await guild.RefreshCharacterPosts();
                     await guild.RefreshQuestPosts();
+                    await Task.Yield();
                 }
             }
             await Task.Yield();
@@ -136,22 +139,18 @@ namespace OpenRoadHelper
         private async Task OnMessageSubmit(SocketMessage msg)
         {
             var message = (SocketUserMessage)msg;
-            if (message.Source is not MessageSource.User)
-            {
-                return;
-            }
-            if (message.Channel is not SocketGuildChannel)
-            {
-                return;
-            }
             var channel = (SocketGuildChannel)message.Channel;
-            if (channel.Guild == null)
+            if (
+                message.Source is not MessageSource.User
+                || message.Channel is not SocketGuildChannel
+                || channel.Guild == null
+            )
             {
                 return;
             }
 
             string charName = channel.Name;
-            ulong guildId = (ulong)channel.Guild.Id;
+            ulong guildId = channel.Guild.Id;
             Guild guild = GetGuild(guildId);
 
             var character = guild.GetCharacter(message.Author.Id, charName);
@@ -173,18 +172,15 @@ namespace OpenRoadHelper
                     continue;
                 }
                 string filepath = @".\data\images\characters\";
-                string dateTime = DateTime.UtcNow.ToString("yyMMdd");
+                string dateTime = DateTime.UtcNow.ToString("yyyyMMdd");
                 Directory.CreateDirectory(filepath);
                 string url = attachment.Url;
-                string filename = $"{charName}--{dateTime}--[{character.Avatars.Count + 1}].webp";
+                string filename = $"{charName}--{dateTime}--[{character.Avatars.Count}].webp";
                 if (!await Generic.DownloadImage(url, filepath + filename))
                 {
                     continue;
                 }
-                character.Avatars.Add(
-                    $"bot--{dateTime}--[{character.Avatars.Count + 1}]",
-                    filename
-                );
+                character.Avatars.Add($"bot--{dateTime}--[{character.Avatars.Count}]", filename);
                 didAddAvatar = true;
             }
             if (didAddAvatar)
