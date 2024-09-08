@@ -39,7 +39,7 @@ namespace OpenRoadHelper
             }
 
             IThreadChannel? charThread = (IThreadChannel?)GetTextChannel(
-                guild.Id,
+                character.Guild,
                 character.CharacterThread
             );
             if (charThread == null)

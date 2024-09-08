@@ -437,11 +437,11 @@ namespace OpenRoadHelper.Characters
             {
                 if (Avatars.Count - 1 >= index)
                 {
-                    return $"{AvatarPrefix}{Avatars[Avatars.Keys.ElementAt(index)]}";
+                    return $@"{AvatarPrefix}{Avatars[Avatars.Keys.ElementAt(index)]}";
                 }
                 else
                 {
-                    return $"{AvatarPrefix}{Avatars[Avatars.Keys.ElementAt(0)]}";
+                    return $@"{AvatarPrefix}{Avatars[Avatars.Keys.ElementAt(0)]}";
                 }
             }
             return string.Empty;

@@ -231,8 +231,8 @@ namespace OpenRoadHelper.Characters
                 return;
             }
 
-            IThreadChannel? transThread = Manager.GetThreadChannel(
-                guild.Id,
+            IThreadChannel? transThread = (IThreadChannel?)Manager.GetTextChannel(
+                character.Guild,
                 character.TransactionThread
             );
             if (transThread == null)
@@ -246,8 +246,8 @@ namespace OpenRoadHelper.Characters
                 return;
             }
 
-            IThreadChannel? charThread = Manager.GetThreadChannel(
-                guild.Id,
+            IThreadChannel? charThread = (IThreadChannel?)Manager.GetTextChannel(
+                character.Guild,
                 character.CharacterThread
             );
             if (charThread == null)

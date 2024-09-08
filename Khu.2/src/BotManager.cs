@@ -90,7 +90,7 @@ namespace OpenRoadHelper
         public Manager(DiscordSocketClient client)
         {
             _client = client;
-            _client.MessageReceived += OnMessageSubmit;
+            _client.MessageReceived += OnMessageReceived;
             _client.ModalSubmitted += OnModalSubmit;
             _client.SelectMenuExecuted += OnSelectMenuExecuted;
             _client.ButtonExecuted += OnButtonExecuted;
@@ -136,7 +136,7 @@ namespace OpenRoadHelper
             await Task.Yield();
         }
 
-        private async Task OnMessageSubmit(SocketMessage msg)
+        private async Task OnMessageReceived(SocketMessage msg)
         {
             var message = (SocketUserMessage)msg;
             var channel = (SocketGuildChannel)message.Channel;
@@ -167,6 +167,7 @@ namespace OpenRoadHelper
             bool didAddAvatar = false;
             foreach (Attachment attachment in message.Attachments)
             {
+                await Task.Yield();
                 if (!_imageExtensions.Contains(Path.GetExtension(attachment.Filename)))
                 {
                     continue;
@@ -175,12 +176,15 @@ namespace OpenRoadHelper
                 string dateTime = DateTime.UtcNow.ToString("yyyyMMdd");
                 Directory.CreateDirectory(filepath);
                 string url = attachment.Url;
-                string filename = $"{charName}--{dateTime}--[{character.Avatars.Count}].webp";
+                string filename =
+                    $"{charName.Replace(' ', '-')}({dateTime})[{character.Avatars.Count}].webp";
+                await Task.Yield();
                 if (!await Generic.DownloadImage(url, filepath + filename))
                 {
                     continue;
                 }
-                character.Avatars.Add($"bot--{dateTime}--[{character.Avatars.Count}]", filename);
+                await Task.Yield();
+                character.Avatars.Add($"({dateTime})[{character.Avatars.Count}]", filename);
                 didAddAvatar = true;
             }
             if (didAddAvatar)
@@ -393,11 +397,11 @@ namespace OpenRoadHelper
 
         public static async Task AwakenThread(Character character)
         {
-            IThreadChannel? threadChannel = GetThreadChannel(
+            IThreadChannel? charThread = (IThreadChannel?)GetTextChannel(
                 character.Guild,
                 character.CharacterThread
             );
-            if (threadChannel == null)
+            if (charThread == null)
             {
                 return;
             }
@@ -406,7 +410,7 @@ namespace OpenRoadHelper
             {
                 return;
             }
-            await threadChannel.ModifyAsync(x =>
+            await charThread.ModifyAsync(x =>
             {
                 x.Archived = false;
             });

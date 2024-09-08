@@ -9,7 +9,8 @@ namespace OpenRoadHelper
     {
         public static async Task DrawCharacterPost(
             SocketMessageComponent component,
-            bool updateDisplay = false, bool isForced = false
+            bool updateDisplay = false,
+            bool isForced = false
         )
         {
             if (component.GuildId == null)
@@ -79,11 +80,11 @@ namespace OpenRoadHelper
 
         public static async Task DrawCharacterPost(Character character, SocketInteraction context)
         {
-            IThreadChannel? threadChannel = GetThreadChannel(
+            IThreadChannel? charThread = (IThreadChannel?)GetTextChannel(
                 character.Guild,
                 character.CharacterThread
             );
-            if (threadChannel == null)
+            if (charThread == null)
             {
                 await context.RespondAsync(
                     $"Character thread for {character.Name} could not be located."
@@ -98,7 +99,7 @@ namespace OpenRoadHelper
                 );
                 return;
             }
-            await threadChannel.ModifyMessageAsync(
+            await charThread.ModifyMessageAsync(
                 character.CharacterThread,
                 msg =>
                 {
@@ -110,11 +111,11 @@ namespace OpenRoadHelper
 
         public static async Task DrawCharacterPost(Character character)
         {
-            IThreadChannel? threadChannel = GetThreadChannel(
+            IThreadChannel? charThread = (IThreadChannel?)GetTextChannel(
                 character.Guild,
                 character.CharacterThread
             );
-            if (threadChannel == null)
+            if (charThread == null)
             {
                 return;
             }
@@ -123,7 +124,7 @@ namespace OpenRoadHelper
             {
                 return;
             }
-            await threadChannel.ModifyMessageAsync(
+            await charThread.ModifyMessageAsync(
                 character.CharacterThread,
                 msg =>
                 {

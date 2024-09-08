@@ -115,8 +115,11 @@ namespace OpenRoadHelper
                 return;
             }
 
-            IThreadChannel? threadChannel = GetThreadChannel(guild.Id, character.CharacterThread);
-            if (threadChannel == null)
+            IThreadChannel? charThread = (IThreadChannel?)GetTextChannel(
+                character.Guild,
+                character.CharacterThread
+            );
+            if (charThread == null)
             {
                 await messageComponent.RespondAsync(
                     $"Character thread for {charName} could not be found.",
@@ -139,7 +142,7 @@ namespace OpenRoadHelper
             guild.QueueSave(SaveType.Characters);
 
             var msg = await transactions.SendMessageAsync(
-                $"{threadChannel.Mention} has been approved."
+                $"{charThread.Mention} has been approved."
             );
             string msgLink = $"https://discord.com/channels/{guildId}/{msg.Channel.Id}/{msg.Id}";
             await messageComponent.UpdateAsync(x =>
@@ -149,7 +152,7 @@ namespace OpenRoadHelper
             });
 
             ulong[] tags = { guild.CharacterBoard.Tags.First(x => x.Name == "Approved").Id };
-            await threadChannel.ModifyAsync(x =>
+            await charThread.ModifyAsync(x =>
             {
                 x.AppliedTags = tags;
             });
@@ -278,8 +281,11 @@ namespace OpenRoadHelper
                 return;
             }
 
-            IThreadChannel? threadChannel = GetThreadChannel(guild.Id, character.CharacterThread);
-            if (threadChannel == null)
+            IThreadChannel? charThread = (IThreadChannel?)GetTextChannel(
+                character.Guild,
+                character.CharacterThread
+            );
+            if (charThread == null)
             {
                 await modal.RespondAsync(
                     $"Character thread for {charName} could not be found.",
@@ -303,7 +309,7 @@ namespace OpenRoadHelper
 
             ulong[] tags = { guild.CharacterBoard.Tags.First(x => x.Name == "Rejected").Id };
 
-            await threadChannel.ModifyAsync(x =>
+            await charThread.ModifyAsync(x =>
             {
                 x.AppliedTags = tags;
             });
@@ -311,7 +317,7 @@ namespace OpenRoadHelper
             string reason = components.First(x => x.CustomId == "rejection_reason").Value;
 
             var msg = await transactions.SendMessageAsync(
-                $"{threadChannel.Mention} has been rejected.",
+                $"{charThread.Mention} has been rejected.",
                 embed: new EmbedBuilder()
                     .WithTitle("Rejection Reason")
                     .WithDescription(reason)

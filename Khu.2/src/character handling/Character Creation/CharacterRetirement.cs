@@ -132,7 +132,10 @@ namespace OpenRoadHelper
                 return;
             }
 
-            IThreadChannel? charThread = GetThreadChannel(guild.Id, character.CharacterThread);
+            IThreadChannel? charThread = (IThreadChannel?)GetTextChannel(
+                character.Guild,
+                character.CharacterThread
+            );
             IThreadChannel? transactionChannel = (IThreadChannel?)GetTextChannel(
                 guild.Id,
                 character.TransactionThread

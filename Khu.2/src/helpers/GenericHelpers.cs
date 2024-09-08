@@ -19,10 +19,14 @@ namespace OpenRoadHelper
             try
             {
                 var response = await client.GetAsync(url);
+                await Task.Yield();
                 response.EnsureSuccessStatusCode();
+                await Task.Yield();
 
                 using var stream = await response.Content.ReadAsStreamAsync();
+                await Task.Yield();
                 using var image = await Image.LoadAsync(stream);
+                await Task.Yield();
                 await image.SaveAsync(filename, new WebpEncoder());
 
                 Console.WriteLine("Image downloaded successfully: " + filename);
