@@ -179,7 +179,7 @@ namespace OpenRoadHelper
                 x.Embed = null;
                 x.Components = null;
             });
-            await guild.RefreshCharacterPosts(character.User);
+            await Guild.RefreshCharacterPosts(character);
         }
 
         public static async Task RetireCharacterCancel(SocketMessageComponent component)

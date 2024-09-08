@@ -95,14 +95,14 @@ namespace OpenRoadHelper
             {
                 character.NextAvatar();
                 await Task.Yield();
-                await guild.RefreshCharacterPosts(button.User.Id);
+                await Guild.RefreshCharacterPosts(character);
                 guild.QueueSave(SaveType.Characters);
             }
             else if (directionToShift == "back")
             {
                 character.PreviousAvatar();
                 await Task.Yield();
-                await guild.RefreshCharacterPosts(button.User.Id);
+                await Guild.RefreshCharacterPosts(character);
                 guild.QueueSave(SaveType.Characters);
             }
             await button.UpdateAsync(x => x.Content = x.Content);

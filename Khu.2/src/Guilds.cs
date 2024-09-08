@@ -399,6 +399,12 @@ namespace OpenRoadHelper.Guilds
             }
         }
 
+        public static async Task RefreshCharacterPosts(Character character)
+        {
+            await Manager.DrawCharacterPost(character);
+            await Manager.AwakenThread(character);
+        }
+
         public async Task RefreshQuestPosts()
         {
             foreach (Quest quest in _quests)

@@ -190,7 +190,7 @@ namespace OpenRoadHelper
             if (didAddAvatar)
             {
                 character.AwaitingInput = DateTime.MinValue;
-                await guild.RefreshCharacterPosts(message.Author.Id);
+                await Guild.RefreshCharacterPosts(character);
                 guild.QueueSave(SaveType.Characters, true);
                 await message.DeleteAsync();
             }
