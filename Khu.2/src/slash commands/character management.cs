@@ -178,7 +178,7 @@ namespace OpenRoadHelper.Characters
             }
             if (sheet != null)
             {
-                await Character.ReplaceAsync(Context, sheet, character);
+                await character.ReplaceAsync(Context, sheet);
             }
         }
 

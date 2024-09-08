@@ -21,6 +21,8 @@ namespace OpenRoadHelper.Characters
             }
         }
 
+		public bool ShouldSave => Status != Status.Replacement && Status != Status.Temp;
+
         public string GetBirthDate()
         {
             return $"{Generic.Ordinal(_birthDay)} {_birthMonth} {_birthYear} AR";
@@ -492,6 +494,7 @@ namespace OpenRoadHelper.Characters
         Approved,
         Retired,
         Deceased,
-        Rejected
+        Rejected,
+        Replacement
     }
 }

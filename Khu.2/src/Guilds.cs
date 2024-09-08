@@ -323,11 +323,11 @@ namespace OpenRoadHelper.Guilds
                 foreach (Quest quest in quests)
                 {
                     _quests.Add(quest);
-					await Task.Yield();
+                    await Task.Yield();
                 }
             }
 
-			await RefreshQuestPosts();
+            await RefreshQuestPosts();
         }
 
         private async Task LoadParties()
@@ -343,7 +343,7 @@ namespace OpenRoadHelper.Guilds
                 foreach (Party party in parties)
                 {
                     _parties.Add(party);
-					await Task.Yield();
+                    await Task.Yield();
                 }
             }
         }
@@ -514,7 +514,23 @@ namespace OpenRoadHelper.Guilds
         {
             if (_characters.Count > 0 && ShouldSave(SaveType.Characters))
             {
-                string json = JsonConvert.SerializeObject(_characters);
+                Dictionary<ulong, List<Character>> charactersToSave = new();
+                foreach (ulong userId in _characters.Keys)
+                {
+                    if (_characters[userId].Any())
+                    {
+                        charactersToSave.Add(userId, new());
+                        foreach (Character character in _characters[userId])
+                        {
+                            if (!character.ShouldSave)
+                            {
+                                continue;
+                            }
+                            charactersToSave[userId].Add(character);
+                        }
+                    }
+                }
+                string json = JsonConvert.SerializeObject(charactersToSave);
                 File.WriteAllText(_guildDataPath + _id + _charactersPath, json);
             }
         }
@@ -539,11 +555,13 @@ namespace OpenRoadHelper.Guilds
 
         public void AddCharacter(ulong playerId, Character character, bool queueSave = true)
         {
-            if (!_characters.ContainsKey(playerId))
+            if (!_characters.TryGetValue(playerId, out List<Character>? value))
             {
-                _characters[playerId] = new();
+                value = new();
+                _characters[playerId] = value;
             }
-            _characters[playerId].Add(character);
+
+            value.Add(character);
             if (queueSave)
             {
                 QueueSave(SaveType.Characters, true);

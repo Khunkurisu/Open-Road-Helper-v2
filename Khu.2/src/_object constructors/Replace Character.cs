@@ -21,8 +21,9 @@ namespace OpenRoadHelper.Characters
             ParseImport(data);
 
             _name = template._name;
+            _level = template._level;
             _updated = template._updated;
-            _status = Status.Temp;
+            _status = Status.Replacement;
             _avatars = template._avatars;
             _colorPref = template._colorPref;
             _notes = template._notes;
@@ -33,15 +34,6 @@ namespace OpenRoadHelper.Characters
             _birthYear = template._birthYear;
 
             _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        }
-
-        public static async Task ReplaceAsync(
-            SocketInteractionContext context,
-            IAttachment sheet,
-            Character character
-        )
-        {
-            await character.ReplaceAsync(context, sheet);
         }
 
         public async Task ReplaceAsync(SocketInteractionContext context, IAttachment sheet)
@@ -118,42 +110,37 @@ namespace OpenRoadHelper.Characters
             List<SocketMessageComponentData> components
         )
         {
-            string[] modalData = modal.Data.CustomId.Split("+");
-            string guildId = modalData[1];
-            Guild guild = Manager.GetGuild(ulong.Parse(guildId));
-            string playerIdString = modalData[2];
-            string charName = modalData[3];
-            ulong playerId = ulong.Parse(playerIdString);
+            if (modal.GuildId == null)
+            {
+                await modal.RespondAsync("This must be run in a guild.", ephemeral: true);
+                return;
+            }
+            ulong guildId = (ulong)modal.GuildId;
+            Guild guild = Manager.GetGuild(guildId);
+
+            FormValue formValues = guild.GetFormValues(modal.Data.CustomId);
+
+            ulong playerId = formValues.User;
             IUser user = modal.User;
-            IUser? player = Manager.GetGuildUser(guild.Id, playerId);
-
-            if (player == null)
+            if (user.Id != playerId)
             {
-                await modal.RespondAsync($"Unable to find user.", ephemeral: true);
+                await modal.RespondAsync("You lack permission to do that!", ephemeral: true);
                 return;
             }
 
-            if (player != user && !guild.IsGamemaster(user))
-            {
-                await modal.RespondAsync(
-                    $"You lack permission to perform that action.",
-                    ephemeral: true
-                );
-                return;
-            }
-
-            Character? character = guild.GetCharacter(player.Id, charName);
+            string charName = formValues.Target;
+            Character? character = Manager.GetCharacter(guildId, playerId, charName);
             if (character == null)
             {
                 await modal.RespondAsync(
-                    $"Unable to locate {charName} for user <@{player.Id}>.",
+                    $"{charName} could not be found in database.",
                     ephemeral: true
                 );
                 return;
             }
 
             Dictionary<string, dynamic>? charData = guild
-                .GetCharacterJson(player.Id)
+                .GetCharacterJson(playerId)
                 ?.GetCharacterData();
             if (charData == null)
             {
@@ -167,10 +154,11 @@ namespace OpenRoadHelper.Characters
             Character newCharacter =
                 new(character, charData)
                 {
+                    Status = Status.Replacement,
                     Reputation = charReputation,
-                    Name = $"{charData["name"]}-NEW"
+                    Name = $"{charData["name"]}-New"
                 };
-            guild.AddCharacter(playerId, newCharacter);
+            guild.AddCharacter(playerId, newCharacter, false);
 
             await modal.RespondAsync(
                 $"Make sure everything looks correct before continuing.",
@@ -181,7 +169,8 @@ namespace OpenRoadHelper.Characters
                         $"{newCharacter.Name}+{character.Name}",
                         "replaceCharacter"
                     )
-                    .Build()
+                    .Build(),
+                ephemeral: true
             );
         }
 
@@ -231,10 +220,8 @@ namespace OpenRoadHelper.Characters
                 return;
             }
 
-            IThreadChannel? transThread = (IThreadChannel?)Manager.GetTextChannel(
-                character.Guild,
-                character.TransactionThread
-            );
+            IThreadChannel? transThread = (IThreadChannel?)
+                Manager.GetTextChannel(character.Guild, character.TransactionThread);
             if (transThread == null)
             {
                 await button.UpdateAsync(x =>
@@ -246,10 +233,8 @@ namespace OpenRoadHelper.Characters
                 return;
             }
 
-            IThreadChannel? charThread = (IThreadChannel?)Manager.GetTextChannel(
-                character.Guild,
-                character.CharacterThread
-            );
+            IThreadChannel? charThread = (IThreadChannel?)
+                Manager.GetTextChannel(character.Guild, character.CharacterThread);
             if (charThread == null)
             {
                 await button.UpdateAsync(x =>
