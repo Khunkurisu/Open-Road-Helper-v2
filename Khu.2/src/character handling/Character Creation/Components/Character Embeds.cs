@@ -17,7 +17,7 @@ namespace OpenRoadHelper.Characters
 
             var detailsEmbed = new EmbedBuilder()
                 .WithTitle($"{Heritage} {Ancestry} {Class} {Level}")
-                .WithAuthor(Name)
+                .WithAuthor(Name.Replace("-New", string.Empty))
                 .WithDescription(Description)
                 .WithColor(GetDiscordColor())
                 .WithFooter(player.Username)
@@ -38,7 +38,7 @@ namespace OpenRoadHelper.Characters
         {
             var attributesEmbed = new EmbedBuilder()
                 .WithTitle(Heritage + " " + Ancestry + " " + Class + " " + Level)
-                .WithAuthor(Name)
+                .WithAuthor(Name.Replace("-New", string.Empty))
                 .WithColor(GetDiscordColor())
                 .WithFooter(player.Username)
                 .WithImageUrl(GetAvatar(Avatar));
@@ -105,7 +105,7 @@ namespace OpenRoadHelper.Characters
             return new EmbedBuilder()
                 .WithDescription("Work In Progress")
                 .WithTitle(Heritage + " " + Ancestry + " " + Class + " " + Level)
-                .WithAuthor(Name)
+                .WithAuthor(Name.Replace("-New", string.Empty))
                 .WithColor(GetDiscordColor())
                 .WithFooter(player.Username)
                 .WithImageUrl(GetAvatar(Avatar));
@@ -116,7 +116,7 @@ namespace OpenRoadHelper.Characters
             return new EmbedBuilder()
                 .WithDescription("Work In Progress")
                 .WithTitle(Heritage + " " + Ancestry + " " + Class + " " + Level)
-                .WithAuthor(Name)
+                .WithAuthor(Name.Replace("-New", string.Empty))
                 .WithColor(GetDiscordColor())
                 .WithFooter(player.Username)
                 .WithImageUrl(GetAvatar(Avatar));
@@ -127,7 +127,7 @@ namespace OpenRoadHelper.Characters
             return new EmbedBuilder()
                 .WithDescription("Work In Progress")
                 .WithTitle(Heritage + " " + Ancestry + " " + Class + " " + Level)
-                .WithAuthor(Name)
+                .WithAuthor(Name.Replace("-New", string.Empty))
                 .WithColor(GetDiscordColor())
                 .WithFooter(player.Username)
                 .WithImageUrl(GetAvatar(Avatar));
