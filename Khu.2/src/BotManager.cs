@@ -414,6 +414,23 @@ namespace OpenRoadHelper
             {
                 x.Archived = false;
             });
+            await foreach (var messages in charThread.GetMessagesAsync())
+            {
+                if (messages.Any())
+                {
+                    var message = messages.First();
+                    if (
+                        DateTime.UtcNow.CompareTo(
+                            message.CreatedAt.UtcDateTime + TimeSpan.FromDays(2)
+                        ) > 0
+                    )
+                    {
+                        var newMessage = await charThread.SendMessageAsync(".");
+                        await Task.Yield();
+                        await newMessage.DeleteAsync();
+                    }
+                }
+            }
         }
 
         public static async Task AwakenThread(Quest quest)
