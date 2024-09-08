@@ -1,7 +1,7 @@
-using OpenRoadHelper.Characters;
-using OpenRoadHelper.Guilds;
 using Discord;
 using Discord.WebSocket;
+using OpenRoadHelper.Characters;
+using OpenRoadHelper.Guilds;
 
 namespace OpenRoadHelper
 {
@@ -89,23 +89,25 @@ namespace OpenRoadHelper
                 );
                 return;
             }
+            await button.DeferAsync();
 
             string directionToShift = formValues.Modifier;
             if (directionToShift == "forward")
             {
                 character.NextAvatar();
                 await Task.Yield();
-                await Guild.RefreshCharacterPosts(character);
-                guild.QueueSave(SaveType.Characters);
             }
             else if (directionToShift == "back")
             {
                 character.PreviousAvatar();
                 await Task.Yield();
-                await Guild.RefreshCharacterPosts(character);
-                guild.QueueSave(SaveType.Characters);
             }
-            await button.UpdateAsync(x => x.Content = x.Content);
+            await button.FollowupAsync(
+                $"Image set to avatar {character.GetAvatarKey(character.Avatar)}!",
+                ephemeral: true
+            );
+            await Guild.RefreshCharacterPosts(character);
+            guild.QueueSave(SaveType.Characters);
         }
     }
 }

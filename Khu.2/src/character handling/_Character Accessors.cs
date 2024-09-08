@@ -21,7 +21,7 @@ namespace OpenRoadHelper.Characters
             }
         }
 
-		public bool ShouldSave => Status != Status.Replacement && Status != Status.Temp;
+        public bool ShouldSave => Status != Status.Replacement && Status != Status.Temp;
 
         public string GetBirthDate()
         {
@@ -409,7 +409,7 @@ namespace OpenRoadHelper.Characters
             get => _currentAvatar;
             set
             {
-                _currentAvatar = Math.Clamp(value, 0, Avatars.Count);
+                _currentAvatar = Math.Clamp(value, 0, Avatars.Count - 1);
                 _updated = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
         }
@@ -437,14 +437,7 @@ namespace OpenRoadHelper.Characters
         {
             if (Avatars.Any())
             {
-                if (Avatars.Count - 1 >= index)
-                {
-                    return $@"{AvatarPrefix}{Avatars[Avatars.Keys.ElementAt(index)]}";
-                }
-                else
-                {
-                    return $@"{AvatarPrefix}{Avatars[Avatars.Keys.ElementAt(0)]}";
-                }
+                return GetAvatar(GetAvatarKey(index));
             }
             return string.Empty;
         }
@@ -453,14 +446,11 @@ namespace OpenRoadHelper.Characters
         {
             if (Avatars.Any())
             {
-                if (Avatars.ContainsKey(key))
+                if (Avatars.TryGetValue(key, out string? value))
                 {
-                    return $"{AvatarPrefix}{Avatars[key]}";
+                    return $"{AvatarPrefix}{value}";
                 }
-                else
-                {
-                    return $"{AvatarPrefix}{Avatars.ElementAt(0)}";
-                }
+                return $"{AvatarPrefix}{Avatars.ElementAt(0)}";
             }
             return string.Empty;
         }
@@ -473,6 +463,16 @@ namespace OpenRoadHelper.Characters
         public int GetAvatarIndex(string key)
         {
             return Avatars.Keys.ToList().IndexOf(key);
+        }
+
+        public string GetAvatarKey(int index)
+        {
+            if (Avatars.Any())
+            {
+                index = Math.Clamp(index, 0, Avatars.Count - 1);
+                return Avatars.Keys.ElementAt(index);
+            }
+            return string.Empty;
         }
 
         [JsonConverter(typeof(StringEnumConverter))]
