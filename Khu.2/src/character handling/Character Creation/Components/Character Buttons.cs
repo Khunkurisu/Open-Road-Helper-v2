@@ -183,6 +183,12 @@ namespace OpenRoadHelper.Characters
 
             return button
                 .WithButton(
+                    "Add Avatar",
+                    guild.GenerateFormValues(new($"addAvatar", User, Name, string.Empty, new())),
+                    ButtonStyle.Primary,
+                    row: 1
+                )
+                .WithButton(
                     "Previous Avatar",
                     guild.GenerateFormValues(new($"shiftAvatar", User, Name, "back", new())),
                     ButtonStyle.Primary,

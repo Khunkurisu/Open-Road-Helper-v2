@@ -659,9 +659,9 @@ namespace OpenRoadHelper.Guilds
 
         public Character? GetCharacter(ulong playerId, string charName)
         {
-            if (_characters.ContainsKey(playerId) && _characters[playerId].Count > 0)
+            if (_characters.TryGetValue(playerId, out List<Character>? value) && value.Any())
             {
-                return _characters[playerId].First(x => x.Name == charName);
+                return value.FirstOrDefault(x => x?.Name == charName, null);
             }
             return null;
         }

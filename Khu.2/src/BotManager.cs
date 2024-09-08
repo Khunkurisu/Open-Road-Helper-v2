@@ -3,12 +3,16 @@ using OpenRoadHelper.Guilds;
 using OpenRoadHelper.Quests;
 using Discord;
 using Discord.WebSocket;
+using System.Net.Mime;
+using SixLabors.ImageSharp;
 
 namespace OpenRoadHelper
 {
     public partial class Manager
     {
         private static DiscordSocketClient? _client;
+        private static readonly List<string> _imageExtensions =
+            new() { ".png", ".jpeg", ".jpg", ".webp", ".tga", ".gif", ".bmp" };
         public static readonly List<Guild> Guilds = new();
 
         public static Quest? GetQuest(ulong guildId, Guid questId)
@@ -85,6 +89,7 @@ namespace OpenRoadHelper
         public Manager(DiscordSocketClient client)
         {
             _client = client;
+            _client.MessageReceived += OnMessageSubmit;
             _client.ModalSubmitted += OnModalSubmit;
             _client.SelectMenuExecuted += OnSelectMenuExecuted;
             _client.ButtonExecuted += OnButtonExecuted;
@@ -128,6 +133,69 @@ namespace OpenRoadHelper
             await Task.Yield();
         }
 
+        private async Task OnMessageSubmit(SocketMessage msg)
+        {
+            var message = (SocketUserMessage)msg;
+            if (message.Source is not MessageSource.User)
+            {
+                return;
+            }
+            if (message.Channel is not SocketGuildChannel)
+            {
+                return;
+            }
+            var channel = (SocketGuildChannel)message.Channel;
+            if (channel.Guild == null)
+            {
+                return;
+            }
+
+            string charName = channel.Name;
+            ulong guildId = (ulong)channel.Guild.Id;
+            Guild guild = GetGuild(guildId);
+
+            var character = guild.GetCharacter(message.Author.Id, charName);
+            if (character == null)
+            {
+                return;
+            }
+
+            if (DateTime.UtcNow.CompareTo(character.AwaitingInput + TimeSpan.FromMinutes(3)) > 0)
+            {
+                return;
+            }
+
+            bool didAddAvatar = false;
+            foreach (Attachment attachment in message.Attachments)
+            {
+                if (!_imageExtensions.Contains(Path.GetExtension(attachment.Filename)))
+                {
+                    continue;
+                }
+                string filepath = @".\data\images\characters\";
+                string dateTime = DateTime.UtcNow.ToString("yyMMdd");
+                Directory.CreateDirectory(filepath);
+                string url = attachment.Url;
+                string filename = $"{charName}--{dateTime}--[{character.Avatars.Count + 1}].webp";
+                if (!await Generic.DownloadImage(url, filepath + filename))
+                {
+                    continue;
+                }
+                character.Avatars.Add(
+                    $"bot--{dateTime}--[{character.Avatars.Count + 1}]",
+                    filename
+                );
+                didAddAvatar = true;
+            }
+            if (didAddAvatar)
+            {
+                character.AwaitingInput = DateTime.MinValue;
+                await guild.RefreshCharacterPosts(message.Author.Id);
+                guild.QueueSave(SaveType.Characters, true);
+                await message.DeleteAsync();
+            }
+        }
+
         private async Task OnButtonExecuted(SocketMessageComponent button)
         {
             if (button.GuildId == null)
@@ -168,9 +236,18 @@ namespace OpenRoadHelper
                     await CharacterCreateConfirm(button);
                 }
             }
-			else if (actionContext.Contains("spendPT")) {
-				await SpendPTPrompt(button);
-			}
+            else if (actionContext.Contains("shiftAvatar"))
+            {
+                await ShiftAvatar(button);
+            }
+            else if (actionContext.Contains("addAvatar"))
+            {
+                await SendAvatarPrompt(button);
+            }
+            else if (actionContext.Contains("spendPT"))
+            {
+                await SpendPTPrompt(button);
+            }
             else if (actionContext.Contains("pt2gp"))
             {
                 await GainGoldFromPT(button);

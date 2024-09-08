@@ -200,6 +200,9 @@ namespace OpenRoadHelper.Characters
             }
         }
 
+        [JsonIgnore]
+        public DateTime AwaitingInput { get; set; } = DateTime.MinValue;
+
         public ulong CharacterThread
         {
             get => _characterThread;
@@ -458,6 +461,11 @@ namespace OpenRoadHelper.Characters
                 }
             }
             return string.Empty;
+        }
+
+        public string GetAvatar()
+        {
+            return GetAvatar(Avatar);
         }
 
         public int GetAvatarIndex(string key)

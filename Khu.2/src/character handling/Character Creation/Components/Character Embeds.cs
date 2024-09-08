@@ -29,7 +29,7 @@ namespace OpenRoadHelper.Characters
                 .AddField("PT", guild.GetPlayerTokenCount(User).ToString())
                 .AddField("DT", Downtime.ToString(), true)
                 .AddField("Coin", $"{Gold} gp", true)
-                .WithImageUrl(GetAvatar(Avatar));
+                .WithImageUrl(GetAvatar());
 
             return detailsEmbed;
         }
@@ -90,9 +90,7 @@ namespace OpenRoadHelper.Characters
                         continue;
                     }
                     lore.Add(
-                        StringExtensions.FirstCharToUpper(k)
-                            + " "
-                            + PF2E.ModifierToString(Lore[k])
+                        StringExtensions.FirstCharToUpper(k) + " " + PF2E.ModifierToString(Lore[k])
                     );
                 }
                 skillField += "; **Lore** " + string.Join(", ", lore);
