@@ -401,7 +401,11 @@ namespace OpenRoadHelper
                 character.Guild,
                 character.CharacterThread
             );
-            if (charThread == null)
+            IThreadChannel? transThread = (IThreadChannel?)GetTextChannel(
+                character.Guild,
+                character.TransactionThread
+            );
+            if (charThread == null || transThread == null)
             {
                 return;
             }
@@ -411,6 +415,10 @@ namespace OpenRoadHelper
                 return;
             }
             await charThread.ModifyAsync(x =>
+            {
+                x.Archived = false;
+            });
+            await transThread.ModifyAsync(x =>
             {
                 x.Archived = false;
             });
@@ -426,6 +434,23 @@ namespace OpenRoadHelper
                     )
                     {
                         var newMessage = await charThread.SendMessageAsync(".");
+                        await Task.Yield();
+                        await newMessage.DeleteAsync();
+                    }
+                }
+            }
+            await foreach (var messages in transThread.GetMessagesAsync())
+            {
+                if (messages.Any())
+                {
+                    var message = messages.First();
+                    if (
+                        DateTime.UtcNow.CompareTo(
+                            message.CreatedAt.UtcDateTime + TimeSpan.FromDays(2)
+                        ) > 0
+                    )
+                    {
+                        var newMessage = await transThread.SendMessageAsync(".");
                         await Task.Yield();
                         await newMessage.DeleteAsync();
                     }

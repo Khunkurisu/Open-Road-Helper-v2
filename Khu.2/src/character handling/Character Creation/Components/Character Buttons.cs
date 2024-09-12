@@ -9,7 +9,8 @@ namespace OpenRoadHelper.Characters
             ulong guildId,
             ulong playerId,
             string charName,
-            string context
+            string context,
+            List<string> metadata
         )
         {
             Guild guild = Manager.GetGuild(guildId);
@@ -18,14 +19,14 @@ namespace OpenRoadHelper.Characters
                 .WithButton(
                     "Confirm",
                     guild.GenerateFormValues(
-                        new($"{context}", playerId, charName, "confirm", new())
+                        new($"{context}", playerId, charName, "confirm", metadata)
                     ),
                     ButtonStyle.Success
                 )
                 .WithButton(
                     "Cancel",
                     guild.GenerateFormValues(
-                        new($"{context}", playerId, charName, "cancel", new())
+                        new($"{context}", playerId, charName, "cancel", metadata)
                     ),
                     ButtonStyle.Danger
                 );
@@ -38,7 +39,7 @@ namespace OpenRoadHelper.Characters
             string context
         )
         {
-            return ConfirmationButtons(ulong.Parse(guildId), playerId, charName, context);
+            return ConfirmationButtons(ulong.Parse(guildId), playerId, charName, context, new());
         }
 
         public static ButtonBuilder ConfirmButton(
@@ -303,18 +304,25 @@ namespace OpenRoadHelper.Characters
             return buttons;
         }
 
-        public ComponentBuilder GenerateButtons(bool isForced = false)
+        public ComponentBuilder GenerateButtons(List<string> metadata, bool isForced = false)
         {
-            if (!isForced && Status == Status.Temp)
+            if (!isForced)
             {
-                return ConfirmationButtons(Guild, User, Name, "createCharacter");
+                if (Status == Status.Temp)
+                {
+                    return ConfirmationButtons(Guild, User, Name, "createCharacter", metadata);
+                }
+                else if (Status == Status.Replacement)
+                {
+                    return ConfirmationButtons(Guild, User, Name, "replaceCharacter", metadata);
+                }
             }
             if (isForced && Status == Status.Temp)
             {
-                return ConfirmationButtons(Guild, User, Name, "forceCreateCharacter");
+                return ConfirmationButtons(Guild, User, Name, "forceCreateCharacter", metadata);
             }
 
-            return GenerateButtons(new(), isForced);
+            return GenerateButtons(new ComponentBuilder(), isForced);
         }
     }
 }

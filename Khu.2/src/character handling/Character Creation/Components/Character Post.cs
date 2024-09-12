@@ -5,9 +5,10 @@ namespace OpenRoadHelper.Characters
 {
     public partial class Character
     {
-        public ComponentBuilder GenerateComponents(bool isForced = false)
+        public ComponentBuilder GenerateComponents(List<string> metadata, bool isForced = false)
         {
-            return GenerateButtons(isForced).WithSelectMenu(CharacterDisplaySelector(isForced));
+            return GenerateButtons(metadata, isForced)
+                .WithSelectMenu(CharacterDisplaySelector(isForced));
         }
 
         public static SelectMenuBuilder CharacterDisplaySelector(

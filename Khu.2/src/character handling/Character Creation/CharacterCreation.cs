@@ -89,7 +89,7 @@ namespace OpenRoadHelper
                     await modal.FollowupAsync(
                         "Ensure everything looks correct before continuing!",
                         embed: character.GenerateEmbed(player).Build(),
-                        components: character.GenerateComponents(isForced).Build(),
+                        components: character.GenerateComponents(new(), isForced).Build(),
                         ephemeral: true
                     );
                 }
@@ -269,14 +269,17 @@ namespace OpenRoadHelper
             await context.DeferLoadingAsync(true);
 
             guild.ClearTempCharacter(player.Id);
-            ForumTag[] tags = { guild.CharacterBoard.Tags.First(x => x.Name == character.Status.ToString()) };
+            ForumTag[] tags =
+            {
+                guild.CharacterBoard.Tags.First(x => x.Name == character.Status.ToString())
+            };
 
             IThreadChannel charThread = await guild.CharacterBoard.CreatePostAsync(
                 character.Name,
                 ThreadArchiveDuration.OneWeek,
                 embed: character.GenerateEmbed(player).Build(),
                 tags: tags,
-                components: character.GenerateComponents().Build()
+                components: character.GenerateComponents(new()).Build()
             );
 
             IThreadChannel transThread = await guild.TransactionBoard.CreatePostAsync(

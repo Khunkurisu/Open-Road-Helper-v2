@@ -74,7 +74,7 @@ namespace OpenRoadHelper
             await component.UpdateAsync(x =>
             {
                 x.Embed = character.GenerateEmbed(user).Build();
-                x.Components = character.GenerateComponents(isForced).Build();
+                x.Components = character.GenerateComponents(new(), isForced).Build();
             });
         }
 
@@ -104,7 +104,7 @@ namespace OpenRoadHelper
                 msg =>
                 {
                     msg.Embed = character.GenerateEmbed(user).Build();
-                    msg.Components = character.GenerateComponents().Build();
+                    msg.Components = character.GenerateComponents(new()).Build();
                 }
             );
         }
@@ -129,7 +129,7 @@ namespace OpenRoadHelper
                 msg =>
                 {
                     msg.Embed = character.GenerateEmbed(user).Build();
-                    msg.Components = character.GenerateComponents().Build();
+                    msg.Components = character.GenerateComponents(new()).Build();
                     msg.Content = string.Empty;
                 }
             );

@@ -163,13 +163,7 @@ namespace OpenRoadHelper.Characters
             await modal.RespondAsync(
                 $"Make sure everything looks correct before continuing.",
                 embed: newCharacter.GenerateEmbed().Build(),
-                components: ConfirmationButtons(
-                        guildId,
-                        playerId,
-                        $"{newCharacter.Name}+{character.Name}",
-                        "replaceCharacter"
-                    )
-                    .Build(),
+                components: newCharacter.GenerateComponents(new() { character.Name }).Build(),
                 ephemeral: true
             );
         }
@@ -204,9 +198,8 @@ namespace OpenRoadHelper.Characters
                 return;
             }
 
-            string[] charNames = formValues.Target.Split("+");
-            string charName = charNames[0];
-            string oldCharName = charNames[1];
+            string charName = formValues.Target;
+            string oldCharName = formValues.Metadata[0];
 
             Character? character = guild.GetCharacter(player.Id, oldCharName);
             if (character == null)
