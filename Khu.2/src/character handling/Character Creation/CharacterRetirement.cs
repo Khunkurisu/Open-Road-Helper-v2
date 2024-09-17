@@ -14,7 +14,7 @@ namespace OpenRoadHelper
         {
             if (component.GuildId == null)
             {
-                await component.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
             ulong guildId = (ulong)component.GuildId;
@@ -36,7 +36,7 @@ namespace OpenRoadHelper
             IUser user = component.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
-                await component.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(component, user);
                 return;
             }
 
@@ -44,10 +44,7 @@ namespace OpenRoadHelper
             Character? character = guild.GetCharacter(playerId, charName);
             if (character == null)
             {
-                await component.RespondAsync(
-                    $"{charName} could not be found in database for {player.Username}.",
-                    ephemeral: true
-                );
+				await InteractionErrors.CharacterNotFound(component, charName);
                 return;
             }
             if (character.Status != Status.Approved)
@@ -87,7 +84,7 @@ namespace OpenRoadHelper
         {
             if (component.GuildId == null)
             {
-                await component.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
             ulong guildId = (ulong)component.GuildId;
@@ -109,7 +106,7 @@ namespace OpenRoadHelper
             IUser user = component.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
-                await component.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(component, user);
                 return;
             }
 
@@ -117,10 +114,7 @@ namespace OpenRoadHelper
             Character? character = guild.GetCharacter(playerId, charName);
             if (character == null)
             {
-                await component.RespondAsync(
-                    $"{charName} could not be found in database for {user.Username}.",
-                    ephemeral: true
-                );
+				await InteractionErrors.CharacterNotFound(component, charName);
                 return;
             }
             if (character.Status != Status.Approved)
@@ -142,10 +136,7 @@ namespace OpenRoadHelper
             );
             if (transactionChannel == null || charThread == null)
             {
-                await component.RespondAsync(
-                    $"{charName} forum threads could not be found.",
-                    ephemeral: true
-                );
+                await InteractionErrors.CharacterThreadNotFound(component, charName);
                 return;
             }
 
@@ -186,7 +177,7 @@ namespace OpenRoadHelper
         {
             if (component.GuildId == null)
             {
-                await component.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
             ulong guildId = (ulong)component.GuildId;
@@ -208,7 +199,7 @@ namespace OpenRoadHelper
             IUser user = component.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
-                await component.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(component, user);
                 return;
             }
 

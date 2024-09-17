@@ -7,36 +7,30 @@ namespace OpenRoadHelper
 {
     public partial class Manager
     {
-        private static async Task JudgeCharacter(SocketMessageComponent messageComponent)
+        private static async Task JudgeCharacter(SocketMessageComponent component)
         {
-            if (messageComponent.GuildId == null)
+            if (component.GuildId == null)
             {
-                await messageComponent.RespondAsync(
-                    $"This can only be performed in a guild.",
-                    ephemeral: true
-                );
+                await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
-            ulong guildId = (ulong)messageComponent.GuildId;
+            ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
 
-            FormValue formValue = guild.GetFormValues(messageComponent.Data.CustomId);
+            FormValue formValue = guild.GetFormValues(component.Data.CustomId);
 
             ulong playerId = formValue.User;
             IUser? player = GetGuildUser(guild.Id, playerId);
             if (player == null)
             {
-                await messageComponent.RespondAsync(
-                    $"<@{playerId}> could not be found in database.",
-                    ephemeral: true
-                );
+                await InteractionErrors.UserNotFound(component, playerId);
                 return;
             }
 
-            IUser user = messageComponent.User;
+            IUser user = component.User;
             if (!IsGamemaster(user, guild.Id))
             {
-                await messageComponent.RespondAsync(
+                await component.RespondAsync(
                     "Only Game Masters may access this feature.",
                     ephemeral: true
                 );
@@ -46,13 +40,10 @@ namespace OpenRoadHelper
             Character? character = GetCharacter(guildId, playerId, charName);
             if (character == null)
             {
-                await messageComponent.RespondAsync(
-                    $"{charName} could not be found in database.",
-                    ephemeral: true
-                );
+                await InteractionErrors.CharacterNotFound(component, charName);
                 return;
             }
-            await messageComponent.RespondAsync(
+            await component.RespondAsync(
                 $"Would you like to approve {character.Name} or send a note of rejection?",
                 components: ApproveRejectButtons(guildId, player.Id, charName, "judgeCharacter")
                     .Build(),
@@ -60,44 +51,38 @@ namespace OpenRoadHelper
             );
         }
 
-        private static async Task ApproveCharacter(SocketMessageComponent messageComponent)
+        private static async Task ApproveCharacter(SocketMessageComponent component)
         {
-            if (messageComponent.GuildId == null)
+            if (component.GuildId == null)
             {
-                await messageComponent.RespondAsync(
-                    $"This can only be performed in a guild.",
-                    ephemeral: true
-                );
+                await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
-            ulong guildId = (ulong)messageComponent.GuildId;
+            ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
             if (guild.CharacterBoard == null || guild.TransactionBoard == null)
             {
-                await messageComponent.RespondAsync(
+                await component.RespondAsync(
                     "Server forum boards have not been assigned.",
                     ephemeral: true
                 );
                 return;
             }
 
-            FormValue formValue = guild.GetFormValues(messageComponent.Data.CustomId);
+            FormValue formValue = guild.GetFormValues(component.Data.CustomId);
 
             ulong playerId = formValue.User;
             IUser? player = GetGuildUser(guild.Id, playerId);
             if (player == null)
             {
-                await messageComponent.RespondAsync(
-                    $"<@{playerId}> could not be found in database.",
-                    ephemeral: true
-                );
+                await InteractionErrors.UserNotFound(component, playerId);
                 return;
             }
 
-            IUser user = messageComponent.User;
+            IUser user = component.User;
             if (!IsGamemaster(user, guild.Id))
             {
-                await messageComponent.RespondAsync(
+                await component.RespondAsync(
                     "Only Game Masters may access this feature.",
                     ephemeral: true
                 );
@@ -108,10 +93,7 @@ namespace OpenRoadHelper
             Character? character = GetCharacter(guildId, playerId, charName);
             if (character == null)
             {
-                await messageComponent.RespondAsync(
-                    $"{charName} could not be found in database.",
-                    ephemeral: true
-                );
+                await InteractionErrors.CharacterNotFound(component, charName);
                 return;
             }
 
@@ -121,20 +103,14 @@ namespace OpenRoadHelper
             );
             if (charThread == null)
             {
-                await messageComponent.RespondAsync(
-                    $"Character thread for {charName} could not be found.",
-                    ephemeral: true
-                );
+                await InteractionErrors.CharacterThreadNotFound(component, charName);
                 return;
             }
 
             IThreadChannel? transactions = GetThreadChannel(guild.Id, character.TransactionThread);
             if (transactions == null)
             {
-                await messageComponent.RespondAsync(
-                    $"Thread for transactions could not be found.",
-                    ephemeral: true
-                );
+                await InteractionErrors.CharacterThreadNotFound(component, charName);
                 return;
             }
 
@@ -145,7 +121,7 @@ namespace OpenRoadHelper
                 $"{charThread.Mention} has been approved."
             );
             string msgLink = $"https://discord.com/channels/{guildId}/{msg.Channel.Id}/{msg.Id}";
-            await messageComponent.UpdateAsync(x =>
+            await component.UpdateAsync(x =>
             {
                 x.Content = $"{charName} has been approved. ({msgLink})";
                 x.Components = null;
@@ -156,47 +132,41 @@ namespace OpenRoadHelper
             {
                 x.AppliedTags = tags;
             });
-            await DrawCharacterPost(character, messageComponent);
+            await DrawCharacterPost(character, component);
         }
 
-        private static async Task RejectCharacter(SocketMessageComponent messageComponent)
+        private static async Task RejectCharacter(SocketMessageComponent component)
         {
-            if (messageComponent.GuildId == null)
+            if (component.GuildId == null)
             {
-                await messageComponent.RespondAsync(
-                    $"This can only be performed in a guild.",
-                    ephemeral: true
-                );
+                await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
-            ulong guildId = (ulong)messageComponent.GuildId;
+            ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
             if (guild.CharacterBoard == null || guild.TransactionBoard == null)
             {
-                await messageComponent.RespondAsync(
+                await component.RespondAsync(
                     "Server forum boards have not been assigned.",
                     ephemeral: true
                 );
                 return;
             }
 
-            FormValue formValue = guild.GetFormValues(messageComponent.Data.CustomId);
+            FormValue formValue = guild.GetFormValues(component.Data.CustomId);
 
             ulong playerId = formValue.User;
             IUser? player = GetGuildUser(guild.Id, playerId);
             if (player == null)
             {
-                await messageComponent.RespondAsync(
-                    $"<@{playerId}> could not be found in database.",
-                    ephemeral: true
-                );
+                await InteractionErrors.UserNotFound(component, playerId);
                 return;
             }
 
-            IUser user = messageComponent.User;
+            IUser user = component.User;
             if (!IsGamemaster(user, guild.Id))
             {
-                await messageComponent.RespondAsync(
+                await component.RespondAsync(
                     "Only Game Masters may access this feature.",
                     ephemeral: true
                 );
@@ -219,8 +189,8 @@ namespace OpenRoadHelper
                     "Detail the reasoning for this rejection."
                 );
 
-            await messageComponent.DeleteOriginalResponseAsync();
-            await messageComponent.RespondWithModalAsync(modal.Build());
+            await component.DeleteOriginalResponseAsync();
+            await component.RespondWithModalAsync(modal.Build());
         }
 
         private static async Task RejectCharacter(
@@ -230,10 +200,7 @@ namespace OpenRoadHelper
         {
             if (modal.GuildId == null)
             {
-                await modal.RespondAsync(
-                    $"This can only be performed in a guild.",
-                    ephemeral: true
-                );
+                await InteractionErrors.MustRunInGuild(modal, modal.User);
                 return;
             }
             ulong guildId = (ulong)modal.GuildId;
@@ -253,10 +220,7 @@ namespace OpenRoadHelper
             IUser? player = GetGuildUser(guild.Id, playerId);
             if (player == null)
             {
-                await modal.RespondAsync(
-                    $"<@{playerId}> could not be found in database.",
-                    ephemeral: true
-                );
+                await InteractionErrors.UserNotFound(modal, playerId);
                 return;
             }
 
@@ -274,10 +238,7 @@ namespace OpenRoadHelper
             Character? character = GetCharacter(guildId, playerId, charName);
             if (character == null)
             {
-                await modal.RespondAsync(
-                    $"{charName} could not be found in database.",
-                    ephemeral: true
-                );
+                await InteractionErrors.CharacterNotFound(modal, charName);
                 return;
             }
 
@@ -287,20 +248,14 @@ namespace OpenRoadHelper
             );
             if (charThread == null)
             {
-                await modal.RespondAsync(
-                    $"Character thread for {charName} could not be found.",
-                    ephemeral: true
-                );
+                await InteractionErrors.CharacterThreadNotFound(modal, charName);
                 return;
             }
 
             IThreadChannel? transactions = GetThreadChannel(guild.Id, character.TransactionThread);
             if (transactions == null)
             {
-                await modal.RespondAsync(
-                    $"Thread for transactions could not be found.",
-                    ephemeral: true
-                );
+                await InteractionErrors.CharacterThreadNotFound(modal, charName);
                 return;
             }
 

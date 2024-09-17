@@ -16,14 +16,14 @@ namespace OpenRoadHelper
         {
             if (message.Exception is CommandException cmdException)
             {
-                Console.WriteLine(
+                Logger.Error(
                     $"[Command/{message.Severity}] {cmdException.Command.Aliases[0]}"
                         + $" failed to execute in {cmdException.Context.Channel}."
                 );
-                Console.WriteLine(cmdException);
+                Logger.Error(cmdException.ToString());
             }
             else
-                Console.WriteLine($"[General/{message.Severity}] {message}");
+                Logger.Error($"[General/{message.Severity}] {message}");
 
             return Task.CompletedTask;
         }

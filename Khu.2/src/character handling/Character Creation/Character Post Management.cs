@@ -15,7 +15,7 @@ namespace OpenRoadHelper
         {
             if (component.GuildId == null)
             {
-                await component.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
             ulong guildId = (ulong)component.GuildId;
@@ -37,16 +37,7 @@ namespace OpenRoadHelper
             IUser user = component.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
-                await component.RespondAsync("You lack permission to do that!", ephemeral: true);
-                return;
-            }
-
-            if (player != user && !guild.IsGamemaster(user))
-            {
-                await component.RespondAsync(
-                    $"You lack permission to perform that action.",
-                    ephemeral: true
-                );
+                await InteractionErrors.MissingPermissions(component, user);
                 return;
             }
 
@@ -94,9 +85,7 @@ namespace OpenRoadHelper
             IUser? user = GetGuildUser(character.Guild, character.User);
             if (user == null)
             {
-                await context.RespondAsync(
-                    $"User <@{character.User}> could not be found in database."
-                );
+				await InteractionErrors.UserNotFound(context, character.User);
                 return;
             }
             await charThread.ModifyMessageAsync(

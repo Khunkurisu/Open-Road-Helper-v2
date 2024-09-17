@@ -13,7 +13,7 @@ namespace OpenRoadHelper
             ulong? guildIdOrNull = selectMenu.GuildId;
             if (guildIdOrNull == null)
             {
-                await selectMenu.RespondAsync("This command can only be used in a guild.");
+				await InteractionErrors.MustRunInGuild(selectMenu, selectMenu.User);
                 return;
             }
             ulong guildId = (ulong)guildIdOrNull;
@@ -93,7 +93,7 @@ namespace OpenRoadHelper
             ulong? guildIdOrNull = modal.GuildId;
             if (guildIdOrNull == null)
             {
-                await modal.RespondAsync("This command can only be used in a guild.");
+				await InteractionErrors.MustRunInGuild(modal, modal.User);
                 return;
             }
             ulong guildId = (ulong)guildIdOrNull;

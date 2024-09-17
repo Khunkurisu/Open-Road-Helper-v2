@@ -199,6 +199,7 @@ namespace OpenRoadHelper.Guilds
         {
             if (!File.Exists(_guildDataPath + _id + _rolesPath))
             {
+				Logger.Warn("Unable to find roles save file.");
                 return;
             }
             string jsonString = File.ReadAllText(_guildDataPath + _id + _rolesPath);
@@ -217,6 +218,7 @@ namespace OpenRoadHelper.Guilds
         {
             if (!File.Exists(_guildDataPath + _id + _tokensPath))
             {
+				Logger.Warn("Unable to find tokens save file.");
                 return;
             }
             string jsonString = File.ReadAllText(_guildDataPath + _id + _tokensPath);
@@ -244,6 +246,7 @@ namespace OpenRoadHelper.Guilds
         {
             if (!File.Exists(_guildDataPath + _id + _availabilityPath))
             {
+				Logger.Warn("Unable to find availability save file.");
                 return;
             }
             string jsonString = File.ReadAllText(_guildDataPath + _id + _availabilityPath);
@@ -264,6 +267,7 @@ namespace OpenRoadHelper.Guilds
         {
             if (!File.Exists(_guildDataPath + _id + _charactersPath))
             {
+				Logger.Warn("Unable to find characters save file.");
                 return;
             }
             string jsonString = File.ReadAllText(_guildDataPath + _id + _charactersPath);
@@ -286,6 +290,7 @@ namespace OpenRoadHelper.Guilds
         {
             if (!File.Exists(_guildDataPath + _id + _boardsPath))
             {
+				Logger.Warn("Unable to find forum boards save file.");
                 return;
             }
             string jsonString = File.ReadAllText(_guildDataPath + _id + _boardsPath);
@@ -314,6 +319,7 @@ namespace OpenRoadHelper.Guilds
         {
             if (!File.Exists(_guildDataPath + _id + _questsPath))
             {
+				Logger.Warn("Unable to find quests save file.");
                 return;
             }
             string jsonString = File.ReadAllText(_guildDataPath + _id + _questsPath);
@@ -334,6 +340,7 @@ namespace OpenRoadHelper.Guilds
         {
             if (!File.Exists(_guildDataPath + _id + _partiesPath))
             {
+				Logger.Warn("Unable to find parties save file.");
                 return;
             }
             string jsonString = File.ReadAllText(_guildDataPath + _id + _partiesPath);

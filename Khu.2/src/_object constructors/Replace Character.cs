@@ -43,18 +43,12 @@ namespace OpenRoadHelper.Characters
             IUser user = context.User;
             if (player == null)
             {
-                await context.Interaction.RespondAsync(
-                    "User <@{User}> could not be found in the database.",
-                    ephemeral: true
-                );
+                await InteractionErrors.UserNotFound(context.Interaction, user.Id);
                 return;
             }
             if (user.Id != User && !guild.IsGamemaster(user))
             {
-                await context.Interaction.RespondAsync(
-                    "You lack permission to do that.",
-                    ephemeral: true
-                );
+                await InteractionErrors.MissingPermissions(context.Interaction, user);
                 return;
             }
             string json = string.Empty;
@@ -70,6 +64,7 @@ namespace OpenRoadHelper.Characters
                     "Please upload a valid json file.",
                     ephemeral: true
                 );
+                Logger.Warn("User uploaded invalid json file.");
                 return;
             }
 
@@ -82,6 +77,7 @@ namespace OpenRoadHelper.Characters
                     "Please upload a valid json file.",
                     ephemeral: true
                 );
+                Logger.Warn("User uploaded invalid json file.");
                 return;
             }
 
@@ -112,7 +108,7 @@ namespace OpenRoadHelper.Characters
         {
             if (modal.GuildId == null)
             {
-                await modal.RespondAsync("This must be run in a guild.", ephemeral: true);
+                await InteractionErrors.MustRunInGuild(modal, modal.User);
                 return;
             }
             ulong guildId = (ulong)modal.GuildId;
@@ -124,7 +120,7 @@ namespace OpenRoadHelper.Characters
             IUser user = modal.User;
             if (user.Id != playerId)
             {
-                await modal.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(modal, user);
                 return;
             }
 
@@ -132,10 +128,7 @@ namespace OpenRoadHelper.Characters
             Character? character = Manager.GetCharacter(guildId, playerId, charName);
             if (character == null)
             {
-                await modal.RespondAsync(
-                    $"{charName} could not be found in database.",
-                    ephemeral: true
-                );
+                await InteractionErrors.CharacterNotFound(modal, charName);
                 return;
             }
 
@@ -145,6 +138,7 @@ namespace OpenRoadHelper.Characters
             if (charData == null)
             {
                 await modal.RespondAsync($"Unable to load submitted data.", ephemeral: true);
+                Logger.Warn("Unable to load user-submitted data.");
                 return;
             }
 
@@ -172,7 +166,7 @@ namespace OpenRoadHelper.Characters
         {
             if (button.GuildId == null)
             {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+                await InteractionErrors.MustRunInGuild(button, button.User);
                 return;
             }
             ulong guildId = (ulong)button.GuildId;
@@ -184,7 +178,7 @@ namespace OpenRoadHelper.Characters
             IUser user = button.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(button, user);
                 return;
             }
 
@@ -195,6 +189,7 @@ namespace OpenRoadHelper.Characters
                     $"Unable to find user <@{playerId}> in database.",
                     ephemeral: true
                 );
+                Logger.Warn("Unable to locate relevant user.");
                 return;
             }
 
@@ -217,12 +212,7 @@ namespace OpenRoadHelper.Characters
                 Manager.GetTextChannel(character.Guild, character.TransactionThread);
             if (transThread == null)
             {
-                await button.UpdateAsync(x =>
-                {
-                    x.Content = $"Transaction thread for {character.Name} could not be found.";
-                    x.Components = null;
-                    x.Embed = null;
-                });
+                await InteractionErrors.CharacterThreadNotFound(button, charName, true);
                 return;
             }
 
@@ -230,12 +220,7 @@ namespace OpenRoadHelper.Characters
                 Manager.GetTextChannel(character.Guild, character.CharacterThread);
             if (charThread == null)
             {
-                await button.UpdateAsync(x =>
-                {
-                    x.Content = $"Character thread for {character.Name} could not be found.";
-                    x.Components = null;
-                    x.Embed = null;
-                });
+                await InteractionErrors.CharacterThreadNotFound(button, charName, true);
                 return;
             }
 
@@ -271,7 +256,7 @@ namespace OpenRoadHelper.Characters
         {
             if (button.GuildId == null)
             {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+                await InteractionErrors.MustRunInGuild(button, button.User);
                 return;
             }
             ulong guildId = (ulong)button.GuildId;
@@ -283,7 +268,7 @@ namespace OpenRoadHelper.Characters
             IUser user = button.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(button, user);
                 return;
             }
 

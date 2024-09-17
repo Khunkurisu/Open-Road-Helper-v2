@@ -52,7 +52,7 @@ namespace OpenRoadHelper.Characters
                     _avatars.Add("Initial", initialImage);
                 }
                 Avatar = GetAvatarIndex("Initial");
-                Console.WriteLine(Avatars.ToString());
+                Logger.Info(Avatars.ToString());
             }
             if (data.TryGetValue("height", out dynamic? height))
             {

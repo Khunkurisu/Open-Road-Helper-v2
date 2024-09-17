@@ -7,23 +7,23 @@ namespace OpenRoadHelper
 {
     public partial class Manager
     {
-        public static async Task SpendPTPrompt(SocketMessageComponent button)
+        public static async Task SpendPTPrompt(SocketMessageComponent component)
         {
-            if (button.GuildId == null)
+            if (component.GuildId == null)
             {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
-            ulong guildId = (ulong)button.GuildId;
+            ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
 
-            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
             ulong playerId = formValues.User;
-            IUser user = button.User;
+            IUser user = component.User;
             if (user.Id != playerId)
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(component, user);
                 return;
             }
 
@@ -31,37 +31,34 @@ namespace OpenRoadHelper
             Character? character = GetCharacter(guildId, playerId, charName);
             if (character == null)
             {
-                await button.RespondAsync(
-                    $"{charName} could not be found in database.",
-                    ephemeral: true
-                );
+				await InteractionErrors.CharacterNotFound(component, charName);
                 return;
             }
 
-            await button.RespondAsync(
+            await component.RespondAsync(
                 "How would you like to spend your PT?",
                 components: character.PowerTokenButtons().Build(),
                 ephemeral: true
             );
         }
 
-        public static async Task GainGoldFromPT(SocketMessageComponent button)
+        public static async Task GainGoldFromPT(SocketMessageComponent component)
         {
-            if (button.GuildId == null)
+            if (component.GuildId == null)
             {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
-            ulong guildId = (ulong)button.GuildId;
+            ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
 
-            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
             ulong playerId = formValues.User;
-            IUser user = button.User;
+            IUser user = component.User;
             if (user.Id != playerId)
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(component, user);
                 return;
             }
 
@@ -69,33 +66,30 @@ namespace OpenRoadHelper
             Character? character = GetCharacter(guildId, playerId, charName);
             if (character == null)
             {
-                await button.RespondAsync(
-                    $"{charName} could not be found in database.",
-                    ephemeral: true
-                );
+				await InteractionErrors.CharacterNotFound(component, charName);
                 return;
             }
 
-            await character.BuyGold(button);
+            await character.BuyGold(component);
         }
 
-        public static async Task ModifyGoldFromPT(SocketMessageComponent button)
+        public static async Task ModifyGoldFromPT(SocketMessageComponent component)
         {
-            if (button.GuildId == null)
+            if (component.GuildId == null)
             {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
-            ulong guildId = (ulong)button.GuildId;
+            ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
 
-            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
             ulong playerId = formValues.User;
-            IUser user = button.User;
+            IUser user = component.User;
             if (user.Id != playerId)
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(component, user);
                 return;
             }
 
@@ -103,32 +97,29 @@ namespace OpenRoadHelper
             Character? character = GetCharacter(guildId, playerId, charName);
             if (character == null)
             {
-                await button.RespondAsync(
-                    $"{charName} could not be found in database.",
-                    ephemeral: true
-                );
+				await InteractionErrors.CharacterNotFound(component, charName);
                 return;
             }
-            await character.ModifyGoldFromPT(button);
+            await character.ModifyGoldFromPT(component);
         }
 
-        public static async Task ConfirmBuyGold(SocketMessageComponent button)
+        public static async Task ConfirmBuyGold(SocketMessageComponent component)
         {
-            if (button.GuildId == null)
+            if (component.GuildId == null)
             {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
-            ulong guildId = (ulong)button.GuildId;
+            ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
 
-            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
             ulong playerId = formValues.User;
-            IUser user = button.User;
+            IUser user = component.User;
             if (user.Id != playerId)
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(component, user);
                 return;
             }
 
@@ -136,32 +127,29 @@ namespace OpenRoadHelper
             Character? character = GetCharacter(guildId, playerId, charName);
             if (character == null)
             {
-                await button.RespondAsync(
-                    $"{charName} could not be found in database.",
-                    ephemeral: true
-                );
+				await InteractionErrors.CharacterNotFound(component, charName);
                 return;
             }
-            await character.ConfirmBuyGold(button);
+            await character.ConfirmBuyGold(component);
         }
 
-        public static async Task GainDowntimeFromPT(SocketMessageComponent button)
+        public static async Task GainDowntimeFromPT(SocketMessageComponent component)
         {
-            if (button.GuildId == null)
+            if (component.GuildId == null)
             {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
-            ulong guildId = (ulong)button.GuildId;
+            ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
 
-            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
             ulong playerId = formValues.User;
-            IUser user = button.User;
+            IUser user = component.User;
             if (user.Id != playerId)
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(component, user);
                 return;
             }
 
@@ -169,33 +157,30 @@ namespace OpenRoadHelper
             Character? character = GetCharacter(guildId, playerId, charName);
             if (character == null)
             {
-                await button.RespondAsync(
-                    $"{charName} could not be found in database.",
-                    ephemeral: true
-                );
+				await InteractionErrors.CharacterNotFound(component, charName);
                 return;
             }
 
-            await character.BuyDowntime(button);
+            await character.BuyDowntime(component);
         }
 
-        public static async Task ModifyDowntimeFromPT(SocketMessageComponent button)
+        public static async Task ModifyDowntimeFromPT(SocketMessageComponent component)
         {
-            if (button.GuildId == null)
+            if (component.GuildId == null)
             {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
-            ulong guildId = (ulong)button.GuildId;
+            ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
 
-            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
             ulong playerId = formValues.User;
-            IUser user = button.User;
+            IUser user = component.User;
             if (user.Id != playerId)
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(component, user);
                 return;
             }
 
@@ -203,32 +188,29 @@ namespace OpenRoadHelper
             Character? character = GetCharacter(guildId, playerId, charName);
             if (character == null)
             {
-                await button.RespondAsync(
-                    $"{charName} could not be found in database.",
-                    ephemeral: true
-                );
+				await InteractionErrors.CharacterNotFound(component, charName);
                 return;
             }
-            await character.ModifyDowntimeFromPT(button);
+            await character.ModifyDowntimeFromPT(component);
         }
 
-        public static async Task ConfirmBuyDowntime(SocketMessageComponent button)
+        public static async Task ConfirmBuyDowntime(SocketMessageComponent component)
         {
-            if (button.GuildId == null)
+            if (component.GuildId == null)
             {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
-            ulong guildId = (ulong)button.GuildId;
+            ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
 
-            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
             ulong playerId = formValues.User;
-            IUser user = button.User;
+            IUser user = component.User;
             if (user.Id != playerId)
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(component, user);
                 return;
             }
 
@@ -236,13 +218,10 @@ namespace OpenRoadHelper
             Character? character = GetCharacter(guildId, playerId, charName);
             if (character == null)
             {
-                await button.RespondAsync(
-                    $"{charName} could not be found in database.",
-                    ephemeral: true
-                );
+				await InteractionErrors.CharacterNotFound(component, charName);
                 return;
             }
-            await character.ConfirmBuyDowntime(button);
+            await character.ConfirmBuyDowntime(component);
         }
     }
 }

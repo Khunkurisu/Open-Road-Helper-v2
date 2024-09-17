@@ -3,8 +3,6 @@ using OpenRoadHelper.Guilds;
 using OpenRoadHelper.Quests;
 using Discord;
 using Discord.WebSocket;
-using System.Net.Mime;
-using SixLabors.ImageSharp;
 
 namespace OpenRoadHelper
 {
@@ -200,7 +198,7 @@ namespace OpenRoadHelper
         {
             if (button.GuildId == null)
             {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+                await InteractionErrors.MissingPermissions(button, button.User);
                 return;
             }
             ulong guildId = (ulong)button.GuildId;
@@ -372,7 +370,7 @@ namespace OpenRoadHelper
         {
             if (selectMenu.GuildId == null)
             {
-                await selectMenu.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(selectMenu, selectMenu.User);
                 return;
             }
             ulong guildId = (ulong)selectMenu.GuildId;
@@ -407,11 +405,13 @@ namespace OpenRoadHelper
             );
             if (charThread == null || transThread == null)
             {
+                await InteractionErrors.CharacterThreadNotFound(character.Name);
                 return;
             }
             IUser? user = GetGuildUser(character.Guild, character.User);
             if (user == null)
             {
+                Logger.Warn("Unable to locate relevant user.");
                 return;
             }
             await charThread.ModifyAsync(x =>
@@ -463,11 +463,13 @@ namespace OpenRoadHelper
             IThreadChannel? threadChannel = GetThreadChannel(quest.GuildId, quest.ThreadId);
             if (threadChannel == null)
             {
+                Logger.Warn("Unable to locate thread boards.");
                 return;
             }
             IUser? user = GetGuildUser(quest.GuildId, quest.GameMaster);
             if (user == null)
             {
+                Logger.Warn("Unable to locate relevant user.");
                 return;
             }
             await threadChannel.ModifyAsync(x => x.Archived = false);
@@ -477,7 +479,7 @@ namespace OpenRoadHelper
         {
             if (modal.GuildId == null)
             {
-                await modal.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(modal, modal.User);
                 return;
             }
             ulong guildId = (ulong)modal.GuildId;

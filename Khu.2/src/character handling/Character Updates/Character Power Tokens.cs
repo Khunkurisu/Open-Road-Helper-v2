@@ -83,7 +83,7 @@ namespace OpenRoadHelper.Characters
             IUser user = button.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(button, user);
                 return;
             }
 
@@ -147,10 +147,7 @@ namespace OpenRoadHelper.Characters
                 Manager.GetTextChannel(guild.Id, TransactionThread);
             if (transactionChannel == null)
             {
-                await button.RespondAsync(
-                    $"{Name} forum threads could not be found.",
-                    ephemeral: true
-                );
+                await InteractionErrors.CharacterThreadNotFound(button, Name);
                 return;
             }
 
@@ -245,7 +242,7 @@ namespace OpenRoadHelper.Characters
             IUser user = button.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(button, user);
                 return;
             }
 
@@ -292,10 +289,7 @@ namespace OpenRoadHelper.Characters
                 Manager.GetTextChannel(guild.Id, TransactionThread);
             if (transactionChannel == null)
             {
-                await button.RespondAsync(
-                    $"{Name} forum threads could not be found.",
-                    ephemeral: true
-                );
+                await InteractionErrors.CharacterThreadNotFound(button, Name);
                 return;
             }
 

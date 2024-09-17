@@ -7,30 +7,30 @@ namespace OpenRoadHelper
 {
     public partial class Manager
     {
-        private static async Task QuestCreateConfirm(SocketMessageComponent button)
+        private static async Task QuestCreateConfirm(SocketMessageComponent component)
         {
-            if (button.GuildId == null)
+            if (component.GuildId == null)
             {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
 
-            ulong guildId = (ulong)button.GuildId;
+            ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
-            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
             ulong gmId = formValues.User;
             IUser? gm = GetGuildUser(guildId, gmId);
             if (gm == null)
             {
-                await button.RespondAsync("Unable to find user.", ephemeral: true);
+                await component.RespondAsync("Unable to find user.", ephemeral: true);
                 return;
             }
 
-            IUser user = button.User;
+            IUser user = component.User;
             if (user.Id != gmId && !guild.IsGamemaster(user))
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(component, user);
                 return;
             }
 
@@ -38,7 +38,7 @@ namespace OpenRoadHelper
             Quest? quest = guild.GetQuest(questName, gm);
             if (quest == null)
             {
-                await button.UpdateAsync(x =>
+                await component.UpdateAsync(x =>
                 {
                     x.Content = $"Unable to locate {questName}.";
                     x.Embed = null;
@@ -49,7 +49,7 @@ namespace OpenRoadHelper
 
             if (quest.Status != Status.Unplayed)
             {
-                await button.UpdateAsync(x =>
+                await component.UpdateAsync(x =>
                 {
                     x.Content = $"{questName} has an invalid status for that action.";
                     x.Embed = null;
@@ -58,35 +58,35 @@ namespace OpenRoadHelper
                 return;
             }
 
-            await PostQuest(button, guild, quest, gm);
+            await PostQuest(component, guild, quest, gm);
         }
 
-        private static async Task QuestCreateCancel(SocketMessageComponent button)
+        private static async Task QuestCreateCancel(SocketMessageComponent component)
         {
-            if (button.GuildId == null)
+            if (component.GuildId == null)
             {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
 
-            ulong guildId = (ulong)button.GuildId;
+            ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
 
-            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
             ulong gmId = formValues.User;
-            IUser gm = button.User;
-            if (gm.Id != gmId && !guild.IsGamemaster(gm))
+            IUser user = component.User;
+            if (user.Id != gmId && !guild.IsGamemaster(user))
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(component, user);
                 return;
             }
 
             string questName = formValues.Target;
-            Quest? quest = guild.GetQuest(questName, gm);
+            Quest? quest = guild.GetQuest(questName, user);
             if (quest == null)
             {
-                await button.UpdateAsync(x =>
+                await component.UpdateAsync(x =>
                 {
                     x.Content = $"Unable to locate {questName}.";
                     x.Embed = null;
@@ -96,7 +96,7 @@ namespace OpenRoadHelper
             }
             if (quest.Status != Status.Unplayed)
             {
-                await button.UpdateAsync(x =>
+                await component.UpdateAsync(x =>
                 {
                     x.Content = $"{questName} has an invalid status for that action.";
                     x.Embed = null;
@@ -106,7 +106,7 @@ namespace OpenRoadHelper
             }
 
             guild.RemoveQuest(quest);
-            await button.UpdateAsync(x =>
+            await component.UpdateAsync(x =>
             {
                 x.Content = "Quest creation canceled.";
                 x.Embed = null;

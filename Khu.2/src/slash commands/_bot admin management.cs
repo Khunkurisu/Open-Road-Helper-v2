@@ -17,10 +17,7 @@ namespace OpenRoadHelper.GameMaster
                 Guild guild = Manager.GetGuild(Context.Guild.Id);
                 if (!guild.IsGamemaster(Context.User))
                 {
-                    await Context.Interaction.RespondAsync(
-                        "Only GMs may run this command!",
-                        ephemeral: true
-                    );
+                    await InteractionErrors.MissingPermissions(Context.Interaction, Context.User);
                     return;
                 }
                 await guild.RefreshCharacterPosts(Context);
@@ -55,12 +52,14 @@ namespace OpenRoadHelper.GameMaster
                 if (guild.AddGMRole(role))
                 {
                     await Context.Interaction.RespondAsync($"{role.Name} was added to GM Roles!");
+                    Logger.Info($"{role.Name} was added to GM Roles!");
                 }
                 else
                 {
                     await Context.Interaction.RespondAsync(
                         $"{role.Name} **could not** be added to GM Roles!"
                     );
+                    Logger.Info($"{role.Name} was added to GM Roles!");
                 }
             }
 

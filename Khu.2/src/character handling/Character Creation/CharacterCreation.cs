@@ -30,7 +30,7 @@ namespace OpenRoadHelper
             ulong? guildIdOrNull = modal.GuildId;
             if (guildIdOrNull == null)
             {
-                await modal.RespondAsync("This command can only be used in a guild.");
+				await InteractionErrors.MustRunInGuild(modal, modal.User);
                 return;
             }
             ulong guildId = (ulong)guildIdOrNull;
@@ -48,10 +48,7 @@ namespace OpenRoadHelper
             IUser user = modal.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
-                await modal.RespondAsync(
-                    "You lack permissions to perform this action.",
-                    ephemeral: true
-                );
+                await InteractionErrors.MissingPermissions(modal, user);
                 return;
             }
             await modal.DeferLoadingAsync(true);
@@ -111,7 +108,7 @@ namespace OpenRoadHelper
         {
             if (button.GuildId == null)
             {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(button, button.User);
                 return;
             }
             ulong guildId = (ulong)button.GuildId;
@@ -130,7 +127,7 @@ namespace OpenRoadHelper
             IUser user = button.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(button, user);
                 return;
             }
 
@@ -189,7 +186,7 @@ namespace OpenRoadHelper
         {
             if (button.GuildId == null)
             {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(button, button.User);
                 return;
             }
             ulong guildId = (ulong)button.GuildId;
@@ -211,7 +208,7 @@ namespace OpenRoadHelper
             IUser user = button.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(button, user);
                 return;
             }
 
@@ -313,7 +310,7 @@ namespace OpenRoadHelper
         {
             if (button.GuildId == null)
             {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(button, button.User);
                 return;
             }
             ulong guildId = (ulong)button.GuildId;
@@ -335,7 +332,7 @@ namespace OpenRoadHelper
             IUser user = button.User;
             if (user.Id != playerId && !guild.IsGamemaster(user))
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(button, user);
                 return;
             }
 
@@ -343,10 +340,7 @@ namespace OpenRoadHelper
             Character? character = guild.GetCharacter(playerId, charName);
             if (character == null)
             {
-                await button.RespondAsync(
-                    $"{charName} could not be found in database for {user.Username}.",
-                    ephemeral: true
-                );
+				await InteractionErrors.CharacterNotFound(button, charName);
                 return;
             }
             if (character.Status != Status.Pending && character.Status != Status.Rejected)
@@ -365,10 +359,7 @@ namespace OpenRoadHelper
             );
             if (transactionChannel == null || charThread == null)
             {
-                await button.RespondAsync(
-                    $"{charName} forum threads could not be found.",
-                    ephemeral: true
-                );
+                await InteractionErrors.CharacterThreadNotFound(button, charName);
                 return;
             }
 

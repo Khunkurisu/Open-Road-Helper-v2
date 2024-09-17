@@ -37,20 +37,20 @@ namespace OpenRoadHelper
             }
         }
 
-        private static async Task QuestCreateBack(SocketMessageComponent button)
+        private static async Task QuestCreateBack(SocketMessageComponent component)
         {
-            ulong? guildIdOrNull = button.GuildId;
+            ulong? guildIdOrNull = component.GuildId;
             if (guildIdOrNull == null)
             {
-                await button.RespondAsync("This command can only be used in a guild.");
+				await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
             ulong guildId = (ulong)guildIdOrNull;
             Guild guild = GetGuild(guildId);
-            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(component.Data.CustomId);
             ulong gmId = formValues.User;
             IUser? gamemaster = GetGuildUser(guildId, gmId);
-            IUser user = button.User;
+            IUser user = component.User;
             if (gamemaster != null && user.Id == gmId)
             {
                 string name = formValues.Target;
@@ -69,7 +69,7 @@ namespace OpenRoadHelper
                             ButtonStyle.Danger
                         );
                     var questEmbed = quest.GenerateEmbed(user);
-                    await button.UpdateAsync(x =>
+                    await component.UpdateAsync(x =>
                     {
                         x.Embed = questEmbed.Build();
                         x.Components = messageComponents.Build();
@@ -77,7 +77,7 @@ namespace OpenRoadHelper
                 }
                 else
                 {
-                    await button.UpdateAsync(x =>
+                    await component.UpdateAsync(x =>
                     {
                         x.Content = "Somehow Quest was null.";
                     });
@@ -85,7 +85,7 @@ namespace OpenRoadHelper
             }
             else
             {
-                await button.UpdateAsync(x => { });
+                await component.UpdateAsync(x => { });
             }
         }
 

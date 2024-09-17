@@ -92,7 +92,7 @@ namespace OpenRoadHelper.Quests
         {
             if (component.GuildId == null)
             {
-                await component.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
             Guild guild = Manager.GetGuild(_guild);
@@ -100,7 +100,7 @@ namespace OpenRoadHelper.Quests
             IUser user = component.User;
             if (user.Id != _gameMaster || !guild.IsGamemaster(user))
             {
-                await component.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(component, user);
                 return;
             }
 

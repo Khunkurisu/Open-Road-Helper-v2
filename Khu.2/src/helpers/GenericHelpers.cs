@@ -29,12 +29,12 @@ namespace OpenRoadHelper
                 await Task.Yield();
                 await image.SaveAsync(filename, new WebpEncoder());
 
-                Console.WriteLine("Image downloaded successfully: " + filename);
+                Logger.Info("Image downloaded successfully: " + filename);
                 return true;
             }
             catch (HttpRequestException ex)
             {
-                Console.WriteLine("Failed to download image: " + ex.Message);
+                Logger.Warn("Failed to download image: " + ex.Message);
                 return false;
             }
         }

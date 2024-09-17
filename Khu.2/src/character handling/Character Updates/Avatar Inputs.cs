@@ -7,23 +7,23 @@ namespace OpenRoadHelper
 {
     public partial class Manager
     {
-        public static async Task SendAvatarPrompt(SocketMessageComponent button)
+        public static async Task SendAvatarPrompt(SocketMessageComponent component)
         {
-            if (button.GuildId == null)
+            if (component.GuildId == null)
             {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
-            ulong guildId = (ulong)button.GuildId;
+            ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
 
-            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
             ulong playerId = formValues.User;
-            IUser user = button.User;
+            IUser user = component.User;
             if (user.Id != playerId)
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(component, user);
                 return;
             }
 
@@ -31,10 +31,7 @@ namespace OpenRoadHelper
             Character? character = GetCharacter(guildId, playerId, charName);
             if (character == null)
             {
-                await button.RespondAsync(
-                    $"{charName} could not be found in database.",
-                    ephemeral: true
-                );
+				await InteractionErrors.CharacterNotFound(component, charName);
                 return;
             }
 
@@ -44,38 +41,35 @@ namespace OpenRoadHelper
             );
             if (charThread == null)
             {
-                await button.RespondAsync(
-                    $"{character.Name} forum threads could not be found.",
-                    ephemeral: true
-                );
+                await InteractionErrors.CharacterThreadNotFound(component, charName);
                 return;
             }
 
             character.AwaitingInput = DateTime.UtcNow;
 
-            await button.RespondAsync(
+            await component.RespondAsync(
                 $"Please upload avatar images as attachments in {charThread.Mention}",
                 ephemeral: true
             );
         }
 
-        public static async Task ShiftAvatar(SocketMessageComponent button)
+        public static async Task ShiftAvatar(SocketMessageComponent component)
         {
-            if (button.GuildId == null)
+            if (component.GuildId == null)
             {
-                await button.RespondAsync("This must be run in a guild.", ephemeral: true);
+				await InteractionErrors.MustRunInGuild(component, component.User);
                 return;
             }
-            ulong guildId = (ulong)button.GuildId;
+            ulong guildId = (ulong)component.GuildId;
             Guild guild = GetGuild(guildId);
 
-            FormValue formValues = guild.GetFormValues(button.Data.CustomId);
+            FormValue formValues = guild.GetFormValues(component.Data.CustomId);
 
             ulong playerId = formValues.User;
-            IUser user = button.User;
+            IUser user = component.User;
             if (user.Id != playerId)
             {
-                await button.RespondAsync("You lack permission to do that!", ephemeral: true);
+                await InteractionErrors.MissingPermissions(component, user);
                 return;
             }
 
@@ -83,10 +77,7 @@ namespace OpenRoadHelper
             Character? character = GetCharacter(guildId, playerId, charName);
             if (character == null)
             {
-                await button.RespondAsync(
-                    $"{charName} could not be found in database.",
-                    ephemeral: true
-                );
+				await InteractionErrors.CharacterNotFound(component, charName);
                 return;
             }
 
@@ -105,7 +96,7 @@ namespace OpenRoadHelper
                 await Guild.RefreshCharacterPosts(character);
                 guild.QueueSave(SaveType.Characters);
             }
-            await button.UpdateAsync(x => x.Content = x.Content);
+            await component.UpdateAsync(x => x.Content = x.Content);
         }
     }
 }
